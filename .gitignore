@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# FreeCAD
+*.FCBak
+*.FCStd1
+
+# Exporte und Testartefakte
+out/
+*.stl
+*.3mf
+*.step
+
+# Lokale Laufzeitdaten
+.omc/
+.serena/
+TODOs/pending-release-log.md
