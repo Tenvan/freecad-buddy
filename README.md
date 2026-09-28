@@ -25,7 +25,7 @@ Claude Code ──HTTP (MCP, Bearer-Token)──► freecad-buddy (TUI) ──TC
 | `addon/FreeCADBuddy/` | FreeCAD-Addon: `buddy_core` (Modellierungslogik), `buddy_bridge` (Transport, nur Stdlib), Workbench „FreeCAD Buddy“ |
 | `src/buddy_server/` | TUI-Server `freecad-buddy` (MCP über Streamable HTTP, importiert nie FreeCAD) |
 | `examples/reference_projects.py` | Referenzprojekte: Box mit Deckel, Wandhalter, Drehknopf |
-| `examples/samples/` | Vergleichs-Samples für LLMs/Thinking-Stufen: Prompt, Soll-Werte, Screenshot, deterministische Prüfung (`testplatte-griff.md`) |
+| `examples/samples/` | Vergleichs-Samples für LLMs/Thinking-Stufen: Prompt, Soll-Werte, Screenshot, deterministische Prüfung; mitwachsendes `referenzmodell.md` in Stufen |
 | `docs/architecture.md` | Architektur und Modellierungsregeln |
 | `docs/tools.md` | Tool-Katalog (generiert) |
 | `docs/acceptance.md` | Checkliste für die Abnahme in der GUI |

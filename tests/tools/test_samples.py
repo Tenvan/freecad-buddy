@@ -1,13 +1,14 @@
-"""Benchmark samples stay consistent: the Markdown shows the numbers the checker expects."""
+"""Benchmark samples stay consistent: the Markdown shows exactly what the checker uses."""
 
 import importlib.util
 from pathlib import Path
+from types import ModuleType
 
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLES = ROOT / "examples" / "samples"
 
 
-def _load(name: str):
+def _load(name: str) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, SAMPLES / f"{name}.py")
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -15,13 +16,19 @@ def _load(name: str):
     return module
 
 
-def test_testplatte_markdown_matches_checker() -> None:
-    sample = _load("testplatte_griff")
-    markdown = (SAMPLES / "testplatte-griff.md").read_text(encoding="utf-8")
+def test_referenzmodell_markdown_matches_the_script() -> None:
+    sample = _load("referenzmodell")
+    markdown = (SAMPLES / "referenzmodell.md").read_text(encoding="utf-8")
 
-    assert f"{sample.expected_volume(sample.PARAMETERS):.1f} mm³" in markdown
-    probe = {**sample.PARAMETERS, "Plate_Length": 240}
-    assert f"{sample.expected_volume(probe):.1f} mm³" in markdown
-    for name in sample.PARAMETERS:
-        assert name in markdown
-    assert (SAMPLES / "testplatte-griff.png").stat().st_size > 1000
+    assert f"```text\n{sample.prompt()}\n```" in markdown, "Prompt im MD veraltet: … referenzmodell.py prompt"
+    for stage in sample.STAGE_PARAMETERS:
+        values = sample.parameters(stage)
+        probe = {**values, "Plate_Length": 240}
+        assert f"{sample.expected_volume(values, stage):.1f} mm³" in markdown
+        assert f"{sample.expected_volume(probe, stage):.1f} mm³" in markdown
+        assert f"| {stage} |" in markdown
+        for name in sample.STAGE_PARAMETERS[stage]:
+            assert name in markdown
+    assert sample.LATEST_STAGE == max(sample.STAGE_PARAMETERS) == max(sample.STAGE_PROMPTS)
+    assert set(sample.STAGE_FEATURES) == set(sample.STAGE_PARAMETERS)
+    assert (SAMPLES / "referenzmodell.png").stat().st_size > 1000
