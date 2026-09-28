@@ -21,7 +21,11 @@ def main(argv: list[str] | None = None) -> int:
     from buddy_bridge.dispatch import InlineDispatcher
     from buddy_bridge.service import BridgeService
 
-    service = BridgeService(InlineDispatcher(), token_path=args.token_file, port=args.port)
+    # Installing needs the confirmation dialog, so a headless bridge never offers it – whatever the
+    # user's FreeCAD preferences say.
+    service = BridgeService(
+        InlineDispatcher(), token_path=args.token_file, port=args.port, allow_addon_install=False
+    )
     service.start()
     print(f"BRIDGE_READY {service.port}", flush=True)
     try:

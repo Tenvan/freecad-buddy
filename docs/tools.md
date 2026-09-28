@@ -40,7 +40,7 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
 | [`search_addons`](#search_addons) | Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit |
 | [`get_addon`](#get_addon) | Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung, |
-| [`install_addon`](#install_addon) | Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user |
+| [`install_addon`](#install_addon) | Install an addon or macro through FreeCAD's Addon Manager (needs FreeCAD's opt-in). FreeCAD shows the user |
 | [`get_printer_profile`](#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
 | [`set_printer_profile`](#set_printer_profile) | Druckerprofil ändern (dauerhaft gespeichert). |
 | [`check_printability`](#check_printability) | Druckbarkeit prüfen: gültiger Solid, Bauraum, Überhänge, Wandstärke, zu kleine Details. |
@@ -741,7 +741,7 @@ Beispiel:
 
 ## install_addon
 
-Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user
+Install an addon or macro through FreeCAD's Addon Manager (needs FreeCAD's opt-in). FreeCAD shows the user
 a confirmation dialog - ask in the chat first. Workbenches need a FreeCAD restart afterwards.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |

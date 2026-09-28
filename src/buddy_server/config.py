@@ -13,8 +13,9 @@ DEFAULT_BRIDGE_PORT = 9876
 LOCAL_HOST = "127.0.0.1"
 
 
-def _env_flag(name: str) -> bool:
-    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes", "on")
+def _env_flag(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name, "").strip().lower()
+    return default if not value else value in ("1", "true", "yes", "on")
 
 
 @dataclass
@@ -23,7 +24,10 @@ class Settings:
     bridge_port: int = DEFAULT_BRIDGE_PORT
     home: Path = field(default_factory=buddy_home)
     allow_python: bool = field(default_factory=lambda: _env_flag("FREECAD_BUDDY_ALLOW_PYTHON"))
-    allow_addon_install: bool = field(default_factory=lambda: _env_flag("FREECAD_BUDDY_ALLOW_ADDON_INSTALL"))
+    # On by default: FreeCAD's own opt-in and the confirmation dialog of every install stay in place.
+    allow_addon_install: bool = field(
+        default_factory=lambda: _env_flag("FREECAD_BUDDY_ALLOW_ADDON_INSTALL", default=True)
+    )
     host: str = LOCAL_HOST
     bridge_host: str = LOCAL_HOST
     connect_timeout: float = 3.0

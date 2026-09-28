@@ -46,7 +46,7 @@ uv run poe install-addon
 
 ## Starten
 
-1. FreeCAD starten. Die Bridge startet automatisch (abschaltbar über Workbench „FreeCAD Buddy“ → „Autostart umschalten“); manuell über „Bridge starten“.
+1. FreeCAD starten. Die Bridge startet automatisch (abschaltbar über Workbench „FreeCAD Buddy“ → „Autostart aus“); manuell über „Bridge starten“.
 2. Server mit Oberfläche starten:
 
 ```bash
@@ -69,7 +69,7 @@ Tasten in der TUI:
 - `p`: `execute_python` umschalten (mit Server-Neustart)
 - `q`: beenden (ein zweites `q` beendet sofort)
 
-Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless` (ohne TUI, Log auf stderr), `--allow-python`, `--allow-addon-install`, `--log-file <pfad>` (Tool-Aufrufe als JSONL, maskiert, rotiert ab 10 MB).
+Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless` (ohne TUI, Log auf stderr), `--allow-python`, `--no-allow-addon-install` (`install_addon` ist standardmäßig an), `--log-file <pfad>` (Tool-Aufrufe als JSONL, maskiert, rotiert ab 10 MB).
 
 ## Nutzung
 
@@ -99,8 +99,8 @@ uv run poe check
 
 - Bridge und MCP-Endpunkt lauschen nur auf `127.0.0.1`; beide verlangen ein Token (`%APPDATA%\FreeCADBuddy\bridge-token`, `mcp-token`).
 - Der MCP-Endpunkt prüft `Host`/`Origin` gegen DNS-Rebinding.
-- `install_addon` ist standardmäßig aus und braucht zwei Freischaltungen: `--allow-addon-install` beim Server **und** in FreeCAD den Befehl „Addon-Installation umschalten“ (oder `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=1` für beide Prozesse). Jede Installation bestätigst du zusätzlich in einem FreeCAD-Dialog (Standard „Abbrechen“). Addons mit Python-Paketen, Addon-Abhängigkeiten oder Git-Pflicht lehnt Buddy ab, dafür ist der Addon Manager zuständig.
-- `execute_python` ist standardmäßig aus und braucht zwei Freischaltungen: `--allow-python` beim Server **und** in FreeCAD „Python-Ausführung umschalten“ (oder `FREECAD_BUDDY_ALLOW_PYTHON=1` für beide Prozesse).
+- `install_addon` braucht zwei Freischaltungen: Der Server bietet es standardmäßig an (aus mit `--no-allow-addon-install` oder `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0`), in FreeCAD schaltest du es mit „Addon-Installation erlauben“ frei (bzw. `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=1` im FreeCAD-Prozess). Jede Installation bestätigst du zusätzlich in einem FreeCAD-Dialog (Standard „Abbrechen“). Addons mit Python-Paketen, Addon-Abhängigkeiten oder Git-Pflicht lehnt Buddy ab, dafür ist der Addon Manager zuständig.
+- `execute_python` ist standardmäßig aus und braucht zwei Freischaltungen: `--allow-python` beim Server **und** in FreeCAD „Python erlauben“ (oder `FREECAD_BUDDY_ALLOW_PYTHON=1` für beide Prozesse).
 - Exporte überschreiben vorhandene Dateien nur mit `overwrite=true`; die Dateiendung muss zum Format passen.
 
 ## Fehlerbehebung

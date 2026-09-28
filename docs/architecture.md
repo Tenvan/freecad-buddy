@@ -131,7 +131,7 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
   - `bridge-token` – von der Bridge beim ersten Start erzeugt, vom Server gelesen (Server ↔ Bridge).
   - `mcp-token` – vom Server beim ersten Start erzeugt, von MCP-Clients als Bearer-Token gesendet (Client ↔ Server).
 - MCP-Endpunkt: DNS-Rebinding-Schutz über `Host`/`Origin`-Prüfung (siehe [MCP-Transport](#mcp-transport-client--server)).
-- `execute_python` braucht eine **doppelte** Freischaltung: der Server registriert das Tool nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1`/`--allow-python`, die Bridge registriert `python.execute` nur mit Einstellung `Mod/FreeCADBuddy/AllowPython` (Workbench-Befehl „Python-Ausführung umschalten“) oder derselben Umgebungsvariable im FreeCAD-Prozess. Skripte laufen als eine Transaktion; `exit()` wird abgefangen und zurückgerollt.
+- `execute_python` braucht eine **doppelte** Freischaltung: der Server registriert das Tool nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1`/`--allow-python`, die Bridge registriert `python.execute` nur mit Einstellung `Mod/FreeCADBuddy/AllowPython` (Workbench-Buttons „Python erlauben“/„Python sperren“) oder derselben Umgebungsvariable im FreeCAD-Prozess. Skripte laufen als eine Transaktion; `exit()` wird abgefangen und zurückgerollt.
 - Token-Dateien werden mit Owner-Rechten angelegt (`0600` unter POSIX; unter Windows schützt das Benutzerprofil `%APPDATA%`).
 
 ## Zeitüberschreitungen und Wiederholungen

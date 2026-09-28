@@ -5,6 +5,31 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 4a — 2026-09-28 (Ralfs Direktauftrag: Opt-in-Standard, Button-Paare)
+
+**Ziel:** `--allow-addon-install` als Standard; die Schalter in FreeCAD wie „Bridge starten/stoppen“ als zwei Buttons.
+
+**Erledigt:**
+- Server: `allow_addon_install` standardmäßig an, `--allow-addon-install/--no-allow-addon-install`, Env `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0` schaltet ab.
+- Bridge: `commands.py` mit `_Setting`/`_SetSetting`; je ein aktiver Button für an und aus (Autostart, Python, Addon-Installation). `Toggle*`-Befehle entfallen. Erzwingt eine Umgebungsvariable den Zustand, warnt die Konsole statt still nichts zu tun.
+- Headless-Bridge bietet `addons.install` nie an (kein Dialog möglich). Der Doppel-Opt-in-Test hing sonst von Ralfs FreeCAD-Einstellung ab.
+
+**Release-Änderungen:**
+- `[feature][server]` `install_addon` ist serverseitig standardmäßig verfügbar, FreeCAD-Freischaltung und Dialog bleiben.
+- `[feature][bridge]` Workbench-Schalter als Button-Paare (an/aus).
+
+**Erkenntnisse:**
+- Die Headless-Bridge liest die echten FreeCAD-Einstellungen des Nutzers. Tests dürfen sich darauf nicht verlassen.
+
+**Validierung:**
+- `poe check` grün: ruff, pyright 0 Fehler, 91 Projekt-Python-Tests, 157 FreeCAD-Python-Tests.
+- GUI: Buttons in der Workbench offen (Teil von G9).
+
+**Nächste Session:**
+- S5 (Phase 3).
+
+---
+
 ## Session 4 — 2026-09-28
 
 **Ziel:** Phase 2, Addon-Installation mit doppeltem Opt-in, Dialog, Job-Muster und Aufräumen. Zusätzlich Ralfs neue Vorgabe: MCP-Ausgaben auf Englisch.

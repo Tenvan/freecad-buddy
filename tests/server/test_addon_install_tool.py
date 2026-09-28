@@ -12,6 +12,7 @@ import pytest
 from buddy_server import addon_catalog, addon_service
 from buddy_server.app import build_mcp
 from buddy_server.bridge import Bridge
+from buddy_server.cli import parse_args, settings_from
 from buddy_server.config import Settings
 from buddy_server.events import EventBus
 from buddy_server.tools import _install_blocker
@@ -31,6 +32,15 @@ def _tool_names(**overrides: Any) -> set[str]:
 def test_install_addon_exists_only_with_the_server_opt_in() -> None:
     assert "install_addon" not in _tool_names(allow_addon_install=False)
     assert "install_addon" in _tool_names(allow_addon_install=True)
+
+
+def test_server_opt_in_is_on_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("FREECAD_BUDDY_ALLOW_ADDON_INSTALL", raising=False)
+    assert Settings().allow_addon_install
+    assert not settings_from(parse_args(["--no-allow-addon-install"])).allow_addon_install
+    monkeypatch.setenv("FREECAD_BUDDY_ALLOW_ADDON_INSTALL", "0")
+    assert not Settings().allow_addon_install
+    assert settings_from(parse_args(["--allow-addon-install"])).allow_addon_install
 
 
 @pytest.fixture(scope="module")

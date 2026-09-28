@@ -687,7 +687,7 @@ def register_tools(
                 int, Field(ge=0, le=900, description="How long to wait for completion")
             ] = 300,
         ) -> dict[str, Any]:
-            """Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user
+            """Install an addon or macro through FreeCAD's Addon Manager (needs FreeCAD's opt-in). FreeCAD shows the user
             a confirmation dialog - ask in the chat first. Workbenches need a FreeCAD restart afterwards."""
             service, state = await ctx.catalog()
             entry = service.find(addon_id)
