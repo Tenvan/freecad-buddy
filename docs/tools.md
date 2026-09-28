@@ -34,7 +34,7 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`pattern`](#pattern) | Features spiegeln oder linear/polar/als Raster vervielfältigen (statt Geometrie mehrfach zu zeichnen). |
 | [`datum_plane`](#datum_plane) | Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche). |
 | [`select_geometry`](#select_geometry) | Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius). |
-| [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten |
+| [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten |
 | [`screenshot`](#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
 | [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
 | [`get_printer_profile`](#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
@@ -615,8 +615,8 @@ Beispiel:
 
 ## set_view
 
-Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten
-Schritt (sobald ein Dokument offen ist) und als letzten Schritt aufrufen (nur mit FreeCAD-GUI).
+Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten
+Schritt aufrufen; nach dem ersten Basis-Feature setzt der Server sie selbst (nur mit FreeCAD-GUI).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|

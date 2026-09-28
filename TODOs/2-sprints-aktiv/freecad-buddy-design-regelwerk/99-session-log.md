@@ -5,6 +5,40 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2b — 2026-09-28 (Live-Test mit Claude Code, Ansicht nach dem ersten Basis-Feature)
+
+**Ziel:** Platte direkt über die MCP-Tools in Claude Code bauen und Ralfs Rückmeldung zur Startansicht umsetzen.
+
+**Erledigt:**
+- Testplatte über die MCP-Tools gebaut (Client `claude-code`): 12 Aufrufe, Volumen 98 994,7 mm³, 8 Undo-Schritte, keine Label-Probleme. Nicht gespeichert.
+- Sichtung: Die Instructions kamen in Claude Code ungekürzt an (1 874 Zeichen). AC-01 ist damit per Sichtung belegt.
+- Rückmeldung Ralf: Die Startansicht passt nicht, weil `set_view` im leeren Dokument nichts zum Einpassen hat. Jetzt setzt das erste Basis-Feature eines Bodys die Ansicht automatisch (iso und fit), die Regel verlangt nur noch den letzten Schritt.
+- TUI-Test: Feste Pause durch Warten auf die Bedingung ersetzt, er war unter Last geflakt.
+
+**Release-Änderungen:**
+- `[feature][core]` Nach dem ersten `pad` bzw. `revolve` eines Bodys springt die FreeCAD-Ansicht auf iso und zeigt das ganze Bauteil, damit sich der Aufbau live verfolgen lässt.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Deterministische Server-Logik ist verlässlicher als eine Regel, die der Agent befolgen muss, wenn der Zeitpunkt eindeutig ist (erstes Solid).
+- Offen und ungeprüft: Auf oberster Ebene des Dokuments liegt `Origin001` („Ursprungspunkt“, `App::Point`), angelegt vermutlich nicht von Buddy.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: keine
+- Doku-Delta: keins
+- Nicht übernehmen: —
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 65 Tests Projekt-Python ✅, 138 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: Ralf hat den Live-Aufbau verfolgt. G12 prüft er nach dem FreeCAD-Neustart erneut.
+
+**Nächste Session:**
+- FreeCAD neu starten (Core geändert), Platte erneut aufbauen, danach S3.
+
+---
+
 ## Session 2a — 2026-09-28 (Chat-Test und Ansichtsregel)
 
 **Ziel:** Chat-Log mit Ralf live testen (Platte ohne Sieb), Farbfehler beheben, Ansichtsregel ergänzen (Spec-Stand 2).

@@ -32,7 +32,7 @@ Enthaltene Aufgaben: #1.1, #1.2, #1.3, #1.4, #1.5
 | #1.2 | `src/buddy_server/design_rules.py`: 9 Themen und 42 Regeln. Regeln mit `requires` erscheinen nur, wenn ihre Tools registriert sind. FDM-Werte als Vorlagen aus dem Profil plus abgeleitete Werte (tragende Wand, Bettfase, M3-Spiel) | in 98 notiert | 2026-09-28 |
 | #1.3 | `build_instructions`: Kernregeln plus Verweis auf `get_design_rules`, 1 688 Zeichen, Namen vorab per `NameCollector` gesammelt | in 98 notiert | 2026-09-28 |
 | #1.4 | Tool `get_design_rules` (Profil aus der Bridge, sonst Standardprofil mit Hinweis), Resource `buddy://design-rules` und Template `/{topic}`, Prompts `human_modeling_guide` und `design_part` aus der Quelle. `ToolContext.local` für serverseitige Tools | keins | 2026-09-28 |
-| #1.6 | Stand 2, Ansichtsregel: `set_view` (Core `view.set_view`, Bridge `view.set`, Tool) mit iso/dimetric/trimetric/Normalansichten und `fit`. Kernregel im Thema `workflow` (mit `requires=set_view`), `design_part` mit erstem und letztem Schritt. Tests für Instructions und Bridge (headless `unsupported`). Instructions jetzt 1 874 Zeichen | keins | 2026-09-28 |
+| #1.6 | Stand 2, Ansichtsregel: `set_view` (Core `view.set_view`, Bridge `view.set`, Tool) mit iso/dimetric/trimetric/Normalansichten und `fit`. Kernregel im Thema `workflow` (mit `requires=set_view`), `design_part` mit erstem und letztem Schritt. Tests für Instructions und Bridge (headless `unsupported`). Instructions jetzt 1 874 Zeichen. Präzisierung nach Ralfs Live-Test: Beim leeren Dokument hatte `set_view` nichts zum Einpassen, deshalb setzen `pad` und additives `revolve` die Ansicht jetzt selbst, sobald sie das erste Solid eines Bodys erzeugen (`features._show_first_base_feature`, nur mit GUI). Die Regel verlangt nur noch den letzten Schritt, Instructions 1 881 Zeichen | keins | 2026-09-28 |
 | #1.5 | `tests/server/test_design_rules.py` (8 Tests): Budget, Kernregeln, nur registrierte Tools genannt (mit und ohne `execute_python`), Themenabdeckung, Profilwerte bei Düse 0,6, versteckte Themen, E2E über MCP mit Tool, Fehlerfall, Resource-Template und Prompt | keins | 2026-09-28 |
 
 ## Geplante Abnahmeprüfungen
@@ -42,7 +42,7 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
 | AC-01: Nach Neustart von Claude Code erscheinen die neuen Instructions ungekürzt im Server-Abschnitt | offen | ausstehend | ausstehend |
-| G12 (AC-16): `set_view` in der GUI, das Bauteil ist danach komplett sichtbar und isometrisch | offen | ausstehend | ausstehend |
+| G12 (AC-16): Beim Aufbau springt die Ansicht nach dem ersten `pad` auf iso und zeigt das Bauteil komplett; am Ende setzt `set_view` dieselbe Ansicht | offen | ausstehend | ausstehend |
 
 ## 🔄 Nächste Session
 

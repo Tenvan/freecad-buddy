@@ -54,8 +54,8 @@ TOPICS: tuple[Topic, ...] = (
         (
             Rule("Vor Änderungen get_model_tree lesen – der Nutzer arbeitet parallel in FreeCAD.", core=True),
             Rule(
-                "Ansicht als erster und letzter Schritt: set_view (iso, fit) – das Bauteil ist komplett sichtbar "
-                "und leicht isometrisch. Ohne offenes Dokument direkt nach new_document/open_document.",
+                "Ansicht: Nach dem ersten Basis-Feature (pad/revolve) setzt FreeCAD Buddy iso + fit selbst; als "
+                "letzter Schritt set_view aufrufen – das Bauteil ist komplett sichtbar und leicht isometrisch.",
                 requires=("set_view",),
                 core=True,
             ),

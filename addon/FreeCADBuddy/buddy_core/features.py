@@ -11,7 +11,7 @@ from typing import Any
 
 import FreeCAD
 
-from buddy_core import naming, select, values
+from buddy_core import naming, select, values, view
 from buddy_core.body import body_of, origin_feature, resolve_body
 from buddy_core.documents import resolve_document, resolve_object
 from buddy_core.errors import RECOMPUTE_FAILED, CoreError, validation
@@ -54,6 +54,22 @@ def _finish(doc: Any, feature: Any, result: ToolResult) -> None:
     result.data["volume"] = shape.Volume if shape.Solids else 0.0
 
 
+def _has_solid(body: Any) -> bool:
+    tip = body.Tip
+    return tip is not None and bool(getattr(tip, "Shape", None) and tip.Shape.Solids)
+
+
+def _show_first_base_feature(doc: Any, feature: Any, result: ToolResult) -> None:
+    """After the first solid of a body, fit an isometric view so the user can follow the build."""
+    if not (FreeCAD.GuiUp and feature.isValid()):
+        return
+    try:
+        view.set_view("iso", True, doc.Name)
+    except CoreError:
+        return  # no 3D view in front (e.g. spreadsheet) - modelling result is unaffected
+    result.data["view"] = "iso"
+
+
 def _ensure_cuts(doc: Any, feature: Any, volume_before: float, result: ToolResult) -> None:
     doc.recompute()
     if feature.isValid() and volume_before - _volume(feature) > _VOLUME_TOL:
@@ -85,6 +101,7 @@ def pad(
     doc = resolve_document(document)
     profile, body = _profile(doc, sketch)
     result = ToolResult()
+    first = not _has_solid(body)
     with transaction(doc, f"Pad: {purpose or profile.Label}"):
         feature = _new(body, "PartDesign::Pad", "Pad", purpose, profile.Label.removeprefix("Sketch_"))
         feature.Profile = profile
@@ -106,6 +123,8 @@ def pad(
                 raise validation("mode muss length, symmetric, two_sides oder up_to_last sein")
         profile.Visibility = False
         _finish(doc, feature, result)
+    if first:
+        _show_first_base_feature(doc, feature, result)
     return result
 
 
@@ -164,6 +183,7 @@ def revolve(
     type_id, prefix = (
         ("PartDesign::Groove", "Groove") if subtractive else ("PartDesign::Revolution", "Revolution")
     )
+    first = not subtractive and not _has_solid(body)
     with transaction(doc, f"{prefix}: {purpose or profile.Label}"):
         before = _volume(body.Tip) if body.Tip else 0.0
         feature = _new(body, type_id, prefix, purpose, profile.Label.removeprefix("Sketch_"))
@@ -174,6 +194,8 @@ def revolve(
         if subtractive:
             _ensure_cuts(doc, feature, before, result)
         _finish(doc, feature, result)
+    if first:
+        _show_first_base_feature(doc, feature, result)
     return result
 
 

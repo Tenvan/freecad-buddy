@@ -28,7 +28,7 @@ def register_prompts(mcp: MCPServer, ctx: ToolContext, available: set[str]) -> N
         return (
             f"Konstruiere mit FreeCAD Buddy: {description}\n\n"
             "Vorgehen:\n"
-            "1. get_status und get_model_tree lesen; sobald ein Dokument offen ist: set_view (iso).\n"
+            "1. get_status und get_model_tree lesen (Ansicht nach dem ersten pad setzt der Server selbst).\n"
             "2. Maße klären und als Parameter anlegen (set_parameters).\n"
             "3. Prüfen, ob ein Design-Tool die Aufgabe abdeckt (Regeln unter design_tools).\n"
             "4. create_body, dann Basisskizze (create_sketch + add_profile) und pad.\n"

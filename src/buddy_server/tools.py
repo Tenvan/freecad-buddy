@@ -495,8 +495,8 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
         ] = True,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten
-        Schritt (sobald ein Dokument offen ist) und als letzten Schritt aufrufen (nur mit FreeCAD-GUI)."""
+        """Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten
+        Schritt aufrufen; nach dem ersten Basis-Feature setzt der Server sie selbst (nur mit FreeCAD-GUI)."""
         return await ctx.call("set_view", "view.set", view=view, fit=fit, document=document)
 
     @tool

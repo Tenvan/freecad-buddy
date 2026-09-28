@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable
 from typing import cast
 
 from textual.widgets import Label, RichLog, Static, TextArea
@@ -88,6 +89,19 @@ def test_sessions_changed_updates_status_bar() -> None:
     asyncio.run(scenario())
 
 
+async def _wait_for(pilot: object, condition: Callable[[], bool], timeout: float = 5.0) -> None:
+    """Poll instead of fixed pauses: batching and mounting take longer on a loaded machine."""
+    deadline = time.monotonic() + timeout
+    while not condition():
+        assert time.monotonic() < deadline, "Bedingung nicht rechtzeitig erfüllt"
+        await pilot.pause(0.05)  # type: ignore[attr-defined]
+
+
+def _mounted(record: object) -> bool:
+    item = getattr(record, "item", None)
+    return item is not None and item.is_mounted
+
+
 def _chat(app: BuddyApp) -> ToolChat:
     return app.query_one("#tool-log", ToolChat)
 
@@ -115,9 +129,8 @@ def test_request_and_response_bubbles_with_state_colors() -> None:
                 ToolFinished(3, "pocket", 0.02, False, "recompute_failed", response="[recompute_failed] kaputt",
                              error_code="recompute_failed")
             )  # fmt: skip
-            await pilot.pause(0.2)
-
             records = _chat(app).records
+            await _wait_for(pilot, lambda: all(_mounted(records.get(i)) for i in (1, 2, 3)))
             assert [records[i].state for i in (1, 2, 3)] == ["ok", "warning", "error"]
             items = {i: records[i].item for i in (1, 2, 3)}
             assert all(item is not None for item in items.values())

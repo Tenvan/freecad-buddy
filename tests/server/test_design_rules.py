@@ -117,5 +117,5 @@ def test_view_rule_is_first_core_rule_after_reading_the_tree() -> None:
     instructions, names = _registered()
 
     assert "set_view" in names
-    assert "Ansicht als erster und letzter Schritt: set_view" in instructions
+    assert "Nach dem ersten Basis-Feature" in instructions and "letzter Schritt set_view" in instructions
     assert instructions.index("get_model_tree lesen") < instructions.index("set_view")
