@@ -40,3 +40,24 @@ def test_referenzmodell_markdown_matches_the_script() -> None:
     assert sample.LATEST_STAGE == max(sample.STAGE_PARAMETERS) == max(sample.STAGE_PROMPTS)
     assert set(sample.STAGE_FEATURES) == set(sample.STAGE_PARAMETERS)
     assert (SAMPLES / "referenzmodell.png").stat().st_size > 1000
+
+
+def test_luefterrahmen_markdown_matches_the_script() -> None:
+    sample = _load("luefterrahmen")
+    markdown = (SAMPLES / "luefterrahmen.md").read_text(encoding="utf-8")
+
+    assert f"```text\n{sample.prompt()}\n```" in markdown, "Prompt im MD veraltet: … luefterrahmen.py prompt"
+    for stage in sample.STAGE_PARAMETERS:
+        values = sample.parameters(stage)
+        assert f"| {stage} |" in markdown
+        assert f"{sample.expected_volume(values, stage):.1f} mm³" in markdown
+        size = " × ".join(f"{v:.1f}" for v in sample.expected_size(values, stage))
+        assert f"{size} mm" in markdown
+        for probe in sample.PROBES:
+            assert f"{sample.expected_volume({**values, **probe}, stage):.1f} mm³" in markdown
+        for name in sample.STAGE_PARAMETERS[stage]:
+            assert name in markdown
+    assert sample.prompt(1).startswith(sample.PROMPT_HEADS[1]), "frühere Stufen behalten ihren Kopf"
+    assert sample.LATEST_STAGE == max(sample.STAGE_PARAMETERS) == max(sample.STAGE_PROMPTS)
+    assert set(sample.STAGE_FEATURES) == set(sample.STAGE_PARAMETERS)
+    assert (SAMPLES / "luefterrahmen.png").stat().st_size > 1000
