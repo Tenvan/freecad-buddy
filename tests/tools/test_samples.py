@@ -29,6 +29,10 @@ def test_referenzmodell_markdown_matches_the_script() -> None:
         assert f"| {stage} |" in markdown
         for name in sample.STAGE_PARAMETERS[stage]:
             assert name in markdown
+        if stage >= sample.BOX_STAGE:
+            assert f"{sample.expected_box_volume(values, stage):.1f} mm³" in markdown
+            assert f"{sample.expected_box_volume(probe, stage):.1f} mm³" in markdown
+    assert sample.prompt(1).startswith(sample.PROMPT_HEADS[1]), "frühere Stufen behalten ihren Kopf"
     assert sample.LATEST_STAGE == max(sample.STAGE_PARAMETERS) == max(sample.STAGE_PROMPTS)
     assert set(sample.STAGE_FEATURES) == set(sample.STAGE_PARAMETERS)
     assert (SAMPLES / "referenzmodell.png").stat().st_size > 1000
