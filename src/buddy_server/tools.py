@@ -208,7 +208,16 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
     async def add_profile(
         sketch: Annotated[str, Field(description="Skizzen-Label")],
         kind: Annotated[
-            Literal["rectangle", "rounded_rectangle", "slot", "circle", "polygon", "hole_rect", "polyline"],
+            Literal[
+                "rectangle",
+                "rounded_rectangle",
+                "slot",
+                "circle",
+                "polygon",
+                "hole_rect",
+                "polyline",
+                "u_path",
+            ],
             Field(description="Profilart"),
         ],
         params: Annotated[
@@ -218,7 +227,8 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
                     "rectangle: width, height, [center=[x,y]], [anchor=center|corner]; "
                     "rounded_rectangle: width, height, radius, [center]; slot: length (Mittenabstand), width, [center]; "
                     "circle: diameter, [center]; polygon: sides, diameter|across_flats, [center]; "
-                    "hole_rect: width, height (Lochabstände), diameter, [center]; polyline: points=[[x,y],…]. "
+                    "hole_rect: width, height (Lochabstände), diameter, [center]; polyline: points=[[x,y],…]; "
+                    "u_path (offener Bügel-Pfad für sweep): length (Beinabstand), height, radius. "
                     "Werte: Zahl oder Parametername."
                 )
             ),
@@ -344,6 +354,25 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
         return await ctx.call(
             "revolve", "feature.revolve", sketch=sketch, axis=axis, angle=angle, subtractive=subtractive,
             purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
+    async def sweep(
+        profile: Annotated[
+            str, Field(description="Skizze mit geschlossenem Querschnitt am Pfadanfang, z. B. Kreis")
+        ],
+        path: Annotated[str, Field(description="Pfad-Skizze, z. B. add_profile kind='u_path'")],
+        subtractive: Annotated[
+            bool, Field(description="true = Material entlang des Pfads entfernen")
+        ] = False,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Querschnitt entlang eines Pfads ziehen (PartDesign AdditivePipe/SubtractivePipe): runde Griffe,
+        Bügel, Kabelkanäle. Querschnitt senkrecht zum Pfadanfang legen (Pfad startet vertikal → Kreis auf XY)."""
+        return await ctx.call(
+            "sweep", "feature.sweep", profile=profile, path=path, subtractive=subtractive, purpose=purpose,
+            document=document,
         )  # fmt: skip
 
     @tool

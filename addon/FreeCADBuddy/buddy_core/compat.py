@@ -23,6 +23,8 @@ REQUIRED_TYPES: tuple[str, ...] = (
     "PartDesign::Pocket",
     "PartDesign::Revolution",
     "PartDesign::Groove",
+    "PartDesign::AdditivePipe",
+    "PartDesign::SubtractivePipe",
     "PartDesign::Hole",
     "PartDesign::Fillet",
     "PartDesign::Chamfer",

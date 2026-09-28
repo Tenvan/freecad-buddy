@@ -147,6 +147,11 @@ TOPICS: tuple[Topic, ...] = (
                 "Details (fillet, chamfer, shell) zuletzt, damit Änderungen an der Basis sie nicht zerstören."
             ),
             Rule("Gehäuse mit shell aus einem Vollkörper statt aus mehreren Pads."),
+            Rule(
+                "Runde Stäbe, Griffe und Bügel mit sweep: Pfad als Skizze (u_path), Kreis-Querschnitt senkrecht "
+                "am Pfadanfang; Biegeradius > halber Stabdurchmesser.",
+                requires=("sweep",),
+            ),
         ),
     ),
     Topic(

@@ -103,6 +103,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.pad": (features.pad, {}),
     "feature.pocket": (features.pocket, {}),
     "feature.revolve": (features.revolve, {}),
+    "feature.sweep": (features.sweep, {}),
     "feature.hole": (features.hole, {}),
     "feature.fillet": (features.fillet, {}),
     "feature.chamfer": (features.chamfer, {}),

@@ -39,12 +39,21 @@ def test_instructions_stay_in_budget_with_every_planned_tool() -> None:
     assert len(design_rules.build_instructions(None)) <= design_rules.INSTRUCTIONS_BUDGET
 
 
+def _profile_kinds() -> set[str]:
+    """Profile kinds of add_profile (e.g. u_path) are valid identifiers in the rules, too."""
+    settings = Settings()
+    bus = EventBus()
+    mcp, _ = build_mcp(settings, Bridge(settings, bus), bus)
+    tools = {tool.name: tool for tool in asyncio.run(mcp.list_tools())}
+    return set(tools["add_profile"].input_schema["properties"]["kind"]["enum"])
+
+
 @pytest.mark.parametrize("allow_python", [False, True])
 def test_rules_only_name_registered_tools(allow_python: bool) -> None:
     instructions, names = _registered(allow_python)
     text = instructions + design_rules.render_all(None, names)
 
-    mentioned = set(_IDENTIFIER.findall(text)) - set(design_rules.TOPIC_KEYS)
+    mentioned = set(_IDENTIFIER.findall(text)) - set(design_rules.TOPIC_KEYS) - _profile_kinds()
     assert mentioned <= names, sorted(mentioned - names)
     assert ("execute_python" in text) == allow_python
 

@@ -185,3 +185,38 @@ def test_pattern_of_pattern_is_rejected_with_hint(doc: Any, part: Any) -> None:
         features.pattern(
             [row["feature"]["name"]], "linear", direction="Y", length=10, count=2, document=doc.Name
         )
+
+
+def test_u_path_is_fully_constrained_and_sweep_makes_a_round_handle(doc: Any, part: Any) -> None:
+    import math
+
+    set_params(doc, Handle_Length=100, Handle_Height=40, Handle_Radius=10, Handle_Diameter=10)
+    path = sketch_on(doc, plane="XZ", purpose="HandlePath")
+    analysis = profile(
+        doc, path, "u_path", length="Handle_Length", height="Handle_Height", radius="Handle_Radius"
+    )
+    assert analysis["sketch"]["dof"] == 0 and analysis["sketch"]["open_wires"] == 1
+
+    section = sketch_on(doc, purpose="HandleSection")
+    profile(doc, section, "circle", diameter="Handle_Diameter", center=["-Handle_Length / 2", 0])
+    result = features.sweep(section.Name, path.Name, purpose="Handle", document=doc.Name).to_dict()
+
+    centre_line = 2 * 40 + 100 - 4 * 10 + math.pi * 10
+    assert result["created"][0]["label"] == "Sweep_Handle"
+    assert abs(result["volume"] - math.pi * 5**2 * centre_line) < 1.0
+
+    set_params(doc, Handle_Length=80)  # the handle follows its parameters
+    doc.recompute()
+    assert abs(part.Tip.Shape.Volume - math.pi * 25 * (centre_line - 20)) < 1.0
+
+
+def test_sweep_rejects_empty_path_and_bad_radius(doc: Any, part: Any) -> None:
+    from buddy_core.errors import CoreError as Error
+
+    path = sketch_on(doc, plane="XZ", purpose="Empty")
+    section = sketch_on(doc, purpose="Section")
+    profile(doc, section, "circle", diameter=5)
+    with pytest.raises(Error):
+        features.sweep(section.Name, path.Name, document=doc.Name)
+    with pytest.raises(Error):
+        profile(doc, path, "u_path", length=20, height=5, radius=10)

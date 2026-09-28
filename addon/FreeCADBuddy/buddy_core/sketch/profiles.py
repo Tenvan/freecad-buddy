@@ -216,6 +216,41 @@ def polyline(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
     return edges
 
 
+def u_path(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
+    """Open U-shaped path (handle, bracket) with rounded corners, symmetric to the V axis.
+
+    The legs start on the H axis; ``length`` is the leg distance, ``height`` the height of the
+    top segment, ``radius`` the bend radius (all measured on the centre line). Sweep target.
+    """
+    length, height, r = (
+        _value(doc, params, "length"),
+        _value(doc, params, "height"),
+        _value(doc, params, "radius"),
+    )
+    if 2 * r.number >= length.number or r.number >= height.number:
+        raise validation("'radius' muss kleiner als die halbe Länge und kleiner als die Höhe sein")
+    hl, h, rr = length.number / 2, height.number, r.number
+    left = b.line((-hl, 0), (-hl, h - rr))
+    arc_left = b.arc((-hl + rr, h - rr), rr, 90, 180)
+    top = b.line((-hl + rr, h), (hl - rr, h))
+    arc_right = b.arc((hl - rr, h - rr), rr, 0, 90)
+    right = b.line((hl, h - rr), (hl, 0))
+    b.con("Tangent", left, END, arc_left, END)
+    b.con("Tangent", arc_left, START, top, START)
+    b.con("Tangent", top, END, arc_right, END)
+    b.con("Tangent", arc_right, START, right, START)
+    b.con("Vertical", left)
+    b.con("Vertical", right)
+    b.con("Horizontal", top)
+    b.con("Equal", arc_left, arc_right)
+    b.dim("Radius", arc_left, value=r, what="Radius")
+    b.dim("DistanceX", left, START, right, END, value=length, what="Length")
+    b.dim("DistanceY", left, START, top, START, value=height, what="Height")
+    b.con("PointOnObject", left, START, -1)
+    b.con("Symmetric", left, START, right, END, -2)
+    return [left, arc_left, top, arc_right, right]
+
+
 PROFILES: dict[str, Callable[[SketchBuilder, Any, Params], list[int]]] = {
     "rectangle": rectangle,
     "rounded_rectangle": rounded_rectangle,
@@ -224,6 +259,7 @@ PROFILES: dict[str, Callable[[SketchBuilder, Any, Params], list[int]]] = {
     "polygon": polygon,
     "hole_rect": hole_rect,
     "polyline": polyline,
+    "u_path": u_path,
 }
 
 

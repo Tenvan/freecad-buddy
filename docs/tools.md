@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-35 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
+36 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
 Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Tool | Zweck |
@@ -27,6 +27,7 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`pad`](#pad) | Profil aufpolstern (additiv). |
 | [`pocket`](#pocket) | Tasche schneiden (subtraktiv). |
 | [`revolve`](#revolve) | Rotationskörper (Revolution) oder Rotationsnut (Groove). |
+| [`sweep`](#sweep) | Querschnitt entlang eines Pfads ziehen (PartDesign AdditivePipe/SubtractivePipe): runde Griffe, |
 | [`hole`](#hole) | Bohrungen (Hole-Feature) an allen Kreismittelpunkten der Skizze. |
 | [`fillet`](#fillet) | Kanten verrunden. Der Selektor wird gespeichert und nach Parameteränderungen neu aufgelöst. |
 | [`chamfer`](#chamfer) | Kanten fasen (an der Druckbett-Unterseite besser als Verrundung – gegen Elefantenfuß). |
@@ -258,8 +259,8 @@ Doppelmaß, benannte Maße. Ergebnis enthält die Skizzenanalyse (DoF muss 0 sei
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `sketch` | string | ja | `—` | Skizzen-Label |
-| `kind` | `rectangle` \| `rounded_rectangle` \| `slot` \| `circle` \| `polygon` \| `hole_rect` \| `polyline` | ja | `—` | Profilart |
-| `params` | object | ja | `—` | rectangle: width, height, [center=[x,y]], [anchor=center\|corner]; rounded_rectangle: width, height, radius, [center]; slot: length (Mittenabstand), width, [center]; circle: diameter, [center]; polygon: sides, diameter\|across_flats, [center]; hole_rect: width, height (Lochabstände), diameter, [center]; polyline: points=[[x,y],…]. Werte: Zahl oder Parametername. |
+| `kind` | `rectangle` \| `rounded_rectangle` \| `slot` \| `circle` \| `polygon` \| `hole_rect` \| `polyline` \| `u_path` | ja | `—` | Profilart |
+| `params` | object | ja | `—` | rectangle: width, height, [center=[x,y]], [anchor=center\|corner]; rounded_rectangle: width, height, radius, [center]; slot: length (Mittenabstand), width, [center]; circle: diameter, [center]; polygon: sides, diameter\|across_flats, [center]; hole_rect: width, height (Lochabstände), diameter, [center]; polyline: points=[[x,y],…]; u_path (offener Bügel-Pfad für sweep): length (Beinabstand), height, radius. Werte: Zahl oder Parametername. |
 | `prefix` | string \| null | nein | `null` | Präfix für Maßnamen, z. B. 'Base' → Base_Width |
 | `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
 
@@ -442,6 +443,29 @@ Beispiel:
   "sketch": "Sketch_Profile",
   "axis": "V_Axis",
   "angle": 360
+}
+```
+
+## sweep
+
+Querschnitt entlang eines Pfads ziehen (PartDesign AdditivePipe/SubtractivePipe): runde Griffe,
+Bügel, Kabelkanäle. Querschnitt senkrecht zum Pfadanfang legen (Pfad startet vertikal → Kreis auf XY).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `profile` | string | ja | `—` | Skizze mit geschlossenem Querschnitt am Pfadanfang, z. B. Kreis |
+| `path` | string | ja | `—` | Pfad-Skizze, z. B. add_profile kind='u_path' |
+| `subtractive` | boolean | nein | `false` | true = Material entlang des Pfads entfernen |
+| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "profile": "Sketch_HandleSection",
+  "path": "Sketch_HandlePath",
+  "purpose": "Handle"
 }
 ```
 

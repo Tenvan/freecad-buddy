@@ -200,6 +200,46 @@ def revolve(
     return result
 
 
+def sweep(
+    profile: str,
+    path: str,
+    subtractive: bool = False,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Sweep a closed profile along a path sketch (AdditivePipe, or SubtractivePipe for a cut).
+
+    The profile should sit at the start of the path, perpendicular to it (e.g. a circle on XY
+    for a path that starts vertically) - that is how a person sets up a sweep in FreeCAD.
+    """
+    doc = resolve_document(document)
+    section, body = _profile(doc, profile)
+    spine = resolve_sketch(doc, path)
+    if body_of(spine) is not body:
+        raise validation("Profil und Pfad müssen im selben Body liegen")
+    edges = spine.Shape.Edges if not spine.Shape.isNull() else []
+    if not edges:
+        raise validation(f"Pfad '{spine.Label}' enthält keine Kanten")
+    type_id, prefix = (
+        ("PartDesign::SubtractivePipe", "SweepCut") if subtractive else ("PartDesign::AdditivePipe", "Sweep")
+    )
+    result = ToolResult()
+    first = not subtractive and not _has_solid(body)
+    with transaction(doc, f"{prefix}: {purpose or section.Label}"):
+        before = _volume(body.Tip) if body.Tip else 0.0
+        feature = _new(body, type_id, prefix, purpose, section.Label.removeprefix("Sketch_"))
+        feature.Profile = section
+        feature.Spine = (spine, [f"Edge{index + 1}" for index in range(len(edges))])
+        section.Visibility = False
+        spine.Visibility = False
+        if subtractive:
+            _ensure_cuts(doc, feature, before, result)
+        _finish(doc, feature, result)
+    if first:
+        _show_first_base_feature(doc, feature, result)
+    return result
+
+
 def _thread_size(feature: Any, size: str) -> str:
     options = feature.getEnumerationsOfProperty("ThreadSize")
     wanted = size.strip().upper().replace(" ", "")
