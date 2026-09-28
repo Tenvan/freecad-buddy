@@ -59,13 +59,21 @@ def render_json(value: Any) -> str:
     return text
 
 
-def preview(text: str, max_lines: int = 8, width: int = 160) -> str:
-    """First lines of ``text`` for a chat bubble, with a hint how much is hidden."""
+def preview_parts(text: str, max_lines: int = 8, width: int = 160) -> tuple[str, int]:
+    """First lines of ``text`` for a chat bubble and the number of hidden lines."""
     lines = text.splitlines() or [""]
     shown = [line if len(line) <= width else line[: width - 1] + "…" for line in lines[:max_lines]]
-    if len(lines) > max_lines:
-        shown.append(f"… (+{len(lines) - max_lines} Zeilen, Enter = alles)")
-    return "\n".join(shown)
+    return "\n".join(shown), max(0, len(lines) - max_lines)
+
+
+def hidden_hint(hidden: int) -> str:
+    return f"… (+{hidden} Zeilen, Enter = alles)"
+
+
+def preview(text: str, max_lines: int = 8, width: int = 160) -> str:
+    """Plain-text preview with the hidden-lines hint appended (headless output, tests)."""
+    shown, hidden = preview_parts(text, max_lines, width)
+    return shown + (f"\n{hidden_hint(hidden)}" if hidden else "")
 
 
 def summarize(result: Any) -> tuple[str, tuple[str, ...]]:

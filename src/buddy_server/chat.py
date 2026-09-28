@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 from rich.console import Group, RenderableType
-from rich.syntax import Syntax
+from rich.highlighter import JSONHighlighter
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
@@ -21,7 +21,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Label, ListItem, ListView, Static, TextArea
 
 from buddy_server.events import ToolFinished, ToolStarted
-from buddy_server.payloads import preview
+from buddy_server.payloads import hidden_hint, preview_parts
 
 MAX_CALLS = 1000
 
@@ -79,11 +79,18 @@ class CallRecord:
         return "\n".join(parts)
 
 
+_JSON = JSONHighlighter()
+
+
 def _code(text: str) -> RenderableType:
-    shown = preview(text)
+    """Bubble body: JSON gets foreground-only highlighting (no background box), the hint stays neutral."""
+    shown, hidden = preview_parts(text)
+    body = Text(shown)
     if shown.lstrip().startswith(("{", "[")):
-        return Syntax(shown, "json", theme="ansi_dark", word_wrap=True, background_color="default")
-    return Text(shown)
+        _JSON.highlight(body)
+    if hidden:
+        body.append("\n" + hidden_hint(hidden), style="dim italic")
+    return body
 
 
 class CallItem(ListItem):

@@ -215,3 +215,20 @@ def test_q_quits_the_app_and_stops_the_runner() -> None:
         assert runner.stop_calls == 1
 
     asyncio.run(scenario())
+
+
+def test_bubble_json_has_no_background_and_the_hint_is_not_highlighted() -> None:
+    from rich.console import Console as RichConsole
+    from rich.text import Text
+
+    from buddy_server.chat import _code
+
+    long_json = "{\n" + "\n".join(f'  "k{i}": {i},' for i in range(40)) + "\n}"
+    body = _code(long_json)
+    assert isinstance(body, Text)
+    hint_start = body.plain.index("… (+")
+    for span in body.spans:
+        style = RichConsole().get_style(span.style) if isinstance(span.style, str) else span.style
+        assert style.bgcolor is None
+        if span.start >= hint_start:
+            assert style.italic and style.dim  # neutral hint, no JSON colours
