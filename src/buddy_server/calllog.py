@@ -14,7 +14,7 @@ from typing import Any
 from mcp.server.context import CallNext, HandlerResult, ServerRequestContext
 
 from buddy_server.events import Event, EventBus, ToolFinished, ToolStarted
-from buddy_server.payloads import Masker, describe_result, render_json
+from buddy_server.payloads import Masker, compact_arguments, describe_result, render_json
 
 # Module-wide, so ids stay unique when the server is rebuilt (e.g. toggling execute_python).
 _call_ids = itertools.count(1)
@@ -34,8 +34,12 @@ class ToolCallLog:
         params = dict(ctx.params or {})
         name = str(params.get("name", "?"))
         call_id = next(_call_ids)
-        arguments = render_json(self._mask(params.get("arguments") or {}))
-        self._bus.publish(ToolStarted(call_id, name, arguments, self._session_label(ctx)))
+        masked = self._mask(params.get("arguments") or {})
+        self._bus.publish(
+            ToolStarted(
+                call_id, name, render_json(masked), self._session_label(ctx), compact_arguments(masked)
+            )
+        )
         started = time.monotonic()
         try:
             result = await call_next(ctx)

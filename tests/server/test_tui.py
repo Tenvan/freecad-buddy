@@ -245,3 +245,59 @@ def test_bubble_json_has_no_background_and_the_hint_is_not_highlighted() -> None
         assert style.bgcolor is None
         if span.start >= hint_start:
             assert style.italic and style.dim  # neutral hint, no JSON colours
+
+
+def test_message_pane_is_a_fifth_and_the_splitter_resizes_it() -> None:
+    from textual import events
+
+    from buddy_server.splitter import Splitter
+
+    async def scenario() -> None:
+        app, _ = _make_app()
+        async with app.run_test(size=(120, 60)) as pilot:
+            await pilot.pause()
+            chat = app.query_one("#tool-log")
+            messages = app.query_one("#message-log")
+            splitter = app.query_one("#splitter", Splitter)
+            total = chat.outer_size.height + messages.outer_size.height
+            assert abs(messages.outer_size.height / total - 0.2) < 0.05
+
+            # drag with the mouse: splitter up by 10 rows -> message pane 10 rows taller
+            before = messages.outer_size.height
+            await pilot.mouse_down("#splitter", offset=(10, 0))
+            await pilot.hover("#splitter", offset=(10, -10))
+            await pilot.pause()
+            assert messages.outer_size.height == before + 10
+            assert splitter.has_class("-dragging")
+            splitter.on_mouse_up(events.MouseUp(None, 0, 0, 0, 0, 1, False, False, False))
+            assert not splitter.has_class("-dragging")
+
+            # limits: never below 3 rows, the chat keeps at least 5 rows
+            splitter.set_lower_height(0)
+            await pilot.pause()
+            assert messages.outer_size.height == 3
+            splitter.set_lower_height(999)
+            await pilot.pause()
+            assert chat.outer_size.height >= 5
+
+            await pilot.press("ctrl+down")
+            await pilot.pause()
+            assert messages.outer_size.height < splitter.parent.region.height  # type: ignore[union-attr]
+
+    asyncio.run(scenario())
+
+
+def test_request_bubble_shows_compact_arguments() -> None:
+    async def scenario() -> None:
+        app, runner = _make_app()
+        async with app.run_test(size=(140, 50)) as pilot:
+            runner.bus.publish(
+                ToolStarted(1, "pad", '{"sketch": "Sketch_Plate"}', "c #1", "sketch: Sketch_Plate")
+            )
+            records = _chat(app).records
+            await _wait_for(pilot, lambda: _mounted(records.get(1)))
+            request = cast(CallItem, records[1].item).query_one(".request", Static)
+            assert "sketch: Sketch_Plate" in str(request.render())
+            assert '"sketch"' in records[1].detail()
+
+    asyncio.run(scenario())

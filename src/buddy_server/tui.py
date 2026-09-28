@@ -33,6 +33,7 @@ from buddy_server.events import (
     ToolStarted,
 )
 from buddy_server.runner import ServerRunner
+from buddy_server.splitter import Splitter
 
 MAX_LOG_LINES = 1000
 QUIT_TIMEOUT_SECONDS = 5
@@ -77,8 +78,8 @@ class BuddyApp(App[None]):
         border: round $primary;
     }
     #tool-log:focus { border: round $accent; }
-    #tool-log { height: 3fr; }
-    #message-log { height: 2fr; }
+    #tool-log { height: 4fr; }
+    #message-log { height: 1fr; min-height: 3; }
     """
 
     BINDINGS: ClassVar[list[BindingType]] = [
@@ -87,6 +88,8 @@ class BuddyApp(App[None]):
         Binding("v", "toggle_view", "Chat/Liste"),
         Binding("p", "toggle_python", "execute_python umschalten"),
         Binding("q", "quit_app", "Beenden"),
+        Binding("ctrl+up", "grow_messages(2)", "Meldungen größer", show=False),
+        Binding("ctrl+down", "grow_messages(-2)", "Meldungen kleiner", show=False),
     ]
 
     def __init__(self, settings: Settings, runner: ServerRunner | None = None) -> None:
@@ -106,6 +109,7 @@ class BuddyApp(App[None]):
             yield Label(self._python_label_text(), id="status-python")
         with Vertical(id="panels"):
             yield ToolChat(id="tool-log")
+            yield Splitter("message-log", id="splitter")
             yield RichLog(id="message-log", max_lines=MAX_LOG_LINES, markup=False)
         yield Footer()
 
@@ -194,6 +198,10 @@ class BuddyApp(App[None]):
             log.write(line)
 
     # -- key bindings ---------------------------------------------------------
+
+    def action_grow_messages(self, rows: int) -> None:
+        splitter = self.query_one("#splitter", Splitter)
+        splitter.set_lower_height(splitter.lower_height() + rows)
 
     def action_toggle_view(self) -> None:
         self.query_one("#tool-log", ToolChat).toggle_class("compact")

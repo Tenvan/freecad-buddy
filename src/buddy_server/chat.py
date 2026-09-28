@@ -36,6 +36,7 @@ class CallRecord:
     name: str
     session: str = ""
     arguments: str = "{}"
+    compact_arguments: str = ""
     started_at: float = 0.0
     finished: ToolFinished | None = None
     item: CallItem | None = None
@@ -118,7 +119,10 @@ class CallItem(ListItem):
         who = f" · {record.session}" if record.session else ""
         stamp = f" · {_clock(record.started_at)}" if record.started_at else ""
         self._request.border_title = f"→ {record.name}{who}{stamp}"
-        self._request.update(_code(record.arguments))
+        if record.compact_arguments:
+            self._request.update(Text(record.compact_arguments))
+        else:
+            self._request.update(_code(record.arguments))
         self._response.border_title = f"← {record.status_text()}"
         done = record.finished
         if done is None:
@@ -185,6 +189,7 @@ class ToolChat(ListView):
                         evicted.append(old.item)
             if isinstance(event, ToolStarted):
                 record.session, record.arguments, record.started_at = event.session, event.arguments, event.at
+                record.compact_arguments = event.compact
             else:
                 record.finished = event
             changed.add(event.call_id)

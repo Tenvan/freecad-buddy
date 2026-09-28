@@ -110,3 +110,26 @@ def test_error_compact_keeps_code_and_hints() -> None:
     )
     shown = describe_result(error, Masker())
     assert shown.compact == "[recompute_failed] Pad ungültig\nHinweis: Länge prüfen"
+
+
+def test_compact_arguments_as_key_value_lines() -> None:
+    from buddy_server.payloads import compact_arguments
+
+    text = compact_arguments(
+        {
+            "sketch": "Sketch_CornerHoles",
+            "kind": "hole_rect",
+            "params": {"width": "Plate_Length - 2*Hole_Edge_Distance", "diameter": "Hole_Diameter"},
+            "parameters": {"Count": {"value": 12, "type": "integer"}},
+            "features": ["Pocket_A", "Pocket_B"],
+        }
+    )
+    assert text.splitlines() == [
+        "sketch: Sketch_CornerHoles",
+        "kind: hole_rect",
+        "params: width Plate_Length - 2*Hole_Edge_Distance, diameter Hole_Diameter",
+        "parameters: Count {value 12, type integer}",
+        "features: [Pocket_A, Pocket_B]",
+    ]
+    assert compact_arguments({}) == "(keine Argumente)"
+    assert len(compact_arguments({f"k{i}": i for i in range(20)}).splitlines()) == 6

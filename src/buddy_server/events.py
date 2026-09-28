@@ -47,6 +47,8 @@ class ToolStarted(Event):
     arguments: str = "{}"
     """Masked, pretty-printed request arguments."""
     session: str = ""
+    compact: str = ""
+    """Arguments as a few ``key: value`` lines (chat bubble)."""
 
 
 @dataclass(frozen=True)

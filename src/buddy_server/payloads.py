@@ -159,6 +159,38 @@ def compact_text(result: Any) -> str:
     return "\n".join(lines[:MAX_COMPACT_LINES]) or "ok"
 
 
+def compact_arguments(arguments: Any) -> str:
+    """Request arguments as ``key: value`` lines (nested objects on one line, long lists counted)."""
+    if not isinstance(arguments, Mapping) or not arguments:
+        return "(keine Argumente)"
+    lines: list[str] = []
+    for key, value in arguments.items():
+        shown = _scalar(value)
+        if shown is None and isinstance(value, Mapping):
+            parts = []
+            for inner_key, inner in value.items():
+                inner_shown = _scalar(inner)
+                if inner_shown is None and isinstance(inner, Mapping):
+                    inner_shown = "{" + ", ".join(f"{k} {_scalar(v)}" for k, v in inner.items()) + "}"
+                elif inner_shown is None and isinstance(inner, list):
+                    inner_shown = _list(inner)
+                parts.append(f"{inner_key} {inner_shown}")
+            shown = ", ".join(parts)
+        elif shown is None and isinstance(value, list):
+            shown = _list(value)
+        lines.append(f"{key}: {shown}")
+    if len(lines) > MAX_COMPACT_LINES:
+        lines = [*lines[: MAX_COMPACT_LINES - 1], f"… (+{len(lines) - MAX_COMPACT_LINES + 1} Argumente)"]
+    return "\n".join(line if len(line) <= 160 else line[:159] + "…" for line in lines)
+
+
+def _list(values: list[Any]) -> str:
+    scalars = [_scalar(v) for v in values]
+    if len(values) <= 5 and all(s is not None for s in scalars):
+        return "[" + ", ".join(str(s) for s in scalars) + "]"
+    return f"{len(values)} Einträge"
+
+
 @dataclass(frozen=True)
 class Response:
     ok: bool
