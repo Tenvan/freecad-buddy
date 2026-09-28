@@ -106,6 +106,33 @@ def test_addon_status_lists_installed_addons_and_version(client: BridgeClient) -
     assert status["mod_dir"].endswith("Mod")
 
 
+class _BusyDispatcher:
+    """Main thread blocked by a modal dialog - like the install job's own confirmation dialog."""
+
+    def call(self, fn: Any, timeout: float) -> Any:
+        raise RpcError(protocol.BUSY_USER_TRANSACTION, "dialog open")
+
+    def post(self, fn: Any) -> None:
+        raise RpcError(protocol.BUSY_USER_TRANSACTION, "dialog open")
+
+
+def test_install_status_is_readable_while_the_confirmation_dialog_is_open() -> None:
+    from buddy_core.addons import install
+
+    registry = build_registry(allow_addon_install=True)
+    job = install.Job(9001, "demo", "workbench")
+    install._jobs[job.job_id] = job
+    try:
+        status = registry.invoke(
+            protocol.Request(1, "addons.install_status", {"job_id": job.job_id}), _BusyDispatcher()
+        )
+        assert status["state"] == job.state and status["done"] is False
+        with pytest.raises(RpcError):  # everything else still respects the busy GUI
+            registry.invoke(protocol.Request(2, "system.status"), _BusyDispatcher())
+    finally:
+        install._jobs.pop(job.job_id, None)
+
+
 def test_addon_install_methods_need_the_freecad_opt_in() -> None:
     assert not {"addons.install", "addons.install_status"} & set(build_registry().names())
     allowed = build_registry(allow_addon_install=True).names()

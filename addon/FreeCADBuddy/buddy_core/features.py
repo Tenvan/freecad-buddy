@@ -450,9 +450,11 @@ def pattern(
                 steps.append(step)
             feature.Originals = originals
             feature.Transformations = steps
-            body.Tip = feature
         else:
             feature.Originals = originals
+        # body.newObject does not make a transformed feature the tip; without this the next feature
+        # would be inserted before this pattern (a second pattern then silently loses the first one).
+        body.Tip = feature
         if kind == "mirrored":
             feature.MirrorPlane = (origin_feature(body, plane), [""])
         elif kind == "linear":

@@ -326,8 +326,8 @@ SUPPORT_CORNERS = ((1, 1, 180, None), (-1, 1, 270, "y_axis"), (-1, -1, 0, "origi
 async def _build_box(call: Client) -> None:
     """Stage 3: box shell below the plate, cavity with fit clearance, four quarter-round supports.
 
-    The supports are drawn in one sketch: two consecutive ``mirrored`` patterns currently lose a copy
-    (the body tip is not advanced), see the known limits in ``referenzmodell.md``.
+    The supports are drawn in one sketch (four symmetric quarter discs); mirroring one support twice
+    is an equally valid way and gives the same volume.
     """
     await call("set_parameters", parameters=STAGE_PARAMETERS[3])
     await call("create_body", label="Box")

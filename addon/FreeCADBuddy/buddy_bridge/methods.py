@@ -126,7 +126,8 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "view.screenshot": (view.screenshot, {"timeout": 60.0}),
     "addons.status": (addon_status.addon_status, {}),
     "addons.install": (addon_install.start_install, {}),
-    "addons.install_status": (addon_install.install_status, {}),
+    # Off the Qt main thread: the install job's own modal confirmation dialog must not block its status.
+    "addons.install_status": (addon_install.install_status, {"main_thread": False}),
     "print.get_profile": (profile.get_printer_profile, {}),
     "print.set_profile": (profile.set_printer_profile, {}),
     "print.check": (check.check_printability, {"timeout": 120.0}),

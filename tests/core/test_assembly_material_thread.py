@@ -168,4 +168,7 @@ def test_get_object_reports_material_link_and_fastener(doc: Any) -> None:
     assert documents.get_object("Box", doc.Name)["material"] == "PLA-Generic"
     link = documents.get_object("Lid_Link", doc.Name)
     assert link["linked_object"]["label"] == "Lid" and link["attachment"]["solver"] == "Asm4EE"
-    assert {c["label"] for c in documents.get_object("Assembly", doc.Name)["group"]} >= {"Link_Box", "Lid_Link"}
+    assert {c["label"] for c in documents.get_object("Assembly", doc.Name)["group"]} >= {
+        "Link_Box",
+        "Lid_Link",
+    }

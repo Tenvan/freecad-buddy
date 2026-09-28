@@ -846,7 +846,9 @@ def register_tools(
                 job = await ctx.call("install_addon", "addons.install_status", job_id=job["job_id"])
             if not job["done"]:
                 job["hint"] = (
-                    "Still running (dialog open or downloading) - call install_addon again for the status."
+                    "Waiting for the user to confirm the dialog in FreeCAD - call install_addon again for the status."
+                    if job["state"] == "awaiting_confirmation"
+                    else "Still downloading/installing - call install_addon again for the status."
                 )
             if job["state"] == "declined":
                 raise ToolError(

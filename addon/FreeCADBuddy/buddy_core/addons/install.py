@@ -206,7 +206,9 @@ def _run(job: Job, entry: dict[str, Any], details: dict[str, Any], branch: str) 
 
 
 def install_status(job_id: int) -> dict[str, Any]:
-    job = _jobs.get(int(job_id))
-    if job is None:
-        raise not_found(f"Install job {job_id}")
-    return job.as_dict()
+    """Job snapshot; runs on the bridge thread (not the Qt main thread) while the dialog may be open."""
+    with _lock:
+        job = _jobs.get(int(job_id))
+        if job is None:
+            raise not_found(f"Install job {job_id}")
+        return job.as_dict()

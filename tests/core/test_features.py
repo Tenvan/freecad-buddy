@@ -110,6 +110,30 @@ def test_patterns(doc: Any, part: Any) -> None:
     assert mirrored["volume"] > 100 * 40 * 10
 
 
+def test_consecutive_patterns_advance_the_tip_and_keep_every_copy(doc: Any, part: Any) -> None:
+    _box(doc, width=100, depth=40, height=10)
+    sketch = sketch_on(doc, purpose="Peg", offset=10)
+    profile(doc, sketch, "circle", diameter=6, center=[-40, -10])
+    peg = features.pad(sketch.Name, length=5, purpose="Peg", document=doc.Name).to_dict()
+    peg_volume = 3.14159265 * 9 * 5
+    base = 100 * 40 * 10 + peg_volume
+
+    first = features.pattern([peg["feature"]["name"]], "mirrored", plane="YZ", document=doc.Name).to_dict()
+    second = features.pattern([peg["feature"]["name"]], "mirrored", plane="XZ", document=doc.Name).to_dict()
+    third = features.pattern(
+        [peg["feature"]["name"]], "polar", axis="Z", angle=360, count=2, document=doc.Name
+    )
+
+    names = [first["feature"]["name"], second["feature"]["name"], third.to_dict()["feature"]["name"]]
+    assert part.Tip.Name == names[-1]
+    order = [o.Name for o in part.Group]
+    assert order.index(names[0]) < order.index(names[1]) < order.index(names[2])
+    assert first["volume"] == pytest.approx(base + peg_volume, abs=1e-2)
+    assert second["volume"] == pytest.approx(base + 2 * peg_volume, abs=1e-2)
+    assert third.to_dict()["volume"] == pytest.approx(base + 3 * peg_volume, abs=1e-2)
+    assert doc.getObject(names[-1]).Visibility and not doc.getObject(names[0]).Visibility
+
+
 def test_polar_pattern_with_parameter_count(doc: Any, part: Any) -> None:
     set_params(doc, Rib_Count={"value": 6, "type": "integer"})
     sketch = sketch_on(doc, purpose="Disc")

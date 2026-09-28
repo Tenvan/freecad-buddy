@@ -116,7 +116,4 @@ Referenzlösung: `… referenzmodell.py build --stage <N>`. Stufe 5 braucht 47 T
 
 - `check_printability` meldet für den Griff keinen Überhang, obwohl der Querstab rund 80 mm frei spannt. Der Fehler liegt in der Prüfung, siehe Backlog-Ticket [`druckpruefung-ueberhang-kruemmung.md`](../../TODOs/1-backlog/freecad-buddy/druckpruefung-ueberhang-kruemmung.md). Die Druckprüfung fließt deshalb nicht in den Score ein.
 - Der Screenshot hängt von Theme und Fenstergröße der GUI ab und dient nur der Sichtprüfung, nicht dem Score.
-- Stufe 5: `pattern kind='grid'` blendet den Tip aus und lässt die zwei Hilfsmuster sichtbar im Dokument-Root (Backlog-Aufgabe). Die Geometrie stimmt, nur die Anzeige ist betroffen.
-- Stufe 5: `install_addon` meldet „Dialog offen“, solange Buddys eigener Bestätigungsdialog offen ist (Backlog-Aufgabe). Bestätigen und den Status mit `get_addon` prüfen.
 - Stufe 5: Assembly4 hat keine eigene Explosionsansicht; sie ist eine Assembly4-Konfiguration (Spreadsheet in „Configurations“) und lässt sich auch im Assembly4-Dialog anwenden.
-- Stufe 3: Zwei aufeinanderfolgende `pattern kind='mirrored'` auf dieselbe Auflage verlieren eine Kopie, weil der Body-Tip nicht weitergesetzt wird. Das Tool meldet trotzdem `ok`. Die Referenzlösung zeichnet deshalb alle vier Viertelkreise symmetrisch in einer Skizze. Modelle, die spiegeln, fallen bei Volumen und Parametrik des Kastens durch, bis der Fehler behoben ist.
