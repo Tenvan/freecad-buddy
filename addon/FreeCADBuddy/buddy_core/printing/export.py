@@ -26,9 +26,7 @@ def _export_filename(doc: Any, obj: Any, extension: str) -> str:
 def _resolve_path(path: str | None, doc: Any, obj: Any, extension: str) -> Path:
     if path is None:
         if not doc.FileName:
-            raise validation(
-                "Dokument wurde noch nie gespeichert: 'path' angeben oder zuerst save_document aufrufen."
-            )
+            raise validation("Document was never saved: pass 'path' or call document(action='save') first.")
         return Path(doc.FileName).parent / "export" / _export_filename(doc, obj, extension)
     candidate = Path(path)
     is_directory = candidate.is_dir() or path.endswith(("/", "\\")) or candidate.suffix == ""

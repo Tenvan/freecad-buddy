@@ -130,6 +130,23 @@ TOPICS: tuple[Topic, ...] = (
             Rule(
                 "Nach Parameteränderungen das Ergebnis prüfen; gespeicherte Selektoren werden neu aufgelöst."
             ),
+            Rule(
+                "Layout sketch: define hole patterns and mounting dimensions once (e.g. a construction line "
+                "symmetric to the origin with the holes at its ends); dependent sketches reference the real "
+                "layout geometry (hole circles, outline) with add_geometry type 'external' - never repeat the "
+                "dimension in another sketch. Construction geometry cannot be referenced externally.",
+                requires=("add_geometry",),
+            ),
+            Rule(
+                "Other bodies: bring their geometry in with shape_binder and reference the binder; external "
+                "references to solid faces or edges only as last resort (explicit opt-in, TNP-prone).",
+                requires=("shape_binder",),
+            ),
+            Rule(
+                "Counterbores and countersinks sized by parameters: give hole a custom cut diameter, depth or "
+                "angle instead of the ISO defaults when the screw or the print needs it.",
+                requires=("hole",),
+            ),
         ),
     ),
     Topic(

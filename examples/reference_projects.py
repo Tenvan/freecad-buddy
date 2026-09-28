@@ -21,7 +21,7 @@ Call = Callable[..., Awaitable[Any]]
 async def box_with_lid(call: Call, out: Path) -> dict[str, Any]:
     """Storage box with a push-fit lid; the lid lip uses the printer's fit clearance."""
     profile = await call("get_printer_profile")
-    await call("new_document", name="Box mit Deckel")
+    await call("document", action="new", name="Box mit Deckel")
     await call(
         "set_parameters",
         parameters={
@@ -103,7 +103,7 @@ async def box_with_lid(call: Call, out: Path) -> dict[str, Any]:
 
 async def wall_bracket(call: Call, out: Path) -> dict[str, Any]:
     """L-shaped wall bracket with countersunk screw holes and a filleted inner corner."""
-    await call("new_document", name="Wandhalter")
+    await call("document", action="new", name="Wandhalter")
     await call(
         "set_parameters",
         parameters={
@@ -162,7 +162,7 @@ async def wall_bracket(call: Call, out: Path) -> dict[str, Any]:
 
 async def knob(call: Call, out: Path) -> dict[str, Any]:
     """Turning knob: revolved body, filleted top, polar grip notches, shaft bore."""
-    await call("new_document", name="Drehknopf")
+    await call("document", action="new", name="Drehknopf")
     await call(
         "set_parameters",
         parameters={

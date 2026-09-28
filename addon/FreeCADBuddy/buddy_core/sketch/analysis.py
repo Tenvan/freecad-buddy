@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from buddy_core.sketch import external
+
 DIMENSIONAL = {"Distance", "DistanceX", "DistanceY", "Radius", "Diameter", "Angle"}
 _ORIGIN_TYPES = ("App::Origin", "App::Line", "App::Plane", "PartDesign::Plane", "PartDesign::Line")
 
@@ -36,15 +38,32 @@ def lint(sketch: Any) -> list[dict[str, Any]]:
                         "issue": "Maß nicht an einen Parameter gebunden",
                     }
                 )
-    for obj, subs in sketch.ExternalGeometry:
-        if not obj.TypeId.startswith(_ORIGIN_TYPES):
-            issues.append(
-                {
-                    "severity": "warning",
-                    "issue": f"Externe Geometrie aus '{obj.Label}' ({', '.join(subs)}) – anfällig für TNP",
-                }
-            )
+    for entry in external.describe(sketch):
+        stable = entry["stable"] or entry["source_name"] in {o.Name for o in _origin_objects(sketch)}
+        where = f"{entry['ref']} from '{entry['source']}' ({entry['element']})"
+        issues.append(
+            {"severity": "info", "ref": entry["ref"], "issue": f"External geometry {where}"}
+            if stable
+            else {
+                "severity": "warning",
+                "ref": entry["ref"],
+                "issue": f"External geometry {where} is prone to the topological naming problem",
+            }
+        )
+    for broken in external.dangling(sketch):
+        issues.append(
+            {
+                "severity": "error",
+                "constraint": broken["constraint"],
+                "ref": broken["ref"],
+                "issue": f"Constraint references missing external geometry {broken['ref']} (source deleted?)",
+            }
+        )
     return issues
+
+
+def _origin_objects(sketch: Any) -> list[Any]:
+    return [obj for obj, _ in sketch.ExternalGeometry if obj.TypeId.startswith(_ORIGIN_TYPES)]
 
 
 def analyze(sketch: Any) -> dict[str, Any]:
@@ -60,6 +79,10 @@ def analyze(sketch: Any) -> dict[str, Any]:
         "partially_redundant": list(sketch.PartiallyRedundantConstraints),
         "malformed": list(sketch.MalformedConstraints),
         "geometry_count": sketch.GeometryCount,
+        "external": [
+            {key: entry[key] for key in ("ref", "source", "element", "defining")}
+            for entry in external.describe(sketch)
+        ],
         "constraint_count": sketch.ConstraintCount,
         "closed_wires": closed,
         "open_wires": open_,

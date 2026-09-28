@@ -35,6 +35,7 @@ REQUIRED_TYPES: tuple[str, ...] = (
     "PartDesign::MultiTransform",
     "PartDesign::Plane",
     "PartDesign::Line",
+    "PartDesign::SubShapeBinder",
 )
 
 

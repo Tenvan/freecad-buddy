@@ -18,7 +18,9 @@ def resolve_document(name: str | None = None) -> Any:
     if name is None:
         doc = FreeCAD.ActiveDocument
         if doc is None:
-            raise not_found("Kein aktives Dokument. Erst new_document oder open_document aufrufen.")
+            raise not_found(
+                "No active document. Call document(action='new') or document(action='open') first."
+            )
         return doc
     docs = FreeCAD.listDocuments()
     if name in docs:
@@ -156,7 +158,7 @@ def revert_document(document: str | None = None) -> ToolResult:
     if not doc.FileName:
         raise validation(
             f"Document '{doc.Label}' was never saved, there is nothing to revert to: "
-            "use close_document(unsaved='discard')"
+            "use document(action='close', unsaved='discard')"
         )
     name, file, discarded = doc.Name, doc.FileName, has_unsaved_changes(doc)
     FreeCAD.closeDocument(name)

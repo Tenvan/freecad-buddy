@@ -233,7 +233,7 @@ async def build(call: Client, stage: int = LATEST_STAGE) -> None:
     missing = [addon for addon, ok in (await _addon_status(call, stage)).items() if not ok]
     if missing:
         raise RuntimeError(f"Addons fehlen: {', '.join(missing)} - install_addon, dann FreeCAD neu starten")
-    await call("new_document", name=DOCUMENT)
+    await call("document", action="new", name=DOCUMENT)
     await call("set_parameters", parameters=STAGE_PARAMETERS[1])
     await call("create_body", label="Plate")
     await call("create_sketch", plane="XY", purpose="Plate")

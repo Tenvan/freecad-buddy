@@ -1,7 +1,10 @@
-"""Generate ``docs/tools.md`` (tool catalogue) from the registered MCP tools.
+"""Generate the tool catalogue from the registered MCP tools, grouped by working phase.
 
-uv run python tools/gen_tool_docs.py          # write docs/tools.md
-uv run python tools/gen_tool_docs.py --check  # fail if the file is outdated
+``docs/tools.md`` is the index (groups with one-line purpose); ``docs/tools/<group>.md`` holds the
+parameters and an example of every tool of that group.
+
+uv run python tools/gen_tool_docs.py          # write the catalogue
+uv run python tools/gen_tool_docs.py --check  # fail if a file is outdated
 """
 
 from __future__ import annotations
@@ -16,14 +19,11 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TARGET = REPO_ROOT / "docs" / "tools.md"
+GROUP_DIR = REPO_ROOT / "docs" / "tools"
 
 EXAMPLES: dict[str, dict[str, Any]] = {
     "get_status": {},
-    "new_document": {"name": "Box mit Deckel"},
-    "open_document": {"path": "C:/Projekte/box.FCStd"},
-    "save_document": {"path": "C:/Projekte/box.FCStd"},
-    "close_document": {"unsaved": "discard"},
-    "revert_document": {},
+    "document": {"action": "new", "name": "Box mit Deckel"},
     "get_model_tree": {},
     "get_object": {"ref": "Sketch_Base"},
     "delete_object": {"ref": "Fillet_Top"},
@@ -63,6 +63,7 @@ EXAMPLES: dict[str, dict[str, Any]] = {
         "count2": "Sieve_Count_Y",
     },
     "datum_plane": {"base": "XY", "offset": "Box_Height", "purpose": "Top"},
+    "shape_binder": {"sources": ["Box:Sketch_Base"], "body": "Lid", "purpose": "BoxOutline"},
     "thread": {"center": [85, 35], "diameter": "Pin_Diameter", "pitch": 1.5, "length": 15, "z_start": 5},
     "set_material": {"target": "Lid", "material": "ABS", "color": "red"},
     "create_assembly": {},
@@ -97,70 +98,121 @@ def _type(schema: dict[str, Any]) -> str:
     return str(kind)
 
 
-async def _tools() -> list[Any]:
+async def _catalog() -> tuple[list[Any], list[tuple[Any, list[str]]]]:
+    """Registered MCP tools (all options on) and their groups in working-phase order."""
     sys.path[:0] = [str(REPO_ROOT / "src"), str(REPO_ROOT / "addon" / "FreeCADBuddy")]
     from buddy_server.app import build_mcp
     from buddy_server.bridge import Bridge
     from buddy_server.config import Settings
     from buddy_server.events import EventBus
+    from buddy_server.tools import tool_groups
 
     settings = Settings(home=Path(tempfile.gettempdir()), allow_python=True, allow_addon_install=True)
     bus = EventBus()
     mcp, _ = build_mcp(settings, Bridge(settings, bus), bus)
-    return await mcp.list_tools()
+    return await mcp.list_tools(), tool_groups()
 
 
-def render(tools: list[Any]) -> str:
-    lines = [
+async def _tools() -> list[Any]:
+    return (await _catalog())[0]
+
+
+def _summary(tool: Any) -> str:
+    """First description line without the ``[Category]`` prefix."""
+    line = (tool.description or "").strip().splitlines()[0]
+    return line.split("] ", 1)[1] if line.startswith("[") and "] " in line else line
+
+
+def _details(tool: Any) -> list[str]:
+    lines = ["", f"## {tool.name}", "", (tool.description or "").strip(), ""]
+    properties = tool.input_schema.get("properties", {})
+    required = set(tool.input_schema.get("required", []))
+    if properties:
+        lines += ["| Parameter | Typ | Pflicht | Standard | Beschreibung |", "|---|---|---|---|---|"]
+        for name, schema in properties.items():
+            default = json.dumps(schema["default"], ensure_ascii=False) if "default" in schema else "—"
+            description = (schema.get("description") or "").replace("|", "\\|")
+            lines.append(
+                f"| `{name}` | {_type(schema).replace('|', '\\|')} | {'ja' if name in required else 'nein'} "
+                f"| `{default}` | {description} |"
+            )
+    else:
+        lines.append("Keine Parameter.")
+    example = json.dumps(EXAMPLES[tool.name], ensure_ascii=False, indent=2)
+    return [*lines, "", "Beispiel:", "", "```json", example, "```"]
+
+
+def render(tools: list[Any], groups: list[tuple[Any, list[str]]]) -> dict[Path, str]:
+    """``docs/tools.md`` (index) and one ``docs/tools/<group>.md`` per non-empty group."""
+    by_name = {tool.name: tool for tool in tools}
+    grouped = [(group, [by_name[name] for name in names]) for group, names in groups if names]
+    missing = set(by_name) - {tool.name for _, members in grouped for tool in members}
+    if missing:
+        raise SystemExit(f"Tools ohne Gruppe: {sorted(missing)}")
+    index = [
         "# Tool-Katalog — FreeCAD Buddy",
         "",
         "> Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.",
         "",
-        f"{len(tools)} Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).",
-        "Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter "
-        '(`"Box_Width - 2*Wall"`).',
+        f"{len(tools)} Tools in {len(grouped)} Gruppen nach Arbeitsphase (`execute_python` nur mit "
+        "`FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer "
+        "Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck "
+        'über Parameter (`"Box_Width - 2*Wall"`).',
         "",
-        "| Tool | Zweck |",
-        "|---|---|",
+        "| Gruppe | Kategorie | Tools |",
+        "|---|---|---|",
     ]
-    for tool in tools:
-        summary = (tool.description or "").strip().splitlines()[0]
-        lines.append(f"| [`{tool.name}`](#{tool.name.replace('_', '_')}) | {summary} |")
-    for tool in tools:
-        lines += ["", f"## {tool.name}", "", (tool.description or "").strip(), ""]
-        properties = tool.input_schema.get("properties", {})
-        required = set(tool.input_schema.get("required", []))
-        if properties:
-            lines += ["| Parameter | Typ | Pflicht | Standard | Beschreibung |", "|---|---|---|---|---|"]
-            for name, schema in properties.items():
-                default = json.dumps(schema["default"], ensure_ascii=False) if "default" in schema else "—"
-                description = (schema.get("description") or "").replace("|", "\\|")
-                lines.append(
-                    f"| `{name}` | {_type(schema).replace('|', '\\|')} | {'ja' if name in required else 'nein'} "
-                    f"| `{default}` | {description} |"
-                )
-        else:
-            lines.append("Keine Parameter.")
-        example = json.dumps(EXAMPLES[tool.name], ensure_ascii=False, indent=2)
-        lines += ["", "Beispiel:", "", "```json", example, "```"]
-    return "\n".join(lines) + "\n"
+    index += [
+        f"| [{group.title}](tools/{group.key}.md) | `[{group.prefix}]` | {len(members)} |"
+        for group, members in grouped
+    ]
+    files: dict[Path, str] = {}
+    for group, members in grouped:
+        index += ["", f"## {group.title}", "", "| Tool | Zweck |", "|---|---|"]
+        index += [f"| [`{t.name}`](tools/{group.key}.md#{t.name}) | {_summary(t)} |" for t in members]
+        page = [
+            f"# {group.title} — Tool-Katalog",
+            "",
+            "> Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. "
+            "Übersicht: [Tool-Katalog](../tools.md).",
+            "",
+            f"Kategorie-Präfix: `[{group.prefix}]` · {len(members)} Tools",
+            "",
+            "| Tool | Zweck |",
+            "|---|---|",
+        ]
+        page += [f"| [`{t.name}`](#{t.name}) | {_summary(t)} |" for t in members]
+        for tool in members:
+            page += _details(tool)
+        files[GROUP_DIR / f"{group.key}.md"] = "\n".join(page) + "\n"
+    return {TARGET: "\n".join(index) + "\n", **files}
+
+
+def stale_files(files: dict[Path, str]) -> list[Path]:
+    """Generated group pages that no longer belong to a group."""
+    return sorted(path for path in GROUP_DIR.glob("*.md") if path not in files) if GROUP_DIR.exists() else []
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    content = render(asyncio.run(_tools()))
+    files = render(*asyncio.run(_catalog()))
     if args.check:
-        current = TARGET.read_text(encoding="utf-8") if TARGET.exists() else ""
-        if current != content:
-            print(
-                "docs/tools.md ist veraltet – uv run python tools/gen_tool_docs.py ausführen", file=sys.stderr
-            )
+        outdated = [p for p, c in files.items() if not p.exists() or p.read_text(encoding="utf-8") != c]
+        outdated += stale_files(files)
+        if outdated:
+            names = ", ".join(str(p.relative_to(REPO_ROOT)) for p in outdated)
+            print(f"Tool-Katalog veraltet ({names}) – uv run python tools/gen_tool_docs.py", file=sys.stderr)
             return 1
         return 0
-    TARGET.write_text(content, encoding="utf-8")
-    print(f"{TARGET} geschrieben ({content.count('## ')} Tools)")
+    GROUP_DIR.mkdir(parents=True, exist_ok=True)
+    for path in stale_files(files):
+        path.unlink()
+    for path, content in files.items():
+        path.write_text(content, encoding="utf-8")
+    tools = sum(content.count("\n## ") for path, content in files.items() if path != TARGET)
+    print(f"{TARGET} + {len(files) - 1} Gruppenseiten geschrieben ({tools} Tools)")
     return 0
 
 

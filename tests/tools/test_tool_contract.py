@@ -7,12 +7,12 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOLS = ROOT / "src" / "buddy_server" / "tools.py"
+TOOLS = ROOT / "src" / "buddy_server" / "tools"  # package: one module per tool group
 METHODS = ROOT / "addon" / "FreeCADBuddy" / "buddy_bridge" / "methods.py"
 
 
 def test_server_tools_only_use_registered_bridge_methods() -> None:
-    source = TOOLS.read_text(encoding="utf-8")
+    source = "\n".join(path.read_text(encoding="utf-8") for path in sorted(TOOLS.glob("*.py")))
     called = set(re.findall(r'ctx\.call\(\s*"[a-z_]+",\s*"([a-z_.]+)"', source))
     called |= set(re.findall(r'self\.bridge\.call\(\s*"([a-z_.]+)"', source))  # used inside ToolContext
     registered = set(re.findall(r'^\s*"([a-z_]+\.[a-z_]+)": \(', METHODS.read_text(encoding="utf-8"), re.M))

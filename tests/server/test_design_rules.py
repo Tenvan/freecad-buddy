@@ -128,3 +128,14 @@ def test_view_rule_is_first_core_rule_after_reading_the_tree() -> None:
     assert "set_view" in names
     assert "Nach dem ersten Basis-Feature" in instructions and "letzter Schritt set_view" in instructions
     assert instructions.index("get_model_tree lesen") < instructions.index("set_view")
+
+
+def test_references_topic_teaches_layout_sketch_and_binder() -> None:
+    """AC-09 (freecad-buddy-referenzen): layout-sketch rule in English, budget unchanged."""
+    _, names = _registered()
+    text = design_rules.render_topic("references", None, names)
+
+    assert "Layout sketch: define hole patterns and mounting dimensions once" in text
+    assert "shape_binder" in text and "Construction geometry cannot be referenced" in text
+    assert "shape_binder" not in design_rules.render_topic("references", None, names - {"shape_binder"})
+    assert len(design_rules.build_instructions(None)) <= design_rules.INSTRUCTIONS_BUDGET

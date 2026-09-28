@@ -7,7 +7,7 @@ from typing import Any
 from buddy_core import naming, values
 from buddy_core.errors import validation
 from buddy_core.result import ToolResult
-from buddy_core.sketch import refs
+from buddy_core.sketch import external, refs
 from buddy_core.sketch.builder import SketchBuilder
 from buddy_core.sketch.model import sketch_edit
 
@@ -36,18 +36,29 @@ def _add_geometry_item(b: SketchBuilder, item: dict[str, Any]) -> int:
         )
     if kind == "point":
         return b.point(_point(item, "at"))
-    raise validation(f"Unbekannter Geometrietyp '{kind}' (erlaubt: line, circle, arc, point)")
+    raise validation(f"Unknown geometry type '{kind}' (allowed: line, circle, arc, point, external)")
 
 
 def add_geometry(sketch: str, items: list[dict[str, Any]], document: str | None = None) -> ToolResult:
-    """Add lines/circles/arcs/points (angles in degrees, counter-clockwise)."""
+    """Add lines/circles/arcs/points (angles in degrees, counter-clockwise) and external geometry.
+
+    ``{type: external, source, element, defining?}`` references an edge/point of another object in
+    the same body and returns ``x<N>`` references (see ``buddy_core.sketch.external``).
+    """
     if not items:
-        raise validation("Keine Geometrie angegeben")
+        raise validation("No geometry given")
 
     def action(doc: Any, sk: Any, result: ToolResult) -> None:
         builder = SketchBuilder(sk, "")
-        ids = [_add_geometry_item(builder, item) for item in items]
-        result.data["geometry"] = [refs.format_ref(i) for i in ids]
+        created: list[str] = []
+        for item in items:
+            if item.get("type") == "external":
+                added, warnings = external.add(doc, sk, item)
+                created.extend(added)
+                result.warnings.extend(warnings)
+            else:
+                created.append(refs.format_ref(_add_geometry_item(builder, item)))
+        result.data["geometry"] = created
 
     return sketch_edit(sketch, document, "Geometrie", action)
 

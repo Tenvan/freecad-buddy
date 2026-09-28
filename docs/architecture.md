@@ -62,6 +62,9 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 | `addon/FreeCADBuddy/buddy_core/` | Core-Paket |
 | `addon/FreeCADBuddy/buddy_bridge/` | Bridge-Paket (S2) |
 | `src/buddy_server/` | Server-Paket: Server-Kern (MCP, Bridge-Client, Ereignisse) und TUI |
+| `src/buddy_server/tools/` | MCP-Tools, ein Modul je Tool-Gruppe (Arbeitsphase: `session`, `model`, `sketch`, `reference`, `feature`, `assembly`, `appearance`, `printing`, `rules`, `expert`); `base.py` mit Argumenttypen, `ToolContext` und `Registration`. Die Gruppe (`GROUP`, `buddy_server.catalog.Group`) ist das Modul, das ein Tool registriert |
+| `addon/FreeCADBuddy/buddy_core/sketch/external.py` | Externe Geometrie (`x<N>`): Quellenprüfung, Abbildung `g<N>` → `EdgeN`, Beschreibung, hängende Referenzen |
+| `addon/FreeCADBuddy/buddy_core/binder.py` | `shape_binder` (`PartDesign::SubShapeBinder`) für Bezüge über Body-Grenzen |
 | `tests/core/` | Core-Tests, laufen in FreeCADs `python.exe` |
 | `tests/server/`, `tests/tools/` | Tests im Projekt-venv |
 | `tools/` | `freecad_env.py` (FreeCAD finden, Core-Tests starten), `run_core_tests.py` (Einstieg in FreeCADs Python) |
@@ -152,6 +155,9 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 | Skizzen voll bestimmt | DoF = 0 nach jedem Profil-Tool; keine `Block`/`Lock`-Constraints |
 | Menschliche Constraint-Muster | Symmetrie zum Ursprung statt zweier Lagemaße, `Equal` statt doppelter Maße, Konstruktionsgeometrie für Hilfslinien |
 | Maße benannt und gebunden | Maß-Constraints tragen Namen und eine Expression auf einen Parameter |
+| Lochbilder und Anschlussmaße einmal | Layout- bzw. Basis-Skizze als einzige Quelle; abhängige Skizzen im selben Body referenzieren deren **reale** Geometrie (z. B. Lochkreise) mit `add_geometry` Typ `external` → `x<N>`. Konstruktionsgeometrie ist in FreeCAD nicht extern referenzierbar. Quellen: nur frühere Skizzen, Datums, Binder desselben Bodys (Zyklen werden vorab abgelehnt) |
+| Bezüge über Body-Grenzen | nur über `shape_binder` (synchroner `SubShapeBinder`), der dann Quelle für `external` ist; Bezüge auf Körperkanten nur mit `allow_face_reference` und TNP-Warnung |
+| Referenznotation in Skizzen | `g<N>` eigene Geometrie, `x<N>` externe Geometrie (GeoId `-3-N`), je mit `.start`/`.end`/`.center`; `origin`, `x_axis`, `y_axis` |
 | Kanten/Flächen semantisch | Fillet/Chamfer/Thickness über Selektoren (`face:top`, `edges:vertical`); keine `Edge12` im Client |
 | Sprechende Labels | `<Typ>_<Zweck>`, z. B. `Sketch_BaseProfile`, `Pad_Base`, `Pocket_ScrewHoles`, `Fillet_TopEdges` |
 | PartDesign-first | Keine Part-Primitive oder -Booleans im Standard-Workflow |
@@ -160,6 +166,8 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 
 - `buddy_core.compat` liefert Versionsinformationen und prüft, dass alle benötigten Dokumenttypen (`REQUIRED_TYPES`) im laufenden Build existieren. Der Core-Test `test_all_required_types_are_available` schlägt beim Wechsel auf ein Weekly-Build mit umbenannten Typen sofort fehl.
 - Neue oder geänderte APIs werden per Laufzeitprüfung abgesichert und mit Fehlercode `1007 unsupported` gemeldet statt mit einer Exception aus FreeCAD.
+- Externe Geometrie (FreeCAD 26.3): `Sketch.addExternal(obj, sub[, defining])` nimmt `defining` nur positional; ungültige Elementnamen werden **still ignoriert**, deshalb validiert Buddy Quelle und Element selbst. `g<N>` einer Quellskizze wird über `Shape.ElementReverseMap` (`g<N+1>;SKT`) auf `EdgeN`/`VertexN` abgebildet; die Quelle je externem Element steht in `ExternalGeometryExtension.Ref`. Nach gelöschter Quelle behält `ExternalGeo` veraltete Einträge und Constraints zeigen ins Leere, bei formal gültiger Skizze – `analyze_sketch` meldet das als Lint-`error`.
+- `HoleCutCustomValues` schaltet eigene Senkungswerte (`HoleCutDiameter`, `HoleCutDepth`, `HoleCutCountersinkAngle`) frei; ohne das Flag setzt FreeCAD die ISO-Werte.
 
 ## Teststrategie
 
@@ -191,4 +199,4 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 
 ## Tool-Katalog
 
-32 öffentliche Tools (+ `execute_python` opt-in), generiert dokumentiert in [`docs/tools.md`](tools.md). Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.
+45 öffentliche Tools inkl. `execute_python` (opt-in) in 10 Gruppen nach Arbeitsphase; Budget ≤ 100, Tools werden nur zusammengelegt, wenn es fachlich Sinn ergibt (z. B. `document(action=new|open|save|close|revert)`). Jede Tool-Beschreibung beginnt mit `[<Kategorie>]`, weil MCP Tools flach listet. Generiert dokumentiert in [`docs/tools.md`](tools.md) (Index) und `docs/tools/<gruppe>.md`; `tests/tools/test_tool_docs.py` prüft Gruppenzuordnung, Präfix und Aktualität. Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.

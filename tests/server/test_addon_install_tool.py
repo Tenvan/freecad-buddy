@@ -15,7 +15,7 @@ from buddy_server.bridge import Bridge
 from buddy_server.cli import parse_args, settings_from
 from buddy_server.config import Settings
 from buddy_server.events import EventBus
-from buddy_server.tools import _install_blocker
+from buddy_server.tools.rules import _install_blocker
 
 from .conftest import make_settings, mcp_session, running_server
 

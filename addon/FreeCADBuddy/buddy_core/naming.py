@@ -8,7 +8,7 @@ from typing import Any
 
 _DEFAULT_LABEL = re.compile(
     r"^(Body|Sketch|Pad|Pocket|Revolution|Groove|Hole|Fillet|Chamfer|Thickness|Mirrored|"
-    r"LinearPattern|PolarPattern|MultiTransform|DatumPlane|Plane|DatumLine|Line)\d*$"
+    r"LinearPattern|PolarPattern|MultiTransform|DatumPlane|Plane|DatumLine|Line|Binder)\d*$"
 )
 _NON_WORD = re.compile(r"[^A-Za-z0-9]+")
 

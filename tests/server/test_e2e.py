@@ -22,7 +22,7 @@ def test_status_and_box_workflow(bridge_home: tuple[Path, int], tmp_path: Path) 
                 assert status["freecad"]["version"].startswith("26.3")
                 assert status["missing_types"] == []
 
-                await call("new_document", name="E2E Box")
+                await call("document", action="new", name="E2E Box")
                 await call("set_parameters", parameters={"Box_Width": 60, "Box_Depth": 40, "Box_Height": 20})
                 await call("create_body", label="Box")
                 sketch = await call("create_sketch", plane="XY", purpose="Base")
@@ -65,7 +65,7 @@ def test_tool_errors_are_readable(bridge_home: tuple[Path, int]) -> None:
 
     async def scenario() -> str:
         async with running_server(settings), mcp_session(settings) as session:
-            await session.call_tool("new_document", {"name": "E2E Errors"})
+            await session.call_tool("document", {"action": "new", "name": "E2E Errors"})
             result = await session.call_tool("pad", {"sketch": "DoesNotExist"})
             assert result.is_error
             return "\n".join(getattr(block, "text", "") for block in result.content)

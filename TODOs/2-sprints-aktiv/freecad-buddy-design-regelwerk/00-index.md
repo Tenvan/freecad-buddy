@@ -1,10 +1,12 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
 
-> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 4 freigegeben
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 5 freigegeben
 
 ## Spezifikation
 
-> Spec-Stand: 4 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen; Stand 2 (R-12, AC-16) durch Ralfs Auftrag im Chat, 2026-09-28 („gleich in Regelwerk einbauen“); Stand 3 (R-13, AC-17) durch Ralfs Auftrag im Chat, 2026-09-28 („keinen deutschen Text mehr im MCP-Server“); Stand 4 (R-07 geändert) durch Ralfs Auftrag im Chat, 2026-09-28 („--allow-addon-install als default setzen“)
+> Spec-Stand: 5 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen; Stand 2 (R-12, AC-16) durch Ralfs Auftrag im Chat, 2026-09-28 („gleich in Regelwerk einbauen“); Stand 3 (R-13, AC-17) durch Ralfs Auftrag im Chat, 2026-09-28 („keinen deutschen Text mehr im MCP-Server“); Stand 4 (R-07 geändert) durch Ralfs Auftrag im Chat, 2026-09-28 („--allow-addon-install als default setzen“); Stand 5 (R-10, AC-12 geändert) durch Ralfs Auftrag im Chat, 2026-09-28 („wir erhöhen die Toolgrenze auf 100“)
+>
+> **Delta Stand 5 (2026-09-28):** Tool-Budget von ≤ 40 auf ≤ 100 öffentliche Tools angehoben. Tools werden nur zusammengelegt, wenn es nötig ist oder wirklich Sinn ergibt – kein Zusammenlegen, nur um das Budget zu halten. Änderung an R-10 und AC-12.
 >
 > **Delta Stand 4 (2026-09-28):** Der Server bietet `install_addon` standardmäßig an (abschaltbar mit `--no-allow-addon-install` oder `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0`). Die Freischaltung in FreeCAD und der Bestätigungsdialog jeder Installation bleiben Pflicht, eine Headless-Bridge bietet die Installation nie an. Die FreeCAD-Schalter (Autostart, Python, Addon-Installation) sind je zwei Buttons wie „Bridge starten/stoppen“. Neu: Änderung an R-07, AC-08 unverändert.
 >
@@ -55,7 +57,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | R-11 | **Chat-Log in der TUI:** Jeder Tool-Aufruf erscheint als Paar aus Anfrage-Blase (Tool, Argumente als formatiertes JSON, MCP-Session) und Antwort-Blase (Ergebnis bzw. Fehler mit Code und Hinweis, Warnungen, Dauer). Farben unterscheiden Anfrage, Erfolg, Warnung und Fehler. Die Anfrage erscheint schon beim Start, die Antwort ergänzt sie danach, laufende Aufrufe sind sichtbar. Lange Inhalte sind gekürzt und in einer Detailansicht vollständig lesbar. Binärdaten wie Screenshots erscheinen als Platzhalter mit Größe. Geheimnisse (Tokens, Authorization) erscheinen nie. Die Oberfläche bleibt bei 1 000 Einträgen und großen Antworten flüssig. Optional wird als JSONL-Datei mitgeschrieben (OF-07). |
 | R-12 | **Ansichtsregel (Stand 2):** Nach dem ersten Basis-Feature eines Bodys (erstes `pad` bzw. additives `revolve`) setzt FreeCAD Buddy die Ansicht selbst auf iso mit `fit`, damit Ralf den Aufbau live verfolgen kann (Präzisierung Ralf, 2026-09-28: „sobald das Basis Body gesetzt ist“). Als letzten Schritt verlangt das Regelwerk `set_view`. In beiden Fällen ist das Bauteil komplett sichtbar und leicht isometrisch. Das Tool `set_view` setzt die Live-Ansicht in FreeCAD dauerhaft (iso, dimetric, trimetric, Normalansichten; `fit` passt alles ein). Ohne GUI kommt `unsupported`. |
 | R-13 | **Englische Ausgaben (Stand 3):** Alles, was der MCP-Server an Clients liefert, ist neutral auf Englisch: Instructions, Regelwerk, Prompts, Tool- und Parameterbeschreibungen, Ergebnisse, Warnungen, Hinweise und Fehlermeldungen, auch die aus Core und Bridge. Doku, TODOs, Code-Kommentare in Deutsch und der Chat mit Ralf bleiben deutsch. Offen (OF-09): FreeCAD-Oberfläche (Workbench-Befehle, Bestätigungsdialog, Konsole) und TUI. |
-| R-10 | **Budget und Doku:** höchstens 40 öffentliche Tools. `docs/tools.md` kennzeichnet Design-Tools als eigene Kategorie. |
+| R-10 | **Budget und Doku (Stand 5):** höchstens 100 öffentliche Tools; Tools nur zusammenlegen, wenn es nötig ist oder wirklich Sinn ergibt. `docs/tools.md` kennzeichnet Design-Tools als eigene Kategorie. |
 
 ## Nicht-Ziele
 
@@ -111,7 +113,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [x] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
 - [ ] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
 - [ ] AC-11: `hole_grid` erfüllt R-09 für `rect`. Das Sieb der Testplatte (34 × 27 Löcher Ø 1 mm, Raster 3 mm) lässt sich mit einem Aufruf erzeugen. Eine Parameteränderung (z. B. Raster 4 mm) aktualisiert das Modell. `hex` gemäß OF-05.
-- [ ] AC-12: Höchstens 40 öffentliche Tools. `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
+- [ ] AC-12: Höchstens 100 öffentliche Tools (Stand 5). `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
 - [x] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
 - [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
 - [x] AC-16 (Stand 2): Die Ansichtsregel ist eine Kernregel der Instructions und steht direkt nach „get_model_tree lesen“. `set_view` ist registriert und setzt die Live-Ansicht, ohne GUI liefert es `unsupported`. Das erste Basis-Feature setzt die Ansicht automatisch (G12).

@@ -259,17 +259,23 @@ def hole(
     diameter: values.ValueSpec | None = None,
     purpose: str | None = None,
     document: str | None = None,
+    cut_diameter: values.ValueSpec | None = None,
+    cut_depth: values.ValueSpec | None = None,
+    countersink_angle: values.ValueSpec | None = None,
 ) -> ToolResult:
     """ISO metric hole at every circle centre of the sketch.
 
     ``cut``: none | countersink | counterbore. Without ``depth`` the hole goes through all.
     ``diameter`` overrides the nominal diameter (e.g. clearance holes for printing).
+    ``cut_diameter``/``cut_depth`` (counterbore) and ``cut_diameter``/``countersink_angle``
+    (countersink) replace the ISO default cut values; numbers, parameters or expressions.
     """
     doc = resolve_document(document)
     profile, body = _profile(doc, sketch)
     cut_types = {"none": "None", "countersink": "Countersink", "counterbore": "Counterbore"}
     if cut not in cut_types:
         raise validation("cut muss none, countersink oder counterbore sein")
+    custom = _hole_cut_values(doc, cut, cut_diameter, cut_depth, countersink_angle)
     result = ToolResult()
     with transaction(doc, f"Bohrung {size}: {purpose or profile.Label}"):
         before = _volume(body.Tip) if body.Tip else 0.0
@@ -286,6 +292,8 @@ def hole(
             values.apply(feature, "Depth", values.resolve(doc, depth, "depth"))
         if diameter is not None:
             values.apply(feature, "Diameter", values.resolve(doc, diameter, "diameter"))
+        if custom:
+            _apply_hole_cut(doc, feature, custom)
         profile.Visibility = False
         _ensure_cuts(doc, feature, before, result)
         _finish(doc, feature, result)
@@ -294,6 +302,56 @@ def hole(
             "Für gedruckte Durchgangsbohrungen ggf. 'diameter' mit Spiel angeben (z. B. M3 → 3.4)."
         )
     return result
+
+
+_HOLE_CUT_PROPERTIES = {
+    "cut_diameter": ("HoleCutDiameter", "diameter", "mm"),
+    "cut_depth": ("HoleCutDepth", "depth", "mm"),
+    "countersink_angle": ("HoleCutCountersinkAngle", "angle", "deg"),
+}
+
+
+def _hole_cut_values(
+    doc: Any,
+    cut: str,
+    cut_diameter: values.ValueSpec | None,
+    cut_depth: values.ValueSpec | None,
+    countersink_angle: values.ValueSpec | None,
+) -> dict[str, values.Value]:
+    """Validate and resolve custom cut values before anything is created."""
+    given = {
+        key: value
+        for key, value in (
+            ("cut_diameter", cut_diameter),
+            ("cut_depth", cut_depth),
+            ("countersink_angle", countersink_angle),
+        )
+        if value is not None
+    }
+    if not given:
+        return {}
+    if cut == "none":
+        raise validation(f"{', '.join(given)} need cut='counterbore' or cut='countersink'")
+    if cut == "counterbore" and "countersink_angle" in given:
+        raise validation("countersink_angle only applies to cut='countersink'")
+    if cut == "countersink" and "cut_depth" in given:
+        raise validation(
+            "cut_depth only applies to cut='counterbore'; a countersink uses cut_diameter and angle"
+        )
+    return {key: values.resolve(doc, value, _HOLE_CUT_PROPERTIES[key][1]) for key, value in given.items()}
+
+
+def _apply_hole_cut(doc: Any, feature: Any, custom: dict[str, values.Value]) -> None:
+    feature.HoleCutCustomValues = True
+    hole_diameter = feature.Diameter.Value
+    if "cut_diameter" in custom and custom["cut_diameter"].number <= hole_diameter:
+        raise validation(
+            f"cut_diameter {custom['cut_diameter'].number:g} mm must be larger than the hole diameter "
+            f"{hole_diameter:g} mm"
+        )
+    for key, value in custom.items():
+        prop, _, unit = _HOLE_CUT_PROPERTIES[key]
+        values.apply(feature, prop, value, unit=unit)
 
 
 def _dress_up(

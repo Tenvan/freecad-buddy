@@ -13,7 +13,7 @@ import FreeCAD
 import buddy_core
 from buddy_bridge import __version__
 from buddy_bridge.registry import MethodRegistry
-from buddy_core import appearance, assembly, body, compat, documents, features, select, thread, view
+from buddy_core import appearance, assembly, binder, body, compat, documents, features, select, thread, view
 from buddy_core import parameters as model_parameters
 from buddy_core.addons import install as addon_install
 from buddy_core.addons import status as addon_status
@@ -114,6 +114,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.shell": (features.shell, {}),
     "feature.pattern": (features.pattern, {}),
     "feature.datum_plane": (features.datum_plane, {}),
+    "feature.shape_binder": (binder.shape_binder, {}),
     "feature.thread": (thread.thread, {"timeout": 120.0}),
     "appearance.set_material": (appearance.set_material, {}),
     "assembly.create": (assembly.create_assembly, {}),
