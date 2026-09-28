@@ -1,4 +1,4 @@
-"""Documents and objects: resolve, create, open, save, inspect, delete, undo."""
+"""Documents and objects: resolve, create, open, save, close, revert, inspect, delete, undo."""
 
 from __future__ import annotations
 
@@ -55,6 +55,7 @@ def new_document(name: str, activate: bool = True) -> ToolResult:
     doc.UndoMode = 1
     if activate:
         FreeCAD.setActiveDocument(doc.Name)
+    _mark_saved(doc)
     result = ToolResult()
     result.data["document"] = {"name": doc.Name, "label": doc.Label}
     result.hints.append("Nächster Schritt: set_parameters für zentrale Maße, dann create_body.")
@@ -68,6 +69,7 @@ def open_document(path: str) -> ToolResult:
     doc = FreeCAD.openDocument(str(file))
     doc.UndoMode = 1
     FreeCAD.setActiveDocument(doc.Name)
+    _mark_saved(doc)
     result = ToolResult()
     result.data["document"] = {"name": doc.Name, "label": doc.Label, "file": doc.FileName}
     return result
@@ -86,8 +88,81 @@ def save_document(document: str | None = None, path: str | None = None) -> ToolR
         doc.save()
     else:
         raise validation("Dokument wurde noch nie gespeichert: 'path' angeben")
+    _mark_saved(doc)
     result = ToolResult()
     result.data["document"] = {"name": doc.Name, "label": doc.Label, "file": doc.FileName}
+    return result
+
+
+# Undo count per document at the last save/open. App documents have no "modified" flag without the GUI,
+# so headless the undo count since then stands in for it (conservative: an undo also counts as a change).
+_saved_marks: dict[str, int] = {}
+
+
+def _mark_saved(doc: Any) -> None:
+    _saved_marks[doc.Name] = doc.UndoCount
+
+
+def has_unsaved_changes(doc: Any) -> bool:
+    """GUI: the document's Modified flag; headless: undo steps since the last save/open (or creation)."""
+    if FreeCAD.GuiUp:
+        import FreeCADGui
+
+        gui_doc = FreeCADGui.getDocument(doc.Name)
+        if gui_doc is not None:
+            return bool(gui_doc.Modified)
+    return doc.UndoCount != _saved_marks.get(doc.Name, 0)
+
+
+UNSAVED_MODES = ("refuse", "save", "discard")
+
+
+def _open_documents() -> list[dict[str, Any]]:
+    return [{"name": d.Name, "label": d.Label, "file": d.FileName} for d in FreeCAD.listDocuments().values()]
+
+
+def close_document(
+    document: str | None = None, unsaved: str = "refuse", path: str | None = None
+) -> ToolResult:
+    """Close a document. Unsaved changes are refused unless ``unsaved`` is 'save' or 'discard'."""
+    if unsaved not in UNSAVED_MODES:
+        raise validation(f"unsaved must be one of {', '.join(UNSAVED_MODES)}")
+    doc = resolve_document(document)
+    ensure_user_not_editing(doc)
+    modified = has_unsaved_changes(doc)
+    if modified and unsaved == "refuse":
+        raise validation(
+            f"Document '{doc.Label}' has unsaved changes: pass unsaved='save' (with path for a new "
+            "document) or unsaved='discard'"
+        )
+    if modified and unsaved == "save":
+        save_document(doc.Name, path)
+    closed = {"name": doc.Name, "label": doc.Label, "file": doc.FileName}
+    FreeCAD.closeDocument(doc.Name)
+    _saved_marks.pop(closed["name"], None)
+    result = ToolResult()
+    result.data["closed"] = closed
+    result.data["discarded_changes"] = modified and unsaved == "discard"
+    result.data["open_documents"] = _open_documents()
+    active = FreeCAD.ActiveDocument
+    result.data["active_document"] = active.Name if active else None
+    return result
+
+
+def revert_document(document: str | None = None) -> ToolResult:
+    """Discard all changes since the last save: close without saving and reopen the saved file."""
+    doc = resolve_document(document)
+    ensure_user_not_editing(doc)
+    if not doc.FileName:
+        raise validation(
+            f"Document '{doc.Label}' was never saved, there is nothing to revert to: "
+            "use close_document(unsaved='discard')"
+        )
+    name, file, discarded = doc.Name, doc.FileName, has_unsaved_changes(doc)
+    FreeCAD.closeDocument(name)
+    _saved_marks.pop(name, None)
+    result = open_document(file)
+    result.data["discarded_changes"] = discarded
     return result
 
 
@@ -164,7 +239,35 @@ def get_object(ref: str, document: str | None = None) -> dict[str, Any]:
     shape = getattr(obj, "Shape", None)
     if shape is not None and not shape.isNull():
         info["shape"] = _shape_summary(shape)
+    info.update(_assembly_details(obj))
     return info
+
+
+def _assembly_details(obj: Any) -> dict[str, Any]:
+    """Material, colour, link target, group members, Asm4 attachment and fastener data, when present."""
+    details: dict[str, Any] = {}
+    material = getattr(obj, "ShapeMaterial", None)
+    if material is not None and material.Name not in ("", "Default"):
+        details["material"] = material.Name
+    view = getattr(obj, "ViewObject", None)
+    appearance = getattr(view, "ShapeAppearance", None) if view is not None else None
+    if appearance:
+        details["color"] = [round(c, 3) for c in appearance[0].DiffuseColor[:3]]
+    linked = getattr(obj, "LinkedObject", None)
+    if obj.TypeId == "App::Link" and linked is not None:
+        details["linked_object"] = describe(linked)
+    if obj.TypeId in ("App::Part", "App::DocumentObjectGroup"):
+        details["group"] = [describe(child) for child in obj.Group]
+    if getattr(obj, "SolverId", ""):
+        details["attachment"] = {
+            "attached_to": getattr(obj, "AttachedTo", ""),
+            "offset": [round(v, 4) for v in obj.AttachmentOffset.Base],
+            "solver": obj.SolverId,
+        }
+        details["placement"] = [round(v, 4) for v in obj.Placement.Base]
+    if obj.TypeId == "Part::FeaturePython" and hasattr(obj, "Diameter") and hasattr(obj, "Type"):
+        details["fastener"] = {"type": obj.Type, "diameter": obj.Diameter, "thread": getattr(obj, "Thread", False)}
+    return details
 
 
 def delete_object(ref: str, document: str | None = None) -> ToolResult:

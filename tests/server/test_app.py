@@ -22,7 +22,7 @@ def test_tool_catalogue_is_small_and_documented(tmp_path: Path) -> None:
     mcp, names = build_mcp(settings, Bridge(settings, bus), bus)
     tools = asyncio.run(mcp.list_tools())
 
-    assert len(names) <= 40
+    assert len(names) <= 50
     assert "execute_python" not in names
     assert all(tool.description and len(tool.description) > 20 for tool in tools)
     assert {"get_status", "add_profile", "pad", "check_printability", "export_body"} <= set(names)
@@ -34,7 +34,7 @@ def test_execute_python_only_with_opt_in(tmp_path: Path) -> None:
     _, names = build_mcp(settings, Bridge(settings, bus), bus)
 
     assert "execute_python" in names
-    assert len(names) <= 40
+    assert len(names) <= 50
 
 
 def test_missing_bridge_token_gives_actionable_error(tmp_path: Path) -> None:

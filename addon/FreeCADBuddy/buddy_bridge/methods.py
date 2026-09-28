@@ -13,7 +13,7 @@ import FreeCAD
 import buddy_core
 from buddy_bridge import __version__
 from buddy_bridge.registry import MethodRegistry
-from buddy_core import body, compat, documents, features, select, view
+from buddy_core import appearance, assembly, body, compat, documents, features, select, thread, view
 from buddy_core import parameters as model_parameters
 from buddy_core.addons import install as addon_install
 from buddy_core.addons import status as addon_status
@@ -89,6 +89,8 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "document.new": (documents.new_document, {}),
     "document.open": (documents.open_document, {}),
     "document.save": (documents.save_document, {}),
+    "document.close": (documents.close_document, {}),
+    "document.revert": (documents.revert_document, {}),
     "document.tree": (documents.model_tree, {}),
     "document.object": (documents.get_object, {}),
     "document.delete": (documents.delete_object, {}),
@@ -112,6 +114,13 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.shell": (features.shell, {}),
     "feature.pattern": (features.pattern, {}),
     "feature.datum_plane": (features.datum_plane, {}),
+    "feature.thread": (thread.thread, {"timeout": 120.0}),
+    "appearance.set_material": (appearance.set_material, {}),
+    "assembly.create": (assembly.create_assembly, {}),
+    "assembly.add": (assembly.add_to_assembly, {}),
+    "assembly.fastener": (assembly.add_fastener, {"timeout": 120.0}),
+    "assembly.explode": (assembly.explode_assembly, {}),
+    "assembly.configuration": (assembly.apply_configuration, {}),
     "select.preview": (select.select_geometry, {}),
     "view.set": (view.set_view, {}),
     "view.screenshot": (view.screenshot, {"timeout": 60.0}),

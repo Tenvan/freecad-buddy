@@ -152,7 +152,39 @@ TOPICS: tuple[Topic, ...] = (
                 "am Pfadanfang; Biegeradius > halber Stabdurchmesser.",
                 requires=("sweep",),
             ),
+            Rule(
+                "Real external threads with thread (native helix, ISO profile) on an existing cylinder; repeat "
+                "them with pattern. Printed threads below M6 are weak - see printing.",
+                requires=("thread",),
+            ),
         ),
+    ),
+    Topic(
+        "assembly",
+        "Assembly",
+        "Assemblies, standard parts, materials and exploded views",
+        (
+            Rule(
+                "One body per part; combine parts with create_assembly + add_to_assembly (Assembly4) instead "
+                "of merging bodies."
+            ),
+            Rule("Model parts in place (assembly coordinates), then add_to_assembly needs no offset."),
+            Rule(
+                "Standard parts (nuts, washers, screws) come from add_fastener, never modelled by hand; stack "
+                "washer and nut by their bottom faces.",
+                requires=("add_fastener",),
+            ),
+            Rule(
+                "set_material per body: library material for density/mass, colour for the appearance.",
+                requires=("set_material",),
+            ),
+            Rule(
+                "Exploded views with explode_assembly (moves from the assembled state, saved as configuration); "
+                "apply_configuration('Assembled') puts the parts back.",
+                requires=("explode_assembly",),
+            ),
+        ),
+        requires=("create_assembly",),
     ),
     Topic(
         "naming",

@@ -15,6 +15,7 @@ ALLOWED_MODULES = frozenset(sys.stdlib_module_names) | {
     "PartDesign",
     "Mesh",
     "MeshPart",
+    "Materials",
     "PySide",
     "buddy_core",
     "buddy_bridge",
@@ -25,6 +26,8 @@ ADDON_MANAGER_MODULES = frozenset(
     {"NetworkManager", "AddonCatalog", "Addon", "addonmanager_installer", "addonmanager_macro"}
 )
 ADDON_MANAGER_ADAPTER = Path("addon") / "FreeCADBuddy" / "buddy_core" / "addons" / "install.py"
+# Optional third-party workbenches: imported lazily, only by their one adapter module.
+OPTIONAL_ADDON_ADAPTERS = {"FastenersCmd": Path("addon") / "FreeCADBuddy" / "buddy_core" / "assembly.py"}
 
 
 def _top_level_module(dotted_name: str) -> str:
@@ -32,7 +35,10 @@ def _top_level_module(dotted_name: str) -> str:
 
 
 def _allowed_addon_manager(path: Path, module: str) -> bool:
-    return module in ADDON_MANAGER_MODULES and path.relative_to(REPO_ROOT) == ADDON_MANAGER_ADAPTER
+    relative = path.relative_to(REPO_ROOT)
+    if module in OPTIONAL_ADDON_ADAPTERS:
+        return relative == OPTIONAL_ADDON_ADAPTERS[module]
+    return module in ADDON_MANAGER_MODULES and relative == ADDON_MANAGER_ADAPTER
 
 
 def _iter_forbidden_imports() -> list[str]:

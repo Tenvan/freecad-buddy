@@ -180,6 +180,29 @@ def register_tools(
         return await ctx.call("save_document", "document.save", path=path, document=document)
 
     @tool
+    async def close_document(
+        unsaved: Annotated[
+            Literal["refuse", "save", "discard"],
+            Field(description="Unsaved changes: refuse (default, error), save first, or discard them"),
+        ] = "refuse",
+        path: Annotated[
+            str | None, Field(description="Target path (.FCStd) for unsaved='save' on a never-saved document")
+        ] = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Close a document. With unsaved changes it refuses unless unsaved='save' or 'discard' - ask the
+        user before discarding. Returns the documents that stay open."""
+        return await ctx.call(
+            "close_document", "document.close", unsaved=unsaved, path=path, document=document
+        )
+
+    @tool
+    async def revert_document(document: Doc = None) -> dict[str, Any]:
+        """Discard all changes since the last save (reopens the saved .FCStd). Ask the user first; for a
+        never-saved document use close_document(unsaved='discard')."""
+        return await ctx.call("revert_document", "document.revert", document=document)
+
+    @tool
     async def get_model_tree(document: Doc = None) -> dict[str, Any]:
         """Modellbaum lesen: Bodies mit Features in Reihenfolge, Gültigkeit, DoF der Skizzen, Undo-Liste und
         Label-Probleme. Vor Änderungen aufrufen – der Nutzer kann parallel in FreeCAD arbeiten."""
@@ -555,6 +578,118 @@ def register_tools(
             "datum_plane", "feature.datum_plane", base=base, offset=offset, angle=angle,
             rotation_axis=rotation_axis, body=body, purpose=purpose, document=document,
         )  # fmt: skip
+
+    @tool
+    async def thread(
+        center: Annotated[
+            list[float | str],
+            Field(description="[x, y] of the vertical cylinder axis (numbers or parameters)"),
+        ],
+        diameter: Annotated[
+            float | str, Field(description="Major diameter, e.g. 10 for M10 or 'Pin_Diameter'")
+        ],
+        pitch: Annotated[float | str, Field(description="Thread pitch, ISO coarse: M3 0.5, M5 0.8, M10 1.5")],
+        length: Num,
+        z_start: Annotated[float | str, Field(description="Height where the thread starts")] = 0,
+        left_handed: bool = False,
+        body: Annotated[
+            str | None, Field(description="Body label; empty when there is only one body")
+        ] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing
+        vertical cylinder of the body. Fully constrained and parametric; repeat it with pattern."""
+        return await ctx.call(
+            "thread", "feature.thread", center=center, diameter=diameter, pitch=pitch, length=length,
+            z_start=z_start, left_handed=left_handed, body=body, purpose=purpose, document=document,
+        )  # fmt: skip
+
+    # --- Material & appearance --------------------------------------------------------------------
+    @tool
+    async def set_material(
+        target: Annotated[str, Field(description="Body, part or link label")],
+        material: Annotated[
+            str | None, Field(description="Library material: 'PLA', 'ABS', 'PETG', a full name or UUID")
+        ] = None,
+        color: Annotated[
+            str | list[float] | None,
+            Field(description="Display colour: name (red, yellow, ...), '#RRGGBB' or [r,g,b]"),
+        ] = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Assign a FreeCAD library material (density -> mass) and/or the display colour of a body."""
+        return await ctx.call(
+            "set_material", "appearance.set_material", target=target, material=material, color=color,
+            document=document,
+        )  # fmt: skip
+
+    # --- Assembly (Assembly4 convention) ----------------------------------------------------------
+    @tool
+    async def create_assembly(
+        label: Annotated[str, Field(description="Assembly label")] = "Assembly",
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Create an Assembly4 assembly in the document (bodies move into a 'Parts' group). Then
+        add_to_assembly for each body, add_fastener for standard parts, explode_assembly for an exploded view."""
+        return await ctx.call("create_assembly", "assembly.create", label=label, document=document)
+
+    @tool
+    async def add_to_assembly(
+        part: Annotated[str, Field(description="Body or App::Part label")],
+        label: Annotated[str | None, Field(description="Link label; empty = part label")] = None,
+        offset: Annotated[
+            list[float] | None, Field(description="[x, y, z] from the modelled position; empty = in place")
+        ] = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Insert a body into the assembly as App::Link placed by Assembly4 (LCS_Origin * AttachmentOffset)."""
+        return await ctx.call(
+            "add_to_assembly", "assembly.add", part=part, label=label, offset=offset, document=document
+        )
+
+    @tool
+    async def add_fastener(
+        type: Annotated[
+            str,
+            Field(description="Fasteners type, e.g. ISO4032 (hex nut), ISO7089 (washer), ISO4762 (screw)"),
+        ],
+        diameter: Annotated[str, Field(description="Size, e.g. 'M10'")],
+        positions: Annotated[
+            list[list[float]], Field(description="One [x, y, z] per fastener (bottom face)")
+        ],
+        thread: Annotated[bool, Field(description="Model the real thread (slower)")] = False,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Standard parts from the Fasteners workbench (needs the addon), placed in the assembly if there
+        is one. Stack e.g. a washer on the plate and the nut on top of the washer."""
+        return await ctx.call(
+            "add_fastener", "assembly.fastener", type=type, diameter=diameter, positions=positions,
+            thread=thread, purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
+    async def explode_assembly(
+        moves: Annotated[
+            dict[str, list[float]], Field(description="Label -> [dx, dy, dz] from the assembled position")
+        ],
+        name: Annotated[str, Field(description="Configuration name")] = "Exploded",
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Exploded view as Assembly4 configuration: saves 'Assembled' once, moves the listed parts and
+        saves the result. Switch back and forth with apply_configuration."""
+        return await ctx.call(
+            "explode_assembly", "assembly.explode", moves=moves, name=name, document=document
+        )
+
+    @tool
+    async def apply_configuration(
+        name: Annotated[str, Field(description="Configuration, e.g. 'Assembled' or 'Exploded'")],
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Apply a saved Assembly4 configuration (positions of all assembly parts)."""
+        return await ctx.call("apply_configuration", "assembly.configuration", name=name, document=document)
 
     @tool
     async def select_geometry(

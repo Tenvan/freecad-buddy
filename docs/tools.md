@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-39 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
+48 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
 Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Tool | Zweck |
@@ -11,6 +11,8 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`new_document`](#new_document) | Neues FreeCAD-Dokument anlegen und aktivieren. Workflow danach: set_parameters → create_body → |
 | [`open_document`](#open_document) | Vorhandenes Dokument öffnen und aktivieren. |
 | [`save_document`](#save_document) | Dokument als .FCStd speichern (ohne path in die bisherige Datei; neue Dokumente brauchen path). |
+| [`close_document`](#close_document) | Close a document. With unsaved changes it refuses unless unsaved='save' or 'discard' - ask the |
+| [`revert_document`](#revert_document) | Discard all changes since the last save (reopens the saved .FCStd). Ask the user first; for a |
 | [`get_model_tree`](#get_model_tree) | Modellbaum lesen: Bodies mit Features in Reihenfolge, Gültigkeit, DoF der Skizzen, Undo-Liste und |
 | [`get_object`](#get_object) | Details eines Objekts: Status, Expressions, bei Skizzen die Analyse, bei Körpern Volumen und Maße. |
 | [`delete_object`](#delete_object) | Objekt löschen (ein Undo-Schritt). |
@@ -34,6 +36,13 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`shell`](#shell) | Körper aushöhlen (Thickness) mit Wandstärke; gewählte Flächen werden zur Öffnung. |
 | [`pattern`](#pattern) | Features spiegeln oder linear/polar/als Raster vervielfältigen (statt Geometrie mehrfach zu zeichnen). |
 | [`datum_plane`](#datum_plane) | Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche). |
+| [`thread`](#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
+| [`set_material`](#set_material) | Assign a FreeCAD library material (density -> mass) and/or the display colour of a body. |
+| [`create_assembly`](#create_assembly) | Create an Assembly4 assembly in the document (bodies move into a 'Parts' group). Then |
+| [`add_to_assembly`](#add_to_assembly) | Insert a body into the assembly as App::Link placed by Assembly4 (LCS_Origin * AttachmentOffset). |
+| [`add_fastener`](#add_fastener) | Standard parts from the Fasteners workbench (needs the addon), placed in the assembly if there |
+| [`explode_assembly`](#explode_assembly) | Exploded view as Assembly4 configuration: saves 'Assembled' once, moves the listed parts and |
+| [`apply_configuration`](#apply_configuration) | Apply a saved Assembly4 configuration (positions of all assembly parts). |
 | [`select_geometry`](#select_geometry) | Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius). |
 | [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten |
 | [`screenshot`](#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
@@ -107,6 +116,40 @@ Beispiel:
 {
   "path": "C:/Projekte/box.FCStd"
 }
+```
+
+## close_document
+
+Close a document. With unsaved changes it refuses unless unsaved='save' or 'discard' - ask the
+user before discarding. Returns the documents that stay open.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `unsaved` | `refuse` \| `save` \| `discard` | nein | `"refuse"` | Unsaved changes: refuse (default, error), save first, or discard them |
+| `path` | string \| null | nein | `null` | Target path (.FCStd) for unsaved='save' on a never-saved document |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "unsaved": "discard"
+}
+```
+
+## revert_document
+
+Discard all changes since the last save (reopens the saved .FCStd). Ask the user first; for a
+never-saved document use close_document(unsaved='discard').
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{}
 ```
 
 ## get_model_tree
@@ -621,6 +664,166 @@ Beispiel:
 }
 ```
 
+## thread
+
+Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing
+vertical cylinder of the body. Fully constrained and parametric; repeat it with pattern.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `center` | array<number \| string> | ja | `—` | [x, y] of the vertical cylinder axis (numbers or parameters) |
+| `diameter` | number \| string | ja | `—` | Major diameter, e.g. 10 for M10 or 'Pin_Diameter' |
+| `pitch` | number \| string | ja | `—` | Thread pitch, ISO coarse: M3 0.5, M5 0.8, M10 1.5 |
+| `length` | number \| string | ja | `—` | Zahl in mm/Grad oder Name eines Parameters (wird per Expression gebunden) |
+| `z_start` | number \| string | nein | `0` | Height where the thread starts |
+| `left_handed` | boolean | nein | `false` |  |
+| `body` | string \| null | nein | `null` | Body label; empty when there is only one body |
+| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "center": [
+    85,
+    35
+  ],
+  "diameter": "Pin_Diameter",
+  "pitch": 1.5,
+  "length": 15,
+  "z_start": 5
+}
+```
+
+## set_material
+
+Assign a FreeCAD library material (density -> mass) and/or the display colour of a body.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `target` | string | ja | `—` | Body, part or link label |
+| `material` | string \| null | nein | `null` | Library material: 'PLA', 'ABS', 'PETG', a full name or UUID |
+| `color` | string \| array<number> \| null | nein | `null` | Display colour: name (red, yellow, ...), '#RRGGBB' or [r,g,b] |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "target": "Lid",
+  "material": "ABS",
+  "color": "red"
+}
+```
+
+## create_assembly
+
+Create an Assembly4 assembly in the document (bodies move into a 'Parts' group). Then
+add_to_assembly for each body, add_fastener for standard parts, explode_assembly for an exploded view.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `label` | string | nein | `"Assembly"` | Assembly label |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{}
+```
+
+## add_to_assembly
+
+Insert a body into the assembly as App::Link placed by Assembly4 (LCS_Origin * AttachmentOffset).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `part` | string | ja | `—` | Body or App::Part label |
+| `label` | string \| null | nein | `null` | Link label; empty = part label |
+| `offset` | array<number> \| null | nein | `null` | [x, y, z] from the modelled position; empty = in place |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "part": "Box"
+}
+```
+
+## add_fastener
+
+Standard parts from the Fasteners workbench (needs the addon), placed in the assembly if there
+is one. Stack e.g. a washer on the plate and the nut on top of the washer.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `type` | string | ja | `—` | Fasteners type, e.g. ISO4032 (hex nut), ISO7089 (washer), ISO4762 (screw) |
+| `diameter` | string | ja | `—` | Size, e.g. 'M10' |
+| `positions` | array<array<number>> | ja | `—` | One [x, y, z] per fastener (bottom face) |
+| `thread` | boolean | nein | `false` | Model the real thread (slower) |
+| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "type": "ISO4032",
+  "diameter": "M10",
+  "positions": [
+    [
+      85,
+      35,
+      7
+    ]
+  ]
+}
+```
+
+## explode_assembly
+
+Exploded view as Assembly4 configuration: saves 'Assembled' once, moves the listed parts and
+saves the result. Switch back and forth with apply_configuration.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `moves` | object | ja | `—` | Label -> [dx, dy, dz] from the assembled position |
+| `name` | string | nein | `"Exploded"` | Configuration name |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "moves": {
+    "Lid": [
+      0,
+      0,
+      60
+    ]
+  }
+}
+```
+
+## apply_configuration
+
+Apply a saved Assembly4 configuration (positions of all assembly parts).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `name` | string | ja | `—` | Configuration, e.g. 'Assembled' or 'Exploded' |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "name": "Assembled"
+}
+```
+
 ## select_geometry
 
 Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius).
@@ -690,7 +893,7 @@ Vor einer neuen Konstruktion die passenden Themen lesen, z. B. sketches und prin
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `topic` | string \| null | nein | `null` | Thema: workflow, parameters, sketches, references, features, naming, printing, design_tools, addons; leer = Themenübersicht |
+| `topic` | string \| null | nein | `null` | Thema: workflow, parameters, sketches, references, features, assembly, naming, printing, design_tools, addons; leer = Themenübersicht |
 
 Beispiel:
 

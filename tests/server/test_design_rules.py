@@ -60,7 +60,7 @@ def test_rules_only_name_registered_tools(allow_python: bool) -> None:
 
 def test_every_topic_of_r03_is_covered() -> None:
     expected = {"workflow", "parameters", "sketches", "references", "features", "naming", "printing"}
-    expected |= {"design_tools", "addons"}
+    expected |= {"design_tools", "addons", "assembly"}
     assert set(design_rules.TOPIC_KEYS) == expected
     assert all(topic.rules for topic in design_rules.TOPICS)
 
