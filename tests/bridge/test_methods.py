@@ -96,3 +96,11 @@ def test_set_view_without_gui_is_unsupported(client: BridgeClient) -> None:
     with pytest.raises(RpcError) as info:
         client.call("view.set", {"view": "iso"})
     assert info.value.code == protocol.UNSUPPORTED
+
+
+def test_addon_status_lists_installed_addons_and_version(client: BridgeClient) -> None:
+    status = client.call("addons.status")
+
+    assert status["freecad_version"][:2] == [int(p) for p in FreeCAD.Version()[:2]]
+    assert isinstance(status["addons"], list) and isinstance(status["macros"], list)
+    assert status["mod_dir"].endswith("Mod")

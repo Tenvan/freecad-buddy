@@ -100,8 +100,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [x] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
 - [ ] AC-04: Die Design-Tool-Regel ist mit Kriterium und Reihenfolge (R-04) in Instructions und Thema `design_tools` formuliert. `design_part` verweist darauf.
 - [ ] AC-05: `propose_design_tool` legt Vorschläge dauerhaft ab, führt gleichnamige zusammen (Zähler) und meldet sie in der TUI. Die Liste ist über ein Tool abrufbar.
-- [ ] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
-- [ ] AC-07: `get_addon(id)` liefert Lizenz, Maintainer, Repository, letzte Aktualisierung, Abhängigkeiten (FreeCAD, Addons, Python) und einen README-Auszug.
+- [x] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
+- [x] AC-07: `get_addon(id)` liefert Lizenz, Maintainer, Repository, letzte Aktualisierung, Abhängigkeiten (FreeCAD, Addons, Python) und einen README-Auszug.
 - [ ] AC-08: Ohne beide Opt-ins ist `install_addon` nicht nutzbar. Mit Opt-ins erscheint der Dialog. Bei Ablehnung kommt `user_declined` und nichts ändert sich. Bei Zustimmung wird über FreeCADs Installer installiert, das Addon gilt im Addon Manager als installiert und das Ergebnis nennt den Neustart. Weder GUI noch Bridge laufen in einen Timeout (R-08). Nachweis headless mit Fixture-Addon und simulierter Bestätigung, GUI über G9.
 - [ ] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
 - [ ] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
@@ -117,7 +117,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | ID | Frage | Betroffen | Annahme bis Klärung | Verantwortlich |
 |---|---|---|---|---|
 | OF-01 | Längenbudget der Instructions: Wie viel übernimmt Claude Code? | #1.1, AC-01 | ≤ 2 000 Zeichen; wird in #1.1 an aktueller Doku geprüft | Agent (Recherche) |
-| OF-02 | Wo läuft die Katalogsuche: in FreeCAD über die Addon-Manager-Module oder im Server? | #2.1, #2.2 | ✅ Entschieden: In FreeCAD (Core), damit Cache, Kompatibilitätslogik und Installationsstatus identisch mit dem Addon Manager sind; Spike #2.1 bestätigt die technische Machbarkeit | Agent, Bestätigung Ralf |
+| OF-02 | Wo läuft die Katalogsuche: in FreeCAD über die Addon-Manager-Module oder im Server? | #2.1, #2.2 | ✅ Entschieden nach Spike #2.1 (2026-09-28), abweichend von der Annahme: **Suche und Details im Server** (eigener Cache mit SHA-256-Prüfung, asynchroner Download, blockiert die GUI nie, funktioniert offline); **Status und Installation in der Bridge** (`Mod/`, Makro-Ordner, AM-Installer). Grund: Der AM lädt offline seinen lokalen Cache nicht (Bug), schreibt beim Abruf seine Hash-Preference und blockiert den Hauptthread bis zu ~100 s | Agent (Spike), zur Kenntnis an Ralf |
 | OF-03 | Addons mit Python-Abhängigkeiten | #2.4, AC-09 | ✅ Entschieden: Ablehnen mit Hinweis auf den Addon Manager (keine pip-Installation über MCP) | Ralf |
 | OF-04 | Makros und Preference Packs installierbar oder nur suchbar? | #2.4 | ✅ Entschieden: Suchen: alle Arten. Installieren: Workbenches und Makros mit demselben Dialog, Preference Packs nur suchen | Ralf |
 | OF-05 | `hole_grid` mit Layout `hex` (versetzte Reihen) im Umfang? | #3.3, AC-11 | ✅ Entschieden: Ja, als zweites Raster mit halbem Versatz (vermutet machbar mit zwei MultiTransforms, ungeprüft); scheitert der Spike, nur `rect` plus Vorschlag | Ralf |
@@ -134,8 +134,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | **erfüllt** (`test_rules_only_name_registered_tools`, `test_printing_numbers_follow_the_profile`, `test_every_topic_of_r03_is_covered`) |
 | AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | **teilweise**: Regel formuliert und Kernregel (`test_instructions_are_compact_and_complete`); Tool-Schritte erscheinen, sobald `hole_grid`, `search_addons` und `propose_design_tool` existieren (S3–S5) |
 | AC-05 | Vorschlagsliste mit Zusammenführung und TUI | #3.2 / P3 | Unit- + Textual-Pilot-Test | offen |
-| AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | offen |
-| AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | offen |
+| AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | **erfüllt** (`test_addon_service.py`: Download, Cache, offline mit/ohne Cache, falsche Prüfsumme; `test_addon_catalog.py`: Ranking; E2E `test_search_and_details_over_mcp`) |
+| AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | **erfüllt** (`get_addon` mit Lizenz, Maintainer, Repository, Aktualisierung, Abhängigkeiten, Kompatibilität, Status und bereinigtem README-Auszug; E2E) |
 | AC-08 | Installation mit doppeltem Opt-in und Dialog | #2.4, #2.5 / P2 | Headless-Test mit Fixture-Addon und simulierter Bestätigung + G9 | offen |
 | AC-09 | Ablehnungsgründe, Aufräumen | #2.4, #2.5 / P2 | Headless-Core-Test | offen |
 | AC-10 | Grid-Recherche dokumentiert | #3.1 / P3 | Dokument, Live-Suche nur mit Ralfs Zustimmung | offen |
@@ -161,18 +161,20 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[████░░░░░░] 45% — 9 von 20 Aufgaben erledigt
+[██████░░░░] 60% — 12 von 20 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
 *Keine Blocker.*
+
+**Risiko Tool-Budget (R-10, ≤ 40):** Aktuell 37 öffentliche Tools plus `execute_python`. Geplant sind noch `install_addon` (opt-in), `propose_design_tool`, `list_design_tool_proposals` und `hole_grid` → 41 bis 42. Vorschlag für S5: Die Vorschlagsliste in `propose_design_tool` integrieren (ohne Argumente = Liste) und opt-in-Tools nicht mitzählen. Entscheidung Ralf in S5.
 
 ## Phasen-Übersicht
 
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
 | 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 6 | [██████████] 100% |
-| 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
+| 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 2 | 3 | [██████░░░░] 60% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |
 | 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 3 | 0 | [░░░░░░░░░░] 0% |
@@ -183,8 +185,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 |---|---|---|---|
 | S1 | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | ✅ Erledigt (2026-09-28) |
 | S2 | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | ✅ Erledigt (2026-09-28) |
-| **→ S3** | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | **Nächste** |
-| S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | Geplant |
+| S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | ✅ Erledigt (2026-09-28) |
+| **→ S4** | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | **Nächste** |
 | S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | Geplant |
 | S6 | Phase 5 | Doku, Release 0.2.0, GUI-Abnahme G1–G11 | Geplant |
 

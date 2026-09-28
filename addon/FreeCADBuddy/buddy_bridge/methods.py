@@ -15,6 +15,7 @@ from buddy_bridge import __version__
 from buddy_bridge.registry import MethodRegistry
 from buddy_core import body, compat, documents, features, select, view
 from buddy_core import parameters as model_parameters
+from buddy_core.addons import status as addon_status
 from buddy_core.documents import resolve_document
 from buddy_core.errors import validation
 from buddy_core.printing import check, export, profile
@@ -113,6 +114,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "select.preview": (select.select_geometry, {}),
     "view.set": (view.set_view, {}),
     "view.screenshot": (view.screenshot, {"timeout": 60.0}),
+    "addons.status": (addon_status.addon_status, {}),
     "print.get_profile": (profile.get_printer_profile, {}),
     "print.set_profile": (profile.set_printer_profile, {}),
     "print.check": (check.check_printability, {"timeout": 120.0}),

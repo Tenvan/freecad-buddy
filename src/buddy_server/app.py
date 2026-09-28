@@ -11,6 +11,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 
 from buddy_bridge.tokens import read_token
 from buddy_server import __version__
+from buddy_server.addon_service import AddonCatalogService
 from buddy_server.bridge import Bridge
 from buddy_server.calllog import ToolCallLog
 from buddy_server.config import Settings
@@ -108,7 +109,7 @@ def transport_security(settings: Settings) -> TransportSecuritySettings:
 
 
 def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPServer, list[str]]:
-    ctx = ToolContext(bridge, bus)
+    ctx = ToolContext(bridge, bus, AddonCatalogService(settings.home / "addon-catalog"))
     # Instructions only mention registered tools, so collect the names before creating the server.
     available = set(register_tools(NameCollector(), ctx, settings.allow_python))
     secrets = [settings.mcp_token(), read_token(settings.bridge_token_path) or ""]

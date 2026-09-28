@@ -69,6 +69,8 @@ EXAMPLES: dict[str, dict[str, Any]] = {
     "export_body": {"format": "3mf", "target": "Box"},
     "get_design_rules": {"topic": "printing"},
     "set_view": {"view": "iso", "fit": True},
+    "search_addons": {"query": "grid", "kind": "any"},
+    "get_addon": {"addon_id": "lattice2"},
     "sweep": {"profile": "Sketch_HandleSection", "path": "Sketch_HandlePath", "purpose": "Handle"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }

@@ -5,6 +5,43 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 3 — 2026-09-28
+
+**Ziel:** Phase 2, Spike Addon-Manager-API, Katalogsuche und Details.
+
+**Erledigt:**
+- #2.1 Spike per Code-Analyse (Agent) plus ein einmaliger Katalog-Download mit Ralfs Zustimmung. OF-02 ist abweichend von der Annahme entschieden: Suche im Server, Status und Installation in der Bridge.
+- #2.2 Katalog-Parser, Service mit Cache, SHA-256 und Offline-Fallback, Tool `search_addons`, Bridge-Methode `addons.status`, Fixture aus dem echten Katalog.
+- #2.3 Tool `get_addon` mit README-Auszug als markiertem Fremdtext.
+- Probe auf dem vollständigen Katalog (438 Einträge): Die Suche „grid“ liefert FreeGrid, Gridfinity, CarteGrid und das Makro „BSurf from grid“, „perforation“ liefert HexFill, „honeycomb“ drei Makros plus HexFill. Das ist Vorarbeit für die Grid-Recherche (S5).
+
+**Release-Änderungen:**
+- `[feature][server]` `search_addons`: den offiziellen Addon-Katalog durchsuchen, mit Kompatibilität und Installationsstatus, offline aus dem Cache.
+- `[feature][server]` `get_addon`: Details, Abhängigkeiten und README-Auszug eines Addons oder Makros.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- AM-Fallen für S4: Die Rückgabe von `AddonInstaller.run()` ist auch bei Fehlern `True`, nur `success` zählt. Der Konstruktor lädt ohne `allow_list` blockierend `constraints.txt`. `NetworkManager.InitializeNetworkManager()` muss im Hauptthread laufen. Downloads kommen von `addons.freecad.org/CatalogCache`.
+- Der AM ignoriert offline seinen lokalen Cache (`new_cache_available` wirft außerhalb des `try`).
+- Fremdinhalte (package.xml, README) sind Angriffsfläche: XML ohne DTD, README als Fremdtext markiert und nicht als Anweisung verwendet.
+- Tool-Budget wird knapp, siehe Risiko im Sprint-Index.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Aufteilung Server/Bridge für Addons (98, bestätigt)
+- Nicht übernehmen: Zeilennummern aus dem Spike
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 82 Tests Projekt-Python ✅, 144 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: keine in dieser Session. Live-Suche in Claude Code nach Server-Neustart möglich.
+
+**Nächste Session:**
+- S4: #2.4 Installation mit Opt-in, Dialog, Job-Muster; #2.5 Tests.
+
+---
+
 ## Session 2c — 2026-09-28 (Ralfs Direktaufträge: Auswahlgrößen, kompakter Chat)
 
 **Ziel:** Zwei Rückmeldungen aus dem Live-Test umsetzen.

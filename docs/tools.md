@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-36 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
+38 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
 Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Tool | Zweck |
@@ -38,6 +38,8 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten |
 | [`screenshot`](#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
 | [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
+| [`search_addons`](#search_addons) | Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit |
+| [`get_addon`](#get_addon) | Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung, |
 | [`get_printer_profile`](#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
 | [`set_printer_profile`](#set_printer_profile) | Druckerprofil ändern (dauerhaft gespeichert). |
 | [`check_printability`](#check_printability) | Druckbarkeit prüfen: gültiger Solid, Bauraum, Überhänge, Wandstärke, zu kleine Details. |
@@ -694,6 +696,45 @@ Beispiel:
 ```json
 {
   "topic": "printing"
+}
+```
+
+## search_addons
+
+Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit
+Kompatibilität zum laufenden FreeCAD und Installationsstatus. Vor einem eigenen Design-Tool prüfen.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `query` | string | ja | `—` | Suchbegriffe, alle müssen passen, z. B. 'grid' oder 'honeycomb' |
+| `kind` | `any` \| `workbench` \| `macro` \| `preference_pack` | nein | `"any"` |  |
+| `limit` | integer | nein | `10` |  |
+| `refresh` | boolean | nein | `false` | Katalog sofort neu laden (sonst höchstens täglich) |
+
+Beispiel:
+
+```json
+{
+  "query": "grid",
+  "kind": "any"
+}
+```
+
+## get_addon
+
+Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung,
+Abhängigkeiten (FreeCAD, Addons, Python), Kompatibilität, Installationsstatus und README-Auszug.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `addon_id` | string | ja | `—` | Id oder Name aus search_addons, z. B. 'lattice2' |
+| `readme` | boolean | nein | `true` | README-Auszug aus dem Repository laden |
+
+Beispiel:
+
+```json
+{
+  "addon_id": "lattice2"
 }
 ```
 

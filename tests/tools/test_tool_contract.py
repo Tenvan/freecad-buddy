@@ -12,7 +12,9 @@ METHODS = ROOT / "addon" / "FreeCADBuddy" / "buddy_bridge" / "methods.py"
 
 
 def test_server_tools_only_use_registered_bridge_methods() -> None:
-    called = set(re.findall(r'ctx\.call\(\s*"[a-z_]+",\s*"([a-z_.]+)"', TOOLS.read_text(encoding="utf-8")))
+    source = TOOLS.read_text(encoding="utf-8")
+    called = set(re.findall(r'ctx\.call\(\s*"[a-z_]+",\s*"([a-z_.]+)"', source))
+    called |= set(re.findall(r'self\.bridge\.call\(\s*"([a-z_.]+)"', source))  # used inside ToolContext
     registered = set(re.findall(r'^\s*"([a-z_]+\.[a-z_]+)": \(', METHODS.read_text(encoding="utf-8"), re.M))
 
     assert called, "keine Tool-Aufrufe gefunden – Regex veraltet?"

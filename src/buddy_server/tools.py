@@ -17,6 +17,8 @@ from pydantic import Field
 
 from buddy_bridge.protocol import RpcError
 from buddy_server import design_rules
+from buddy_server.addon_catalog import AddonEntry, search
+from buddy_server.addon_service import UNTRUSTED_NOTE, AddonCatalogService, CatalogError
 from buddy_server.bridge import Bridge, BridgeTimeout, BridgeUnavailable
 from buddy_server.events import EventBus
 
@@ -60,9 +62,28 @@ class ToolContext:
     Request/response logging happens in ``calllog.ToolCallLog`` (MCP middleware), not here.
     """
 
-    def __init__(self, bridge: Bridge, bus: EventBus) -> None:
+    def __init__(self, bridge: Bridge, bus: EventBus, addons: AddonCatalogService | None = None) -> None:
         self.bridge = bridge
         self.bus = bus
+        self.addons = addons
+
+    async def installed(self) -> dict[str, Any] | None:
+        """Installed addons/macros and FreeCAD version from the bridge, ``None`` if it cannot answer."""
+        try:
+            result = await self.bridge.call("addons.status", {}, None)
+        except (BridgeUnavailable, BridgeTimeout, RpcError):
+            return None
+        return result if isinstance(result, dict) else None
+
+    async def catalog(self, refresh: bool = False) -> tuple[AddonCatalogService, dict[str, Any]]:
+        if self.addons is None:
+            raise ToolError("[unsupported] Addon-Katalog ist in diesem Server nicht konfiguriert")
+        try:
+            state = await self.addons.ensure(refresh)
+        except CatalogError as error:
+            hint = "Netz/Proxy prüfen" if error.code == "catalog_unavailable" else "später erneut versuchen"
+            raise ToolError(f"[{error.code}] {error}\nHinweis: {hint}") from None
+        return self.addons, state.as_dict()
 
     async def call(self, tool: str, method: str, timeout: float | None = None, **params: Any) -> Any:
         clean = {key: value for key, value in params.items() if value is not None}
@@ -82,6 +103,21 @@ class ToolContext:
         except (BridgeUnavailable, BridgeTimeout, RpcError):
             return None
         return result if isinstance(result, dict) else None
+
+
+def _installed_flag(entry: AddonEntry, status: dict[str, Any] | None) -> bool | None:
+    if status is None:
+        return None
+    if entry.kind == "macro":
+        return entry.filename in status["macros"] or f"Macro_{entry.filename}" in status["macros"]
+    return entry.id in status["addons"]
+
+
+def _version(status: dict[str, Any] | None) -> tuple[int, int, int] | None:
+    if status is None:
+        return None
+    major, minor, patch = (int(part) for part in status["freecad_version"][:3])
+    return major, minor, patch
 
 
 def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> list[str]:
@@ -569,6 +605,55 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
         if profile is None:
             text += "\n\n(FreeCAD nicht erreichbar – Werte aus dem Standard-Druckerprofil)"
         return text
+
+    # --- Addons ----------------------------------------------------------------------------------
+    @tool
+    async def search_addons(
+        query: Annotated[
+            str, Field(description="Suchbegriffe, alle müssen passen, z. B. 'grid' oder 'honeycomb'")
+        ],
+        kind: Literal["any", "workbench", "macro", "preference_pack"] = "any",
+        limit: Annotated[int, Field(ge=1, le=50)] = 10,
+        refresh: Annotated[
+            bool, Field(description="Katalog sofort neu laden (sonst höchstens täglich)")
+        ] = False,
+    ) -> dict[str, Any]:
+        """Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit
+        Kompatibilität zum laufenden FreeCAD und Installationsstatus. Vor einem eigenen Design-Tool prüfen."""
+        service, state = await ctx.catalog(refresh)
+        status = await ctx.installed()
+        version = _version(status)
+        hits = search(service.entries(), query, None if kind == "any" else kind, limit)
+        results = [
+            {**e.summary(version), "installed": _installed_flag(e, status), "score": s} for e, s in hits
+        ]
+        warnings = [state["warning"]] if "warning" in state else []
+        if status is None:
+            warnings.append("FreeCAD nicht erreichbar: Kompatibilität und Installationsstatus unbekannt")
+        return {"catalog": state, "freecad_version": status and status["freecad_version"], "query": query,
+                "count": len(results), "results": results, "warnings": warnings}  # fmt: skip
+
+    @tool
+    async def get_addon(
+        addon_id: Annotated[str, Field(description="Id oder Name aus search_addons, z. B. 'lattice2'")],
+        readme: Annotated[bool, Field(description="README-Auszug aus dem Repository laden")] = True,
+    ) -> dict[str, Any]:
+        """Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung,
+        Abhängigkeiten (FreeCAD, Addons, Python), Kompatibilität, Installationsstatus und README-Auszug."""
+        service, state = await ctx.catalog()
+        entry = service.find(addon_id)
+        if entry is None:
+            raise ToolError(
+                f"[not_found] Kein Addon '{addon_id}' im Katalog\nHinweis: search_addons verwenden"
+            )
+        status = await ctx.installed()
+        details = {**entry.details(_version(status)), "installed": _installed_flag(entry, status),
+                   "catalog": state}  # fmt: skip
+        if readme:
+            text = await service.readme(entry)
+            details["readme"] = text
+            details["readme_note"] = UNTRUSTED_NOTE if text else "README nicht abrufbar"
+        return details
 
     # --- 3D printing ------------------------------------------------------------------------------
     @tool

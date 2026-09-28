@@ -1,0 +1,82 @@
+{
+ "FCHoneycombMaker": {
+  "name": "FCHoneycombMaker",
+  "on_wiki": true,
+  "on_git": false,
+  "desc": "This macro creates a parametric honeycomb grid.<br />The parametric properties are contained in a spreadsheet.<br />You could also change the base object for the honeycomb grid to achieve other interesting arrays, such as this egg crate by changing the base hexagon object with an egg-shaped ellipsoid.<br />Including hexagon radius, separation between hexagons, etc., can be modified via an included spreadsheet.<br /><br />Macro version: 2020.10.30<br />Last modified: 2020-10-30<br />FreeCAD version: 0.17 and above<br />Download: <a rel=\"nofollow\" class=\"external text\" href=\"https://wiki.freecad.org/images/2/2d/FCHoneycombMakerIcon.png\">ToolBar Icon</a><br />Author: TheMarkster<br /> ",
+  "comment": "This macro creates a parametric honeycomb grid.",
+  "code": "# stripped for test fixture\n",
+  "url": "https://wiki.freecad.org/Macro_FCHoneycombMaker",
+  "raw_code_url": "",
+  "wiki": "https://github.com/mwganson/FCHoneycombMaker/blob/master/README.md",
+  "version": "2020.10.30",
+  "license": "",
+  "date": "2020.10.30",
+  "src_filename": "",
+  "filename_from_url": "",
+  "author": "TheMarkster",
+  "icon": "https://wiki.freecad.org/images/2/2d/FCHoneycombMakerIcon.png",
+  "icon_source_url": "",
+  "icon_data": null,
+  "xpm": "",
+  "other_files": [
+   ""
+  ],
+  "other_files_data": {},
+  "parsed": true,
+  "icon_extension": "png"
+ },
+ "ArrayCopy": {
+  "name": "ArrayCopy",
+  "on_wiki": true,
+  "on_git": false,
+  "desc": "This macro copies the selected object several times, on an array grid You can define the number of rows and columns and the distance between them.<br /><br />Macro version: 1.0<br />Last modified: 2014-05-04<br />FreeCAD version: All<br />Download: <a rel=\"nofollow\" class=\"external text\" href=\"https://wiki.freecad.org/images/9/9d/Macro_ArrayCopy.png\">ToolBar Icon</a><br />Author: Yorik<br /> ",
+  "comment": "This macro copies the selected object several times, on an array grid You can define the number of rows and columns and the distance between them.",
+  "code": "# stripped for test fixture\n",
+  "url": "https://wiki.freecad.org/Macro_ArrayCopy",
+  "raw_code_url": "",
+  "wiki": "",
+  "version": "",
+  "license": "",
+  "date": "2014-05-04",
+  "src_filename": "",
+  "filename_from_url": "",
+  "author": "Yorik",
+  "icon": "https://wiki.freecad.org/images/9/9d/Macro_ArrayCopy.png",
+  "icon_source_url": "",
+  "icon_data": null,
+  "xpm": "",
+  "other_files": [
+   ""
+  ],
+  "other_files_data": {},
+  "parsed": true,
+  "icon_extension": "png"
+ },
+ "Foto": {
+  "name": "Foto",
+  "on_wiki": false,
+  "on_git": true,
+  "desc": "",
+  "comment": "Creates a real sized 300-dpi foto of the selected part from top view",
+  "code": "# stripped for test fixture\n",
+  "url": "",
+  "raw_code_url": "",
+  "wiki": "",
+  "version": "0.1.0",
+  "license": "All rights reserved",
+  "date": "",
+  "src_filename": "FreeCAD-macros/Foto.FCMacro",
+  "filename_from_url": "",
+  "author": "microelly",
+  "icon": "",
+  "icon_source_url": "",
+  "icon_data": null,
+  "xpm": "",
+  "other_files": [
+   ""
+  ],
+  "other_files_data": {},
+  "parsed": true
+ }
+}
