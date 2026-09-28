@@ -28,14 +28,15 @@ def register_prompts(mcp: MCPServer, ctx: ToolContext, available: set[str]) -> N
         return (
             f"Konstruiere mit FreeCAD Buddy: {description}\n\n"
             "Vorgehen:\n"
-            "1. get_status und get_model_tree lesen.\n"
+            "1. get_status und get_model_tree lesen; sobald ein Dokument offen ist: set_view (iso).\n"
             "2. Maße klären und als Parameter anlegen (set_parameters).\n"
             "3. Prüfen, ob ein Design-Tool die Aufgabe abdeckt (Regeln unter design_tools).\n"
             "4. create_body, dann Basisskizze (create_sketch + add_profile) und pad.\n"
             "5. Weitere Features (pocket, hole, pattern, revolve), danach fillet/chamfer/shell.\n"
             "6. Nach jedem Schritt warnings und DoF prüfen; bei Fehlern Hinweise befolgen oder undo.\n"
             "7. check_printability ausführen, Befunde beheben, export_body (3mf).\n"
-            "8. Zusammenfassung: Parameter, Features, Druckhinweise.\n\n" + await rulebook()
+            "8. set_view (iso), damit das fertige Bauteil komplett sichtbar ist.\n"
+            "9. Zusammenfassung: Parameter, Features, Druckhinweise.\n\n" + await rulebook()
         )
 
     @mcp.resource(RULES_URI, name="design-rules", title="Designregeln (Übersicht)", mime_type="text/markdown")

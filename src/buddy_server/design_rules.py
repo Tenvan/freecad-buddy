@@ -54,6 +54,12 @@ TOPICS: tuple[Topic, ...] = (
         (
             Rule("Vor Änderungen get_model_tree lesen – der Nutzer arbeitet parallel in FreeCAD.", core=True),
             Rule(
+                "Ansicht als erster und letzter Schritt: set_view (iso, fit) – das Bauteil ist komplett sichtbar "
+                "und leicht isometrisch. Ohne offenes Dokument direkt nach new_document/open_document.",
+                requires=("set_view",),
+                core=True,
+            ),
+            Rule(
                 "Reihenfolge: Maße als Parameter → create_body → Basisskizze → Basis-Feature → "
                 "Detail-Features → Kanten (fillet/chamfer) → check_printability → export_body."
             ),

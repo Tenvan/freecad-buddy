@@ -5,6 +5,41 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2a — 2026-09-28 (Chat-Test und Ansichtsregel)
+
+**Ziel:** Chat-Log mit Ralf live testen (Platte ohne Sieb), Farbfehler beheben, Ansichtsregel ergänzen (Spec-Stand 2).
+
+**Erledigt:**
+- Testplatte live neu gebaut: 12 Tool-Aufrufe, Volumen 98 994,7 mm³, Druckprüfung ohne Befund. Nicht gespeichert, `out/Testplatte.FCStd` bleibt unverändert.
+- Bugfix nach Ralfs Screenshot: Der Kürzungshinweis wurde als JSON-Fehler rot markiert und Rich-`Syntax` malte einen schwarzen Hintergrund. Jetzt `JSONHighlighter` nur für den Vordergrund, der Hinweis ist gedimmt und kursiv (`57a5edc`).
+- #1.6 Ansichtsregel und `set_view` (Spec-Stand 2).
+
+**Release-Änderungen:**
+- `[bugfix][server]` Chat-Blasen ohne schwarzen Hintergrund, Kürzungshinweis nicht mehr rot.
+- `[feature][core]` Neues Tool `set_view`: Live-Ansicht setzen (iso, dimetric, trimetric, Normalansichten) und alles einpassen.
+- `[feature][server]` Regelwerk: Ansicht als erster und letzter Schritt, Bauteil komplett sichtbar und isometrisch.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Der Client des Skripts meldet sich als `mcp` (clientInfo), deshalb heißt die Session im Chat `mcp #12`.
+- Das Budget der Instructions wird knapp: 1 874 von 2 000 Zeichen. Weitere Kernregeln nur, wenn andere kürzer werden.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md` (Tool-Katalog)
+- Doku-Delta: keins
+- Nicht übernehmen: —
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 65 Tests Projekt-Python ✅, 138 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: Ralf hat den Chat live gesichtet („sieht gut aus“, Farbfehler gemeldet und behoben), G11 damit teilweise belegt. G12 offen.
+
+**Nächste Session:**
+- FreeCAD neu starten, weil der Bridge-Code geändert wurde. Danach S3 (Addon-Manager), Live-Katalogabruf nur mit Zustimmung.
+
+---
+
 ## Session 2 — 2026-09-28
 
 **Ziel:** Phase 4, TUI-Chat-Log. Zusätzlich Ralfs Zwischenmeldung: `q` hängt.

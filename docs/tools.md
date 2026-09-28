@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-34 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
+35 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
 Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Tool | Zweck |
@@ -34,6 +34,7 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`pattern`](#pattern) | Features spiegeln oder linear/polar/als Raster vervielfältigen (statt Geometrie mehrfach zu zeichnen). |
 | [`datum_plane`](#datum_plane) | Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche). |
 | [`select_geometry`](#select_geometry) | Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius). |
+| [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten |
 | [`screenshot`](#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
 | [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
 | [`get_printer_profile`](#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
@@ -612,13 +613,33 @@ Beispiel:
 }
 ```
 
+## set_view
+
+Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten
+Schritt (sobald ein Dokument offen ist) und als letzten Schritt aufrufen (nur mit FreeCAD-GUI).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `view` | `iso` \| `dimetric` \| `trimetric` \| `front` \| `back` \| `top` \| `bottom` \| `left` \| `right` \| `current` | nein | `"iso"` |  |
+| `fit` | boolean | nein | `true` | Alles einpassen, damit das Bauteil komplett sichtbar ist |
+| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+
+Beispiel:
+
+```json
+{
+  "view": "iso",
+  "fit": true
+}
+```
+
 ## screenshot
 
 Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `view` | `iso` \| `front` \| `back` \| `top` \| `bottom` \| `left` \| `right` \| `current` | nein | `"iso"` |  |
+| `view` | `iso` \| `dimetric` \| `trimetric` \| `front` \| `back` \| `top` \| `bottom` \| `left` \| `right` \| `current` | nein | `"iso"` |  |
 | `width` | integer | nein | `800` |  |
 | `height` | integer | nein | `600` |  |
 | `fit` | boolean | nein | `true` |  |

@@ -1,10 +1,12 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
 
-> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 1 freigegeben
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 2 freigegeben
 
 ## Spezifikation
 
-> Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen (OF-01 wird in #1.1 zusätzlich an der Doku geprüft)
+> Spec-Stand: 2 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen; Stand 2 (R-12, AC-16) durch Ralfs Auftrag im Chat, 2026-09-28 („gleich in Regelwerk einbauen“)
+>
+> **Delta Stand 2 (2026-09-28):** Ansichtsregel. Das Bauteil soll immer komplett sichtbar und leicht isometrisch dargestellt werden, als erster und letzter Schritt. Neu: R-12, AC-16, Aufgabe #1.6 und das Tool `set_view`. Der übrige Umfang bleibt unverändert.
 
 Quelle: Chat-Auftrag von Ralf vom 2026-09-28, festgehalten in den Backlog-Tickets [`design-regelwerk.md`](../../1-backlog/freecad-buddy/design-regelwerk.md), [`addon-manager-integration.md`](../../1-backlog/freecad-buddy/addon-manager-integration.md), [`grid-loesung-recherche.md`](../../1-backlog/freecad-buddy/grid-loesung-recherche.md), [`tui-chat-log.md`](../../1-backlog/freecad-buddy/tui-chat-log.md) und [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md). Die Kriterien des letzten Tickets werden unverändert übernommen und als `GA-AC-01` … `GA-AC-08` referenziert. Vorgänger-Sprint: [`2026-09-freecad-buddy-aufbau`](../../3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md).
 
@@ -47,6 +49,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | R-08 | **Lange Laufzeit:** Die Installation blockiert weder die GUI noch läuft sie in Bridge-Timeouts. Der Agent erhält Fortschritt bzw. Endergebnis, auch den nötigen FreeCAD-Neustart. |
 | R-09 | **`hole_grid`:** Ein Aufruf erzeugt Parameter im VarSet, eine vollständig bestimmte Skizze mit Startloch, ein Pocket und ein Raster. Layout `rect`, `hex` laut OF-05. Eingaben: Feldgröße oder Anzahl, Lochdurchmesser, Raster, Randabstand, Tiefe bzw. durchgehend. Das Ergebnis ist ein Undo-Schritt und bleibt über Parameter änderbar. |
 | R-11 | **Chat-Log in der TUI:** Jeder Tool-Aufruf erscheint als Paar aus Anfrage-Blase (Tool, Argumente als formatiertes JSON, MCP-Session) und Antwort-Blase (Ergebnis bzw. Fehler mit Code und Hinweis, Warnungen, Dauer). Farben unterscheiden Anfrage, Erfolg, Warnung und Fehler. Die Anfrage erscheint schon beim Start, die Antwort ergänzt sie danach, laufende Aufrufe sind sichtbar. Lange Inhalte sind gekürzt und in einer Detailansicht vollständig lesbar. Binärdaten wie Screenshots erscheinen als Platzhalter mit Größe. Geheimnisse (Tokens, Authorization) erscheinen nie. Die Oberfläche bleibt bei 1 000 Einträgen und großen Antworten flüssig. Optional wird als JSONL-Datei mitgeschrieben (OF-07). |
+| R-12 | **Ansichtsregel (Stand 2):** Das Regelwerk verlangt als ersten Schritt (sobald ein Dokument offen ist) und als letzten Schritt eine Ansicht, in der das Bauteil komplett sichtbar und leicht isometrisch ist. Das Tool `set_view` setzt die Live-Ansicht in FreeCAD dauerhaft (iso, dimetric, trimetric, Normalansichten; `fit` passt alles ein). Ohne GUI kommt `unsupported`. |
 | R-10 | **Budget und Doku:** höchstens 40 öffentliche Tools. `docs/tools.md` kennzeichnet Design-Tools als eigene Kategorie. |
 
 ## Nicht-Ziele
@@ -106,7 +109,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [ ] AC-12: Höchstens 40 öffentliche Tools. `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
 - [x] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
 - [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
-- [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`hole_grid` in der GUI weiterbearbeitbar) und G11 (Chat-Log in der TUI verständlich) sind abgenommen oder per Scope-Entscheidung verschoben.
+- [x] AC-16 (Stand 2): Die Ansichtsregel ist eine Kernregel der Instructions und steht direkt nach „get_model_tree lesen“. `set_view` ist registriert und setzt die Live-Ansicht (G12), ohne GUI liefert es `unsupported`.
+- [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`hole_grid` in der GUI weiterbearbeitbar) G11 (Chat-Log in der TUI verständlich) und G12 (Ansicht nach `set_view` komplett und isometrisch) sind abgenommen oder per Scope-Entscheidung verschoben.
 
 ## Offene Fragen
 
@@ -139,7 +143,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | **erfüllt** (`test_request_and_response_bubbles_with_state_colors`; Pilot-Test mit Widget-Assertions statt Snapshot-Plugin); Sichtung G11 offen |
 | AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | **erfüllt** (`test_payloads.py`, `test_tool_chat_is_capped_under_load_and_stays_usable`, `test_enter_opens_full_detail_and_escape_closes`) |
 | AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | offen |
-| AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G11 | #5.3 / P5 | Nutzerabnahme | offen |
+| AC-16 | Ansichtsregel und `set_view` | #1.6 / P1 | Unit-Test (Instructions) + Bridge-Test headless + G12 | **erfüllt** automatisiert (`test_view_rule_is_first_core_rule_after_reading_the_tree`, `test_set_view_without_gui_is_unsupported`); G12 offen |
+| AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G12 | #5.3 / P5 | Nutzerabnahme | offen |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -151,11 +156,12 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2026-09-28 | Addon-Installation nur mit doppeltem Opt-in und Bestätigungsdialog in FreeCAD, über FreeCADs Installer (Ralf) | Addons sind fremder Code im FreeCAD-Prozess; der Addon Manager bleibt konsistent | mehrere |
 | 2026-09-28 | Design-Tool-Regel mit Vorschlagsliste; Design-Tools entstehen als Buddy-Tools im Code, nicht zur Laufzeit (Ralf) | Laufzeit-Skripte bräuchten Code-Ausführung; Code-Tools sind testbar | server, core |
 | 2026-09-28 | Tool-Log wird zur farbigen Chat-Ansicht mit Anfrage und Antwort (Ralf) | Nachvollziehbarkeit der Agentenarbeit | server |
+| 2026-09-28 | Ansichtsregel: erster und letzter Schritt `set_view` iso, alles sichtbar (Ralf, Spec-Stand 2) | Der Nutzer sieht immer das ganze Bauteil | core, server |
 | 2026-09-28 | GUI-Abnahme G1–G8 aus dem Vorgänger-Sprint wird als Phase 5 mitgeführt (Ralf) | Abnahme zusammen mit neuen GUI-Prüfungen G9/G10 | keiner |
 
 ## Gesamtfortschritt
 
-[████░░░░░░] 42% — 8 von 19 Aufgaben erledigt
+[████░░░░░░] 45% — 9 von 20 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -165,7 +171,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
-| 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 5 | [██████████] 100% |
+| 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 6 | [██████████] 100% |
 | 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |

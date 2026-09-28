@@ -486,8 +486,24 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
         )
 
     @tool
+    async def set_view(
+        view: Literal[
+            "iso", "dimetric", "trimetric", "front", "back", "top", "bottom", "left", "right", "current"
+        ] = "iso",
+        fit: Annotated[
+            bool, Field(description="Alles einpassen, damit das Bauteil komplett sichtbar ist")
+        ] = True,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als ersten
+        Schritt (sobald ein Dokument offen ist) und als letzten Schritt aufrufen (nur mit FreeCAD-GUI)."""
+        return await ctx.call("set_view", "view.set", view=view, fit=fit, document=document)
+
+    @tool
     async def screenshot(
-        view: Literal["iso", "front", "back", "top", "bottom", "left", "right", "current"] = "iso",
+        view: Literal[
+            "iso", "dimetric", "trimetric", "front", "back", "top", "bottom", "left", "right", "current"
+        ] = "iso",
         width: Annotated[int, Field(ge=16, le=1600)] = 800,
         height: Annotated[int, Field(ge=16, le=1600)] = 600,
         fit: bool = True,

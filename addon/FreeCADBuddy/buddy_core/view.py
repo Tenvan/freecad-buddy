@@ -1,4 +1,4 @@
-"""Screenshots of the 3D view (GUI only)."""
+"""3D view: set the user's view and take screenshots (GUI only)."""
 
 from __future__ import annotations
 
@@ -20,8 +20,31 @@ VIEWS = {
     "bottom": "viewBottom",
     "left": "viewLeft",
     "right": "viewRight",
+    "dimetric": "viewDimetric",
+    "trimetric": "viewTrimetric",
 }
 MAX_SIZE = 1600
+
+
+def set_view(view: str = "iso", fit: bool = True, document: str | None = None) -> dict[str, Any]:
+    """Set the live 3D view of ``document`` (unlike ``screenshot``, the camera is not restored)."""
+    if not FreeCAD.GuiUp:
+        raise CoreError(UNSUPPORTED, "Ansicht setzen ist nur mit laufender FreeCAD-GUI möglich")
+    if view != "current" and view not in VIEWS:
+        raise validation(f"Unbekannte Ansicht '{view}' (erlaubt: current, {', '.join(VIEWS)})")
+
+    import FreeCADGui
+
+    doc = resolve_document(document)
+    FreeCADGui.setActiveDocument(doc.Name)
+    active_view = FreeCADGui.getDocument(doc.Name).ActiveView
+    if active_view is None or not hasattr(active_view, "fitAll"):
+        raise CoreError(UNSUPPORTED, "Keine 3D-Ansicht aktiv (z. B. Tabelle oder Zeichnung im Vordergrund)")
+    if view != "current":
+        getattr(active_view, VIEWS[view])()
+    if fit:
+        active_view.fitAll()
+    return {"document": doc.Name, "view": view, "fit": fit}
 
 
 def screenshot(

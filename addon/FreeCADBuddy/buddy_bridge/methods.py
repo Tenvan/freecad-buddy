@@ -110,6 +110,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.pattern": (features.pattern, {}),
     "feature.datum_plane": (features.datum_plane, {}),
     "select.preview": (select.select_geometry, {}),
+    "view.set": (view.set_view, {}),
     "view.screenshot": (view.screenshot, {"timeout": 60.0}),
     "print.get_profile": (profile.get_printer_profile, {}),
     "print.set_profile": (profile.set_printer_profile, {}),

@@ -88,3 +88,11 @@ def test_screenshot_without_gui_is_unsupported(client: BridgeClient) -> None:
         client.call("view.screenshot")
 
     assert info.value.code == protocol.UNSUPPORTED
+
+
+def test_set_view_without_gui_is_unsupported(client: BridgeClient) -> None:
+    client.call("document.new", {"name": "HeadlessView"})
+
+    with pytest.raises(RpcError) as info:
+        client.call("view.set", {"view": "iso"})
+    assert info.value.code == protocol.UNSUPPORTED
