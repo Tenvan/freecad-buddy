@@ -122,7 +122,9 @@ def model_tree(document: str | None = None) -> dict[str, Any]:
     top_level = [
         obj
         for obj in doc.Objects
-        if obj.Name not in in_body and obj.Name not in origin_parts and not obj.TypeId.startswith("App::Origin")
+        if obj.Name not in in_body
+        and obj.Name not in origin_parts
+        and not obj.TypeId.startswith("App::Origin")
     ]
     return {
         "document": {"name": doc.Name, "label": doc.Label, "file": doc.FileName},
