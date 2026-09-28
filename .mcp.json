@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "freecad-buddy": {
+      "type": "http",
+      "url": "http://127.0.0.1:${FREECAD_BUDDY_PORT:-8765}/mcp",
+      "headers": {
+        "Authorization": "Bearer ${FREECAD_BUDDY_TOKEN}"
+      }
+    }
+  }
+}
