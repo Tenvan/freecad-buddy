@@ -1,0 +1,231 @@
+# 📋 Umsetzungsplan — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
+
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 1 freigegeben
+
+## Spezifikation
+
+> Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen (OF-01 wird in #1.1 zusätzlich an der Doku geprüft)
+
+Quelle: Chat-Auftrag von Ralf vom 2026-09-28, festgehalten in den Backlog-Tickets [`design-regelwerk.md`](../../1-backlog/freecad-buddy/design-regelwerk.md), [`addon-manager-integration.md`](../../1-backlog/freecad-buddy/addon-manager-integration.md), [`grid-loesung-recherche.md`](../../1-backlog/freecad-buddy/grid-loesung-recherche.md), [`tui-chat-log.md`](../../1-backlog/freecad-buddy/tui-chat-log.md) und [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md). Die Kriterien des letzten Tickets werden unverändert übernommen und als `GA-AC-01` … `GA-AC-08` referenziert. Vorgänger-Sprint: [`2026-09-freecad-buddy-aufbau`](../../3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md).
+
+## Ausgangslage
+
+Backlog-Quelle: die fünf oben genannten Tickets.
+Branch: `main`. Die Umsetzung aus dem Vorgänger-Sprint seit `6c05a50` ist noch nicht committet; das sollte vor S1 passieren.
+
+- Die Instructions umfassen sechs Kurzregeln in `src/buddy_server/prompts.py`, dazu kommen die Prompts `design_part` und `human_modeling_guide`. Ein Regelwerk nach Themen fehlt. Konkrete FDM-Werte stehen nur verstreut in `buddy_core/printing`.
+- Komplexe Wiederholungsaufgaben baut der Agent ad hoc nach. Beispiel Sieb: Das Muster auf ein Muster ist in PartDesign gescheitert, die Lösung kam erst nachträglich als `pattern kind="grid"`.
+- Das Tool-Log der TUI zeigt pro Aufruf nur eine Zeile mit Kurzfassung. `ToolFinished` enthält weder Argumente noch Antwort, deshalb lässt sich nicht nachvollziehen, was der Agent angefragt und was er zurückbekommen hat.
+- FreeCAD 26.3 enthält den Addon Manager 2026.8.18 mit zentralem Katalog (`addons.freecad.org/addon_catalog_cache.zip` samt `.sha256`, `macro_cache.zip`), lokalem Cache `<UserCache>/AddonManager2026-1` sowie `AddonInstaller` und `MacroInstaller` (beide QObject). Einen Buddy-Zugang dazu gibt es nicht.
+- **Risiken:**
+  - Clients könnten lange Instructions kürzen (vermutet, ungeprüft).
+  - Die Programmier-API des Addon Managers ist intern und kann sich zwischen Weekly-Builds ändern.
+  - Eine Installation dauert länger als die Bridge-Timeouts (30/60/120 s).
+  - Addons sind fremder Code, der im FreeCAD-Prozess läuft.
+
+## Ziel
+
+Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Regelwerk. Wiederkehrende komplexe Aufgaben löst er über Design-Tools, sonst schlägt er ein neues vor. Außerdem findet er fertige Lösungen im FreeCAD-Addon-Katalog und kann sie nach deiner Bestätigung in FreeCAD installieren. Das erste Design-Tool ist `hole_grid`, abgeleitet aus der Grid-Recherche. In der TUI ist jeder Tool-Aufruf als farbiger Chat-Verlauf aus Anfrage und Antwort nachvollziehbar.
+
+## Beteiligte und Zielgruppen
+
+- **Ralf:** Auftraggeber. Er bestätigt Installationen im FreeCAD-Dialog und nimmt die GUI-Prüfungen ab.
+- **MCP-Client-Agent (Claude Code):** liest Instructions und Regelwerk und nutzt die neuen Tools.
+- **Implementierender Agent:** setzt die Sessions um.
+
+## Anforderungen
+
+| ID | Anforderung |
+|---|---|
+| R-01 | **Eine Quelle:** Das Regelwerk liegt an genau einer Stelle im Server. Instructions, `get_design_rules`, die MCP-Resource und der Prompt `human_modeling_guide` werden daraus erzeugt. |
+| R-02 | **Kompakte Instructions:** nur Kernregeln, Design-Tool-Regel und der Hinweis auf `get_design_rules`, innerhalb eines Längenbudgets (OF-01). |
+| R-03 | **Themen des Regelwerks:** Grundsätze und Workflow, Parameter, Skizzen, Referenzen/TNP, Features, Benennung, 3D-Druck (FDM), Design-Tools, Addons. Jede Regel ist kurz und umsetzbar. FDM-Zahlen kommen aus dem aktiven Druckerprofil. |
+| R-04 | **Design-Tool-Regel:** Eine Aufgabe gilt als wiederkehrend-komplex, wenn sie im Projekt mindestens zum zweiten Mal vorkommt oder ≥ 5 Tool-Aufrufe braucht. Dann prüft der Agent in dieser Reihenfolge: vorhandenes Design-Tool → fertiges Addon (`search_addons`) → `propose_design_tool`. Eine Einmallösung aus Einzelschritten ist erlaubt, der Vorschlag trotzdem Pflicht. |
+| R-05 | **Vorschlagsliste:** `propose_design_tool` speichert Vorschläge dauerhaft. Gleichnamige Vorschläge werden zusammengeführt und gezählt. Die TUI zeigt neue Vorschläge an. Umgesetzt wird ein Vorschlag als Buddy-Tool im Code, nicht zur Laufzeit. |
+| R-06 | **Addon-Suche:** `search_addons` und `get_addon` durchsuchen Workbenches, Makros und Preference Packs aus dem offiziellen Katalog. Sie zeigen Kompatibilität mit dem laufenden FreeCAD, Installationsstatus, Lizenz und Quelle. Der Cache wird mit FreeCADs Addon Manager geteilt. |
+| R-07 | **Addon-Installation:** `install_addon` ist nur verfügbar, wenn sowohl der Server (`--allow-addon-install` bzw. Env) als auch FreeCAD (Einstellung plus Workbench-Befehl) freigeschaltet sind. Jede Installation braucht deine Bestätigung in einem modalen FreeCAD-Dialog mit Name, Quelle, Lizenz, Abhängigkeiten und Standardknopf „Abbrechen“. Installiert wird über FreeCADs Installer, sodass der Addon Manager das Addon danach als installiert führt. |
+| R-08 | **Lange Laufzeit:** Die Installation blockiert weder die GUI noch läuft sie in Bridge-Timeouts. Der Agent erhält Fortschritt bzw. Endergebnis, auch den nötigen FreeCAD-Neustart. |
+| R-09 | **`hole_grid`:** Ein Aufruf erzeugt Parameter im VarSet, eine vollständig bestimmte Skizze mit Startloch, ein Pocket und ein Raster. Layout `rect`, `hex` laut OF-05. Eingaben: Feldgröße oder Anzahl, Lochdurchmesser, Raster, Randabstand, Tiefe bzw. durchgehend. Das Ergebnis ist ein Undo-Schritt und bleibt über Parameter änderbar. |
+| R-11 | **Chat-Log in der TUI:** Jeder Tool-Aufruf erscheint als Paar aus Anfrage-Blase (Tool, Argumente als formatiertes JSON, MCP-Session) und Antwort-Blase (Ergebnis bzw. Fehler mit Code und Hinweis, Warnungen, Dauer). Farben unterscheiden Anfrage, Erfolg, Warnung und Fehler. Die Anfrage erscheint schon beim Start, die Antwort ergänzt sie danach, laufende Aufrufe sind sichtbar. Lange Inhalte sind gekürzt und in einer Detailansicht vollständig lesbar. Binärdaten wie Screenshots erscheinen als Platzhalter mit Größe. Geheimnisse (Tokens, Authorization) erscheinen nie. Die Oberfläche bleibt bei 1 000 Einträgen und großen Antworten flüssig. Optional wird als JSONL-Datei mitgeschrieben (OF-07). |
+| R-10 | **Budget und Doku:** höchstens 40 öffentliche Tools. `docs/tools.md` kennzeichnet Design-Tools als eigene Kategorie. |
+
+## Nicht-Ziele
+
+- Agenten, die zur Laufzeit selbst Design-Tools als Skripte anlegen. Das ist verworfen, weil es Code-Ausführung wie `execute_python` braucht.
+- Deinstallieren oder Aktualisieren von Addons über MCP. Das bleibt im Addon Manager.
+- Installation von Python-Abhängigkeiten eines Addons per pip (OF-03).
+- Eigene Addon-Quellen bzw. Custom Repositories.
+- Weitere Design-Tools außer `hole_grid`. Weitere kommen über die Vorschlagsliste in spätere Sprints.
+
+## Regeln und Einschränkungen
+
+- Bestehende Verträge bleiben: JSON-RPC-Protokoll, Undo-Schritt pro Tool, Sicherheitsmodell von `execute_python` und Tool-Namen aus 0.1.0.
+- Tests laufen ohne Netz, mit lokalem Fake-Katalog und Fixture-Addon. Live-Zugriffe auf `addons.freecad.org` in einer Session nur mit Ralfs Zustimmung. Echte Installationen macht nur Ralf in der GUI (G9).
+- Die interne Addon-Manager-API wird in einem einzigen Adapter-Modul gekapselt, mit Kompatibilitätstest gegen den laufenden Build wie `tests/core/test_compat.py`.
+- Der Bestätigungsdialog läuft im Qt-Hauptthread. Kann FreeCAD headless keinen Dialog zeigen, wird die Installation mit `unsupported` abgelehnt.
+
+## Beispiele
+
+- `get_design_rules()` → Themenliste mit Einzeilern. `get_design_rules("printing")` → FDM-Regeln mit den Zahlen des aktiven Profils, z. B. Mindestwand 0,8 mm bei Düse 0,4.
+- Der Agent soll ein Sieb bauen und findet `hole_grid` → ein Aufruf statt fünf.
+- Der Agent soll zum zweiten Mal einen Schraubendom bauen und findet kein Tool → `search_addons("screw boss")` → kein Treffer → `propose_design_tool("screw_boss", …)` → Eintrag in der TUI.
+- Der Agent ruft `pad(sketch="Sketch_Plate", length="Plate_Thickness")` auf → in der TUI eine blaue Anfrage-Blase mit den Argumenten, darunter eine grüne Antwort-Blase mit `created: Pad_Plate` und 180 ms. Bei Fehler rot mit `[recompute_failed]` und Hinweis. Enter auf einem Eintrag öffnet das vollständige JSON.
+- `search_addons("grid")` → Trefferliste mit Kompatibilität und Installationsstatus. `install_addon("Lattice2")` → Dialog in FreeCAD → du bestätigst → „installiert, FreeCAD-Neustart nötig“.
+
+## Ausnahme- und Fehlerfälle
+
+| Situation | Erwartetes Verhalten |
+|---|---|
+| Unbekanntes Regelwerk-Thema | `validation` mit Liste gültiger Themen |
+| Katalog nicht erreichbar, lokaler Cache vorhanden | Suche auf dem Cache, Warnung mit Cache-Alter |
+| Katalog nicht erreichbar, kein Cache | `bridge_unavailable`-artiger, verständlicher Fehler mit Hinweis auf Netz oder Proxy |
+| Prüfsumme des Katalogs passt nicht | Katalog verwerfen, Fehler, kein Teil-Update |
+| `install_addon` ohne beide Opt-ins | Tool nicht registriert bzw. `unauthorized` |
+| Dialog abgelehnt oder geschlossen | `user_declined`, nichts verändert |
+| Addon bereits installiert, inkompatibel oder mit Python-Abhängigkeiten | Ablehnung mit Grund und Hinweis auf den Addon Manager |
+| Abbruch oder Netzfehler während der Installation | kein halb installiertes Addon (Aufräumen), Fehler mit Grund |
+| `hole_grid` passt nicht ins Feld oder Loch ≥ Raster | `validation` mit Rechnung und Vorschlag |
+| Antwort sehr groß (z. B. Modellbaum mit 900 Features) oder Bild | Blase gekürzt mit „… (+N Zeilen)“ bzw. `[PNG 240 KB]`, vollständig in der Detailansicht (Bilder nur als Metadaten) |
+| Argument oder Antwort enthält Token-ähnliche Werte | maskiert (`***`), auch in Detailansicht und JSONL |
+| Aufruf läuft noch, wenn die TUI beendet wird | Eintrag mit Status „abgebrochen“ |
+| Vorschlag mit bestehendem Namen | Zähler erhöhen, Beschreibung ergänzen, kein Duplikat |
+
+## Akzeptanzkriterien
+
+- [ ] AC-01: Die Server-Instructions liegen innerhalb des Budgets (OF-01). Sie enthalten die Kernregeln, die Design-Tool-Regel (R-04) und den Verweis auf `get_design_rules` und erscheinen in Claude Code als Server-Instructions.
+- [ ] AC-02: `get_design_rules()` liefert die Themenliste, `get_design_rules(topic)` den Themeninhalt, ein unbekanntes Thema ergibt `validation` mit gültigen Themen. Dieselben Inhalte gibt es als MCP-Resource `buddy://design-rules/{topic}`. Der Prompt `human_modeling_guide` stammt aus derselben Quelle.
+- [ ] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
+- [ ] AC-04: Die Design-Tool-Regel ist mit Kriterium und Reihenfolge (R-04) in Instructions und Thema `design_tools` formuliert. `design_part` verweist darauf.
+- [ ] AC-05: `propose_design_tool` legt Vorschläge dauerhaft ab, führt gleichnamige zusammen (Zähler) und meldet sie in der TUI. Die Liste ist über ein Tool abrufbar.
+- [ ] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
+- [ ] AC-07: `get_addon(id)` liefert Lizenz, Maintainer, Repository, letzte Aktualisierung, Abhängigkeiten (FreeCAD, Addons, Python) und einen README-Auszug.
+- [ ] AC-08: Ohne beide Opt-ins ist `install_addon` nicht nutzbar. Mit Opt-ins erscheint der Dialog. Bei Ablehnung kommt `user_declined` und nichts ändert sich. Bei Zustimmung wird über FreeCADs Installer installiert, das Addon gilt im Addon Manager als installiert und das Ergebnis nennt den Neustart. Weder GUI noch Bridge laufen in einen Timeout (R-08). Nachweis headless mit Fixture-Addon und simulierter Bestätigung, GUI über G9.
+- [ ] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
+- [ ] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
+- [ ] AC-11: `hole_grid` erfüllt R-09 für `rect`. Das Sieb der Testplatte (34 × 27 Löcher Ø 1 mm, Raster 3 mm) lässt sich mit einem Aufruf erzeugen. Eine Parameteränderung (z. B. Raster 4 mm) aktualisiert das Modell. `hex` gemäß OF-05.
+- [ ] AC-12: Höchstens 40 öffentliche Tools. `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
+- [ ] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
+- [ ] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
+- [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`hole_grid` in der GUI weiterbearbeitbar) und G11 (Chat-Log in der TUI verständlich) sind abgenommen oder per Scope-Entscheidung verschoben.
+
+## Offene Fragen
+
+| ID | Frage | Betroffen | Annahme bis Klärung | Verantwortlich |
+|---|---|---|---|---|
+| OF-01 | Längenbudget der Instructions: Wie viel übernimmt Claude Code? | #1.1, AC-01 | ≤ 2 000 Zeichen; wird in #1.1 an aktueller Doku geprüft | Agent (Recherche) |
+| OF-02 | Wo läuft die Katalogsuche: in FreeCAD über die Addon-Manager-Module oder im Server? | #2.1, #2.2 | ✅ Entschieden: In FreeCAD (Core), damit Cache, Kompatibilitätslogik und Installationsstatus identisch mit dem Addon Manager sind; Spike #2.1 bestätigt die technische Machbarkeit | Agent, Bestätigung Ralf |
+| OF-03 | Addons mit Python-Abhängigkeiten | #2.4, AC-09 | ✅ Entschieden: Ablehnen mit Hinweis auf den Addon Manager (keine pip-Installation über MCP) | Ralf |
+| OF-04 | Makros und Preference Packs installierbar oder nur suchbar? | #2.4 | ✅ Entschieden: Suchen: alle Arten. Installieren: Workbenches und Makros mit demselben Dialog, Preference Packs nur suchen | Ralf |
+| OF-05 | `hole_grid` mit Layout `hex` (versetzte Reihen) im Umfang? | #3.3, AC-11 | ✅ Entschieden: Ja, als zweites Raster mit halbem Versatz (vermutet machbar mit zwei MultiTransforms, ungeprüft); scheitert der Spike, nur `rect` plus Vorschlag | Ralf |
+| OF-07 | Chat-Log zusätzlich als JSONL-Datei mitschreiben? | #4.3, AC-15 | ✅ Entschieden: Ja, per `--log-file <pfad>` (Standard aus), rotierend ab 10 MB | Ralf |
+| OF-08 | Nur Chat-Ansicht oder umschaltbar auf die bisherige Einzeilen-Liste? | #4.2 | ✅ Entschieden: Umschaltbar per Taste `v`, Standard Chat | Ralf |
+| OF-06 | Versionsnummer | #5.2 | ✅ Entschieden: 0.2.0 | Ralf |
+
+## Umsetzung und Nachweis
+
+| Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
+|---|---|---|---|---|
+| AC-01 | kompakte Instructions im Budget | #1.1, #1.3 / P1 | Unit-Test (Länge, Pflichtinhalte) + Sichtung in Claude Code | offen |
+| AC-02 | Regelwerk per Tool, Resource, Prompt | #1.2, #1.4 / P1 | E2E über MCP (Headless) | offen |
+| AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | offen |
+| AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | offen |
+| AC-05 | Vorschlagsliste mit Zusammenführung und TUI | #3.2 / P3 | Unit- + Textual-Pilot-Test | offen |
+| AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | offen |
+| AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | offen |
+| AC-08 | Installation mit doppeltem Opt-in und Dialog | #2.4, #2.5 / P2 | Headless-Test mit Fixture-Addon und simulierter Bestätigung + G9 | offen |
+| AC-09 | Ablehnungsgründe, Aufräumen | #2.4, #2.5 / P2 | Headless-Core-Test | offen |
+| AC-10 | Grid-Recherche dokumentiert | #3.1 / P3 | Dokument, Live-Suche nur mit Ralfs Zustimmung | offen |
+| AC-11 | `hole_grid` | #3.3 / P3 | Headless-Core-Test + E2E Testplatte + G10 | offen |
+| AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | offen |
+| AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | offen |
+| AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | offen |
+| AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G11 | #5.3 / P5 | Nutzerabnahme | offen |
+
+Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
+
+## Entscheidungen
+
+| Datum | Entscheidung | Begründung | Architektur-Impact |
+|---|---|---|---|
+| 2026-09-28 | Regelwerk kompakt in Instructions, vollständig über `get_design_rules` und MCP-Resource, aus einer Quelle (Ralf) | Clients könnten kürzen (vermutet); weniger Kontext pro Session | server |
+| 2026-09-28 | Addon-Installation nur mit doppeltem Opt-in und Bestätigungsdialog in FreeCAD, über FreeCADs Installer (Ralf) | Addons sind fremder Code im FreeCAD-Prozess; der Addon Manager bleibt konsistent | mehrere |
+| 2026-09-28 | Design-Tool-Regel mit Vorschlagsliste; Design-Tools entstehen als Buddy-Tools im Code, nicht zur Laufzeit (Ralf) | Laufzeit-Skripte bräuchten Code-Ausführung; Code-Tools sind testbar | server, core |
+| 2026-09-28 | Tool-Log wird zur farbigen Chat-Ansicht mit Anfrage und Antwort (Ralf) | Nachvollziehbarkeit der Agentenarbeit | server |
+| 2026-09-28 | GUI-Abnahme G1–G8 aus dem Vorgänger-Sprint wird als Phase 5 mitgeführt (Ralf) | Abnahme zusammen mit neuen GUI-Prüfungen G9/G10 | keiner |
+
+## Gesamtfortschritt
+
+[░░░░░░░░░░] 0% — 0 von 19 Aufgaben erledigt
+
+## ⚠️ Blocker
+
+*Keine Blocker.*
+
+## Phasen-Übersicht
+
+| Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
+|---|---|---|---|---|---|
+| 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 5 | 0 | [░░░░░░░░░░] 0% |
+| 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
+| 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
+| 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 3 | 0 | [░░░░░░░░░░] 0% |
+| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 3 | 0 | [░░░░░░░░░░] 0% |
+
+## 📅 Session-Übersicht
+
+| Session | Phase | Ziel | Status |
+|---|---|---|---|
+| **→ S1** | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | **Nächste** |
+| S2 | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | Geplant |
+| S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | Geplant |
+| S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | Geplant |
+| S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | Geplant |
+| S6 | Phase 5 | Doku, Release 0.2.0, GUI-Abnahme G1–G11 | Geplant |
+
+## 🔗 Dependency-Übersicht
+
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+graph TD
+    R[S1 Regelwerk + Instructions] --> D[S5 Grid-Recherche + Design-Tools]
+    L[S2 TUI-Chat-Log] --> A[S3 Spike + Addon-Suche]
+    A --> I[S4 Addon-Installation]
+    A --> D
+    I --> E[S6 Doku + Release + GUI-Abnahme]
+    D --> E
+    R --> E
+    L --> E
+```
+
+## Architektur-Update
+
+→ [98-architecture-update.md](98-architecture-update.md)
+
+Pflicht zum Sprint-Abschluss:
+
+- Architektur-Deltas aus Phasen und Session-Log prüfen.
+- Relevante Abschnitte in `docs/architecture.md` aktualisieren (Schichten, RPC-Vertrag, Tool-Katalog, Modellierungsregeln).
+- Keine unnötigen Code-Samples übernehmen; Architektur als Modulgrenzen, Datenflüsse, Integrationspunkte, Regeln, Diagramme oder Tabellen dokumentieren.
+- Wenn keine Architekturänderung nötig ist, Begründung im Architektur-Update und Session-Log festhalten.
+
+## Abnahmeregel
+
+GUI-, manuelle und Live-Netz-Prüfungen laufen nach der [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen). Vorher wird geklärt, was Ralf bereits geprüft hat und was der Agent übernehmen darf. Echte Addon-Installationen führt nur Ralf durch.
+
+## Sprint-Abschluss / Definition of Done
+
+- [ ] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
+- [ ] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
+- [ ] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
+- [ ] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
+- [ ] Offene Blocker mit Besitzer und nächstem Schritt festgehalten.
+- [ ] `99-session-log.md` aktualisiert.
+- [ ] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
+- [ ] `98-architecture-update.md` ausgewertet.
+- [ ] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben, `master-todo.md` angepasst.
+- [ ] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
+
+## 📓 Session-Log
+
+→ [99-session-log.md](99-session-log.md)

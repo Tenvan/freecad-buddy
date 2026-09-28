@@ -7,13 +7,13 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: PartDesign-first für 3D-Druck | [`2-sprints-aktiv/freecad-buddy-aufbau/00-index.md`](2-sprints-aktiv/freecad-buddy-aufbau/00-index.md) | 🔵 Aktiv (Spec-Stand 2: freigegeben) | 6 Phasen, 10 Sessions, 4/36 Aufgaben (S1 erledigt, nächste: S2) |
+| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 1 freigegeben | 19 Aufgaben / 6 Sessions; nächste: S1 Regelwerk |
 
 ## Backlog (nach Domain)
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | Nur Ideen-Parkplatz, keine Tickets |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 5 Tickets, alle im Sprint `freecad-buddy-design-regelwerk` eingeplant; dazu Ideen-Parkplatz |
 
 ## Konzepte
 
@@ -25,4 +25,4 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| — | — | — | Keine erledigten Sprints erfasst |
+| FreeCAD Buddy: PartDesign-first für 3D-Druck | [`3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md) | ✅ Erledigt (2026-09-28) | 36/36 Aufgaben, Spec-Stand 2; GUI-Abnahme G1–G8 → Backlog-Ticket |
