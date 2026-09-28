@@ -19,6 +19,7 @@ Domain-Backlog für den FreeCAD-MCP-Server. Tickets sind nach Priorität geliste
 
 | Status | Ticket | Pfad | Architektur-Impact | Kurzbeschreibung |
 |---|---|---|---|---|
+| 🟡 | Druckprüfung: Überhänge an gekrümmten Flächen und freie Brücken | [`druckpruefung-ueberhang-kruemmung.md`](druckpruefung-ueberhang-kruemmung.md) | core | Griff-Test: Überhang am runden Stab nicht erkannt (eine Normale pro Fläche) |
 | 🔵 | Design-Regelwerk und Design-Tool-Regel | [`design-regelwerk.md`](design-regelwerk.md) | server | Eingeplant im Sprint `freecad-buddy-design-regelwerk` |
 | 🔵 | Addon-Manager-Integration (Suche, Installation) | [`addon-manager-integration.md`](addon-manager-integration.md) | mehrere | Eingeplant im Sprint `freecad-buddy-design-regelwerk` |
 | 🔵 | Recherche fertige Grid-Lösung | [`grid-loesung-recherche.md`](grid-loesung-recherche.md) | keiner | Eingeplant im Sprint `freecad-buddy-design-regelwerk` |

@@ -107,7 +107,8 @@ def checked_edit(doc: Any, sketch: Any, label: str, result: ToolResult) -> Itera
             )
         if report["open_wires"]:
             result.warnings.append(
-                f"{report['open_wires']} offene(r) Linienzug(e) – für Pad/Pocket ungeeignet."
+                f"{report['open_wires']} offene(r) Linienzug(e): als Pfad für sweep richtig, "
+                "als Profil für Pad/Pocket ungeeignet."
             )
 
 

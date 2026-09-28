@@ -13,7 +13,7 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 5 Tickets, alle im Sprint `freecad-buddy-design-regelwerk` eingeplant; dazu Ideen-Parkplatz |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 6 Tickets: 5 im Sprint `freecad-buddy-design-regelwerk`, 1 offen (🟡 Druckprüfung Überhang/Brücken); dazu Ideen-Parkplatz |
 
 ## Konzepte
 
