@@ -10,14 +10,15 @@ import base64
 import itertools
 import json
 import time
-from typing import Annotated, Any, Literal
+from collections.abc import Awaitable, Callable
+from typing import Annotated, Any, Literal, Protocol, TypeVar
 
-from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.mcpserver.utilities.types import Image
 from pydantic import Field
 
 from buddy_bridge.protocol import RpcError
+from buddy_server import design_rules
 from buddy_server.bridge import Bridge, BridgeTimeout, BridgeUnavailable
 from buddy_server.events import EventBus, ToolFinished, ToolStarted
 
@@ -34,6 +35,19 @@ SELECTOR_HELP = (
 )
 
 _ids = itertools.count(1)
+
+T = TypeVar("T")
+
+
+class ToolRegistrar(Protocol):
+    def tool(self) -> Callable[[Any], Any]: ...
+
+
+class NameCollector:
+    """Stand-in registrar: collects tool names without an MCP server (for building instructions)."""
+
+    def tool(self) -> Callable[[Any], Any]:
+        return lambda fn: fn
 
 
 def _summary(result: Any) -> tuple[str, tuple[str, ...]]:
@@ -82,13 +96,35 @@ class ToolContext:
         self._finish(call_id, tool, started, True, summary, warnings)
         return result
 
+    async def local(self, tool: str, fn: Callable[[], Awaitable[T]]) -> T:
+        """Run a tool that is answered by the server itself, with the same start/finish events."""
+        call_id = next(_ids)
+        self.bus.publish(ToolStarted(call_id, tool))
+        started = time.monotonic()
+        try:
+            result = await fn()
+        except ToolError as error:
+            code = str(error).split("]", 1)[0].lstrip("[") if str(error).startswith("[") else "error"
+            self._finish(call_id, tool, started, False, code)
+            raise
+        self._finish(call_id, tool, started, True, "ok")
+        return result
+
+    async def printer_profile(self) -> dict[str, Any] | None:
+        """Active printer profile from FreeCAD, or ``None`` if the bridge cannot answer."""
+        try:
+            result = await self.bridge.call("print.get_profile", {}, None)
+        except (BridgeUnavailable, BridgeTimeout, RpcError):
+            return None
+        return result if isinstance(result, dict) else None
+
     def _finish(
         self, call_id: int, tool: str, started: float, ok: bool, summary: str, warnings: tuple[str, ...] = ()
     ) -> None:
         self.bus.publish(ToolFinished(call_id, tool, time.monotonic() - started, ok, summary, warnings))
 
 
-def register_tools(mcp: MCPServer, ctx: ToolContext, allow_python: bool) -> list[str]:
+def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> list[str]:
     names: list[str] = []
 
     def tool(fn: Any) -> Any:
@@ -504,6 +540,33 @@ def register_tools(mcp: MCPServer, ctx: ToolContext, allow_python: bool) -> list
             isolate=isolate, document=document,
         )  # fmt: skip
         return Image(data=base64.b64decode(result["data"]), format="png")
+
+    # --- Design rules ---------------------------------------------------------------------------
+    @tool
+    async def get_design_rules(
+        topic: Annotated[
+            str | None,
+            Field(description=f"Thema: {', '.join(design_rules.TOPIC_KEYS)}; leer = Themenübersicht"),
+        ] = None,
+    ) -> str:
+        """Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil).
+        Vor einer neuen Konstruktion die passenden Themen lesen, z. B. sketches und printing."""
+
+        async def render() -> str:
+            available = set(names)
+            if topic is None:
+                return design_rules.render_overview(available)
+            profile = await ctx.printer_profile()
+            try:
+                text = design_rules.render_topic(topic, profile, available)
+            except KeyError:
+                keys = ", ".join(t.key for t in design_rules.visible_topics(available))
+                raise ToolError(f"[validation] Unbekanntes Thema '{topic}'. Gültig: {keys}") from None
+            if profile is None:
+                text += "\n\n(FreeCAD nicht erreichbar – Werte aus dem Standard-Druckerprofil)"
+            return text
+
+        return await ctx.local("get_design_rules", render)
 
     # --- 3D printing ------------------------------------------------------------------------------
     @tool

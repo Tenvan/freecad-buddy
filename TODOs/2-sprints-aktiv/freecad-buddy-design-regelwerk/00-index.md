@@ -93,8 +93,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 ## Akzeptanzkriterien
 
 - [ ] AC-01: Die Server-Instructions liegen innerhalb des Budgets (OF-01). Sie enthalten die Kernregeln, die Design-Tool-Regel (R-04) und den Verweis auf `get_design_rules` und erscheinen in Claude Code als Server-Instructions.
-- [ ] AC-02: `get_design_rules()` liefert die Themenliste, `get_design_rules(topic)` den Themeninhalt, ein unbekanntes Thema ergibt `validation` mit gültigen Themen. Dieselben Inhalte gibt es als MCP-Resource `buddy://design-rules/{topic}`. Der Prompt `human_modeling_guide` stammt aus derselben Quelle.
-- [ ] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
+- [x] AC-02: `get_design_rules()` liefert die Themenliste, `get_design_rules(topic)` den Themeninhalt, ein unbekanntes Thema ergibt `validation` mit gültigen Themen. Dieselben Inhalte gibt es als MCP-Resource `buddy://design-rules/{topic}`. Der Prompt `human_modeling_guide` stammt aus derselben Quelle.
+- [x] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
 - [ ] AC-04: Die Design-Tool-Regel ist mit Kriterium und Reihenfolge (R-04) in Instructions und Thema `design_tools` formuliert. `design_part` verweist darauf.
 - [ ] AC-05: `propose_design_tool` legt Vorschläge dauerhaft ab, führt gleichnamige zusammen (Zähler) und meldet sie in der TUI. Die Liste ist über ein Tool abrufbar.
 - [ ] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
@@ -125,10 +125,10 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 
 | Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
 |---|---|---|---|---|
-| AC-01 | kompakte Instructions im Budget | #1.1, #1.3 / P1 | Unit-Test (Länge, Pflichtinhalte) + Sichtung in Claude Code | offen |
-| AC-02 | Regelwerk per Tool, Resource, Prompt | #1.2, #1.4 / P1 | E2E über MCP (Headless) | offen |
-| AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | offen |
-| AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | offen |
+| AC-01 | kompakte Instructions im Budget | #1.1, #1.3 / P1 | Unit-Test (Länge, Pflichtinhalte) + Sichtung in Claude Code | **erfüllt** automatisiert (1 688 ≤ 2 000 Zeichen, `test_design_rules.py`); Sichtung in Claude Code offen |
+| AC-02 | Regelwerk per Tool, Resource, Prompt | #1.2, #1.4 / P1 | E2E über MCP (Headless) | **erfüllt** (`test_tool_resource_and_prompt_over_mcp`) |
+| AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | **erfüllt** (`test_rules_only_name_registered_tools`, `test_printing_numbers_follow_the_profile`, `test_every_topic_of_r03_is_covered`) |
+| AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | **teilweise**: Regel formuliert und Kernregel (`test_instructions_are_compact_and_complete`); Tool-Schritte erscheinen, sobald `hole_grid`, `search_addons` und `propose_design_tool` existieren (S3–S5) |
 | AC-05 | Vorschlagsliste mit Zusammenführung und TUI | #3.2 / P3 | Unit- + Textual-Pilot-Test | offen |
 | AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | offen |
 | AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | offen |
@@ -155,7 +155,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[░░░░░░░░░░] 0% — 0 von 19 Aufgaben erledigt
+[███░░░░░░░] 26% — 5 von 19 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -165,7 +165,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
-| 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 5 | 0 | [░░░░░░░░░░] 0% |
+| 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 5 | [██████████] 100% |
 | 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 3 | 0 | [░░░░░░░░░░] 0% |
@@ -175,8 +175,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
-| **→ S1** | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | **Nächste** |
-| S2 | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | Geplant |
+| S1 | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | ✅ Erledigt (2026-09-28) |
+| **→ S2** | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | **Nächste** |
 | S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | Geplant |
 | S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | Geplant |
 | S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | Geplant |

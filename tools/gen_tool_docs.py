@@ -67,6 +67,7 @@ EXAMPLES: dict[str, dict[str, Any]] = {
     "set_printer_profile": {"updates": {"nozzle": 0.6, "min_wall": 1.2}},
     "check_printability": {"target": "Box"},
     "export_body": {"format": "3mf", "target": "Box"},
+    "get_design_rules": {"topic": "printing"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
 

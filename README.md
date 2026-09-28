@@ -64,7 +64,8 @@ Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless
 
 ## Nutzung
 
-- MCP-Prompt `design_part` („Konstruiere eine Box 80×50×30 mit Deckel“) führt den Agenten durch den Workflow; `human_modeling_guide` enthält die Modellierungsregeln.
+- Design-Regelwerk: Die Server-Instructions enthalten die Kernregeln. Das vollständige Regelwerk nach Themen liefert `get_design_rules(topic)` mit den Werten des aktiven Druckerprofils. Dasselbe gibt es als MCP-Resource `buddy://design-rules/{topic}` und als Prompt `human_modeling_guide`. Quelle ist `src/buddy_server/design_rules.py`.
+- MCP-Prompt `design_part` („Konstruiere eine Box 80×50×30 mit Deckel“) führt den Agenten durch den Workflow.
 - Referenzprojekte gegen den laufenden Server bauen:
 
 ```bash

@@ -18,7 +18,7 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 
 | Quelle | Bereich | Erkenntnis | Ziel-Skill | Ziel-Dokument | Status |
 |---|---|---|---|---|---|
-| Planung | Server / Agentenführung | Das Regelwerk ist eine Server-Komponente mit genau einer Quelle. Instructions, Tool, Resource und Prompts werden daraus erzeugt, Profilwerte kommen über die Bridge | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
+| S1 | Server / Agentenführung | Das Regelwerk (`design_rules.py`) ist die einzige Quelle für Instructions, `get_design_rules`, Resource und Prompts. Regeln mit `requires` erscheinen nur bei registrierten Tools, deshalb sammelt `build_mcp` die Tool-Namen vor dem Serverstart. Profilwerte kommen über die Bridge, ohne Bridge gilt das Standardprofil | `docs/architecture.md` | `docs/architecture.md` | offen (bestätigt in S1) |
 | Planung | Core / Integration | Die interne Addon-Manager-API wird nur über den Adapter `buddy_core/addons/` genutzt und per Kompatibilitätstest abgesichert (Ort laut OF-02) | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
 | Planung | RPC-Vertrag | Job-Muster für lang laufende Methoden (Addon-Installation), alle übrigen Methoden bleiben synchron mit bestehenden Timeouts | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
 | Planung | Security | Die Addon-Installation braucht dasselbe doppelte Opt-in wie `execute_python` plus Bestätigung im FreeCAD-Dialog. Tests arbeiten offline mit Fixtures | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |

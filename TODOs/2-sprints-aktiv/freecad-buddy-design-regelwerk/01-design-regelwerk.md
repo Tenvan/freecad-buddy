@@ -22,17 +22,17 @@ Enthaltene Aufgaben: #1.1, #1.2, #1.3, #1.4, #1.5
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #1.1 | Recherche mit aktuellen Quellen: Wie übernimmt Claude Code MCP-Server-Instructions (Längengrenze, Kürzung)? Wie werden Resources und Resource-Templates angeboten? Ergebnis setzt OF-01 | Geplant | `server` | — | 1 | AC-01 (OF-01) |
-| #1.2 | Regelwerk-Quelle `buddy_server/design_rules.py` mit Themen aus R-03: je Thema Titel, Einzeiler und Regeln. FDM-Regeln als Vorlagen mit Profilwerten (Mindestwand, Überhang, Spiel, Layerhöhe, Brückenlänge, Bohrungsaufmaß, Elefantenfuß-Fase, Orientierung). Inhalt aus `HUMAN_MODELING_GUIDE` übernehmen und ausbauen | Geplant | `server` | #1.1 | 3 | AC-02, AC-03 |
-| #1.3 | Kompakte `INSTRUCTIONS` aus der Quelle erzeugen: Kernregeln, Design-Tool-Regel (R-04), Verweis auf `get_design_rules`, innerhalb des Budgets | Geplant | `server` | #1.2 | 1 | AC-01, AC-04 |
-| #1.4 | Tool `get_design_rules(topic=None)` (Profilwerte über `get_printer_profile` der Bridge, ohne Bridge mit Standardprofil und Hinweis), Resources `buddy://design-rules` und `buddy://design-rules/{topic}`, `human_modeling_guide` und `design_part` aus der Quelle | Geplant | `server` | #1.2 | 2 | AC-02, AC-04 |
-| #1.5 | Tests: Budget und Pflichtinhalte der Instructions, jedes genannte Tool existiert, Profilwechsel (Düse 0,6) ändert Zahlen, unbekanntes Thema ergibt `validation`, E2E über MCP (Tool und Resource) | Geplant | `server` | #1.3, #1.4 | 2 | AC-01 bis AC-04 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #1.1 | Recherche: Claude Code dokumentiert weder Übernahme noch Längengrenze der MCP-Instructions. Resource-Templates sind nur in der MCP-Spec beschrieben. Tool-Ausgaben sind standardmäßig auf 25 000 Tokens begrenzt (`MAX_MCP_OUTPUT_TOKENS`). OF-01 bleibt bei ≤ 2 000 Zeichen, geprüft wird per Sichtung | keins | 2026-09-28 |
+| #1.2 | `src/buddy_server/design_rules.py`: 9 Themen und 42 Regeln. Regeln mit `requires` erscheinen nur, wenn ihre Tools registriert sind. FDM-Werte als Vorlagen aus dem Profil plus abgeleitete Werte (tragende Wand, Bettfase, M3-Spiel) | in 98 notiert | 2026-09-28 |
+| #1.3 | `build_instructions`: Kernregeln plus Verweis auf `get_design_rules`, 1 688 Zeichen, Namen vorab per `NameCollector` gesammelt | in 98 notiert | 2026-09-28 |
+| #1.4 | Tool `get_design_rules` (Profil aus der Bridge, sonst Standardprofil mit Hinweis), Resource `buddy://design-rules` und Template `/{topic}`, Prompts `human_modeling_guide` und `design_part` aus der Quelle. `ToolContext.local` für serverseitige Tools | keins | 2026-09-28 |
+| #1.5 | `tests/server/test_design_rules.py` (8 Tests): Budget, Kernregeln, nur registrierte Tools genannt (mit und ohne `execute_python`), Themenabdeckung, Profilwerte bei Düse 0,6, versteckte Themen, E2E über MCP mit Tool, Fehlerfall, Resource-Template und Prompt | keins | 2026-09-28 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -46,8 +46,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 5
-> - Nächste Session: S1
+> - Offene Aufgaben: 0 (S1 erledigt)
+> - Nächste Session: S2 (Phase 4, TUI-Chat-Log)
 > - Relevante Dateien: `src/buddy_server/prompts.py`, `src/buddy_server/app.py`
 > - Architektur-Deltas: in `98-architecture-update.md` ergänzen
-> - Startpunkt: #1.1
+> - Startpunkt: #4.1 in `04-tui-chat-log.md`

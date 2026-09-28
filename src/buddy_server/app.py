@@ -12,9 +12,10 @@ from mcp.server.transport_security import TransportSecuritySettings
 from buddy_server import __version__
 from buddy_server.bridge import Bridge
 from buddy_server.config import Settings
+from buddy_server.design_rules import build_instructions
 from buddy_server.events import Console, EventBus, SessionsChanged
-from buddy_server.prompts import INSTRUCTIONS, register_prompts
-from buddy_server.tools import ToolContext, register_tools
+from buddy_server.prompts import register_prompts
+from buddy_server.tools import NameCollector, ToolContext, register_tools
 
 Scope = dict[str, Any]
 Receive = Any
@@ -104,9 +105,14 @@ def transport_security(settings: Settings) -> TransportSecuritySettings:
 
 
 def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPServer, list[str]]:
-    mcp = MCPServer("FreeCAD Buddy", instructions=INSTRUCTIONS, version=__version__, log_level="WARNING")
-    names = register_tools(mcp, ToolContext(bridge, bus), settings.allow_python)
-    register_prompts(mcp)
+    ctx = ToolContext(bridge, bus)
+    # Instructions only mention registered tools, so collect the names before creating the server.
+    available = set(register_tools(NameCollector(), ctx, settings.allow_python))
+    mcp = MCPServer(
+        "FreeCAD Buddy", instructions=build_instructions(available), version=__version__, log_level="WARNING"
+    )
+    names = register_tools(mcp, ctx, settings.allow_python)
+    register_prompts(mcp, ctx, set(names))
     return mcp, names
 
 

@@ -5,6 +5,43 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 1 — 2026-09-28
+
+**Ziel:** Phase 1 – Design-Regelwerk, kompakte Instructions, `get_design_rules`, Resource.
+
+**Erledigt:**
+- #1.1 Recherche: Claude Code dokumentiert weder Übernahme noch Längengrenze der Instructions. Budget bleibt bei 2 000 Zeichen und wird per Sichtung geprüft. Tool-Ausgaben sind standardmäßig auf 25 000 Tokens begrenzt (für S2 wichtig).
+- #1.2 `src/buddy_server/design_rules.py`: 9 Themen und 42 Regeln, `requires`-Filter, Druckwerte aus dem Profil.
+- #1.3 Instructions aus der Quelle: 1 688 Zeichen, Design-Tool-Regel als Kernregel.
+- #1.4 Tool `get_design_rules`, Resource `buddy://design-rules` und `/{topic}`, Prompts aus der Quelle. Der alte Text `HUMAN_MODELING_GUIDE` ist entfallen.
+- #1.5 8 Tests in `tests/server/test_design_rules.py`. `docs/tools.md` neu erzeugt (34 Tools), README ergänzt.
+- Vorab zwei Commits: `f10cbf6` (0.1.0) und `d94df30` (Planung).
+
+**Release-Änderungen:**
+- `[feature][server]` Design-Regelwerk mit 9 Themen über `get_design_rules`, MCP-Resource und Prompt; Druckwerte folgen dem Druckerprofil.
+- `[feature][server]` Kompaktere, vollständigere Server-Instructions inklusive Design-Tool-Regel.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- `MCPServer.instructions` ist read-only. Die Tool-Namen werden deshalb vorab über einen `NameCollector` gesammelt, das spart private API.
+- `session.read_resource` erwartet in SDK 2.2 einen `str`, keine `AnyUrl`.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Regelwerk als einzige Quelle mit `requires`-Filter (98, bestätigt)
+- Nicht übernehmen: Regeltexte selbst (liegen im Code)
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 53 Tests Projekt-Python ✅, 137 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: Sichtung der Instructions in Claude Code nach Neustart offen (AC-01).
+
+**Nächste Session:**
+- S2 (Phase 4): #4.1 Events mit Payload, danach die Chat-Ansicht.
+
+---
+
 ## Session 0 — 2026-09-28 (Planung)
 
 **Ziel:** Neuen Sprint aus Ralfs Auftrag planen: Design-Regelwerk, Addon-Suche und -Installation, Grid-Recherche, Design-Tool-Regel, dazu nachgereicht der Chat-Log in der TUI.
