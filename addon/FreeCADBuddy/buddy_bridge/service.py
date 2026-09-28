@@ -43,6 +43,21 @@ def set_python_allowed(enabled: bool) -> None:
     _params().SetBool("AllowPython", enabled)
 
 
+def addon_install_allowed() -> bool:
+    """Installing addons needs an opt-in on the FreeCAD side too (setting or environment)."""
+    env = os.environ.get("FREECAD_BUDDY_ALLOW_ADDON_INSTALL", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    return env or _params().GetBool("AllowAddonInstall", False)
+
+
+def set_addon_install_allowed(enabled: bool) -> None:
+    _params().SetBool("AllowAddonInstall", enabled)
+
+
 def console(level: str, message: str) -> None:
     printer = {
         "warning": FreeCAD.Console.PrintWarning,
@@ -71,11 +86,13 @@ class BridgeService:
         token_path: Path | None = None,
         port: int | None = None,
         allow_python: bool | None = None,
+        allow_addon_install: bool | None = None,
     ) -> None:
         self._dispatcher = dispatcher
         self._token_path = token_path or buddy_home() / BRIDGE_TOKEN_FILE
         self._port = port
         self._allow_python = allow_python
+        self._allow_addon_install = allow_addon_install
         self._server: BridgeServer | None = None
 
     @property
@@ -94,12 +111,16 @@ class BridgeService:
     def allow_python(self) -> bool:
         return python_allowed() if self._allow_python is None else self._allow_python
 
+    @property
+    def allow_addon_install(self) -> bool:
+        return addon_install_allowed() if self._allow_addon_install is None else self._allow_addon_install
+
     def start(self) -> None:
         if self.running:
             return
         token = load_or_create_token(self._token_path)
         server = BridgeServer(
-            build_registry(allow_python=self.allow_python),
+            build_registry(allow_python=self.allow_python, allow_addon_install=self.allow_addon_install),
             self._dispatcher,
             token,
             port=self._port if self._port is not None else configured_port(),
@@ -118,7 +139,8 @@ class BridgeService:
         clients = f", {self._server.client_count()} Verbindung(en)" if self._server else ""
         return (
             f"Bridge {state}{clients}; Token: {self._token_path}; Autostart: {autostart_enabled()}; "
-            f"Python-Ausführung: {'erlaubt' if self.allow_python else 'gesperrt'}"
+            f"Python-Ausführung: {'erlaubt' if self.allow_python else 'gesperrt'}; "
+            f"Addon-Installation: {'erlaubt' if self.allow_addon_install else 'gesperrt'}"
         )
 
     def _log(self, level: str, message: str) -> None:

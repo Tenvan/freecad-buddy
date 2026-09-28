@@ -104,3 +104,10 @@ def test_addon_status_lists_installed_addons_and_version(client: BridgeClient) -
     assert status["freecad_version"][:2] == [int(p) for p in FreeCAD.Version()[:2]]
     assert isinstance(status["addons"], list) and isinstance(status["macros"], list)
     assert status["mod_dir"].endswith("Mod")
+
+
+def test_addon_install_methods_need_the_freecad_opt_in() -> None:
+    assert not {"addons.install", "addons.install_status"} & set(build_registry().names())
+    allowed = build_registry(allow_addon_install=True).names()
+    assert {"addons.install", "addons.install_status"} <= set(allowed)
+    assert "python.execute" not in allowed  # the two opt-ins are independent

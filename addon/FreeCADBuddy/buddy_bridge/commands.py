@@ -93,12 +93,33 @@ class _TogglePython:
         return True
 
 
+class _ToggleAddonInstall:
+    def GetResources(self) -> dict[str, Any]:
+        return {
+            "MenuText": "Addon-Installation umschalten",
+            "ToolTip": "install_addon auf FreeCAD-Seite erlauben/sperren; jede Installation fragt trotzdem nach",
+        }
+
+    def Activated(self) -> None:
+        enabled = not service.addon_install_allowed()
+        service.set_addon_install_allowed(enabled)
+        bridge = service.get_service()
+        if bridge.running:
+            bridge.stop()
+            _start()
+        service.console("info", f"Addon-Installation {'erlaubt' if enabled else 'gesperrt'}")
+
+    def IsActive(self) -> bool:
+        return True
+
+
 COMMANDS: dict[str, Any] = {
     "Buddy_StartBridge": _StartBridge(),
     "Buddy_StopBridge": _StopBridge(),
     "Buddy_BridgeStatus": _BridgeStatus(),
     "Buddy_ToggleAutostart": _ToggleAutostart(),
     "Buddy_TogglePython": _TogglePython(),
+    "Buddy_ToggleAddonInstall": _ToggleAddonInstall(),
 }
 
 

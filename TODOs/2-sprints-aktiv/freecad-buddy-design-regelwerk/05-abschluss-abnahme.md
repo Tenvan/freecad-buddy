@@ -14,7 +14,7 @@
 - **Architektur-Relevanz:** `docs/architecture.md`
 - **Architektur-Notiz:** Deltas aus `98-architecture-update.md` übernehmen.
 
-Enthaltene Aufgaben: #5.1, #5.2, #5.3
+Enthaltene Aufgaben: #5.4, #5.1, #5.2, #5.3
 
 ---
 
@@ -22,6 +22,7 @@ Enthaltene Aufgaben: #5.1, #5.2, #5.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
+| #5.4 | Stand 3: alle MCP-Ausgaben auf Englisch umstellen (Instructions, Regelwerk, Prompts, Tool-/Parameterbeschreibungen, Ergebnisse, Warnungen, Hinweise, Fehler aus Server, Core und Bridge). Sprachprüf-Test (deutsche Stoppwörter und Umlaute in allen MCP-Ausgaben). OF-09 (FreeCAD-UI, TUI) vorher mit Ralf klären | Geplant | `mehrere` | Phasen 1–4 | 4 | AC-17 |
 | #5.1 | `gen_tool_docs.py` um Kategorien erweitern (Modellierung, Design-Tools, Addons, Druck, Diagnose), Beispiele für neue Tools, Budgettest ≤ 40 | Geplant | `server` | Phasen 1–4 | 1 | AC-12 |
 | #5.2 | `docs/architecture.md`, README (Opt-ins, `--log-file`, Chat-Log), `CHANGELOG.md` 0.2.0, Version in `pyproject.toml` und Addon (OF-06) | Geplant | `mehrere` | #5.1 | 2 | AC-12 |
 | #5.3 | `docs/acceptance.md` um G9–G11 ergänzen. GUI-Abnahme G1–G11 mit Ralf nach Freigaberegel. Ergebnisse im Session-Log und im Ticket `gui-abnahme.md` | Geplant | `keine` | #5.2 | 1 (+ Ralf) | AC-13, GA-AC-01 … 08 |
@@ -45,8 +46,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
+> - Offene Aufgaben: 4
 > - Nächste Session: S6
 > - Relevante Dateien: `docs/*`, `CHANGELOG.md`
 > - Architektur-Deltas: alle aus `98-architecture-update.md` übernehmen
-> - Startpunkt: #5.1
+> - Startpunkt: #5.4 (OF-09 klären)

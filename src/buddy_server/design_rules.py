@@ -243,8 +243,8 @@ TOPICS: tuple[Topic, ...] = (
                 requires=("get_addon",),
             ),
             Rule(
-                "Installation nur nach Rückfrage beim Nutzer; install_addon öffnet einen Bestätigungsdialog "
-                "in FreeCAD, danach ist ein FreeCAD-Neustart nötig.",
+                "Installation nur nach Rückfrage beim Nutzer im Chat; install_addon öffnet zusätzlich einen "
+                "Bestätigungsdialog in FreeCAD, Workbenches brauchen danach einen FreeCAD-Neustart.",
                 requires=("install_addon",),
             ),
         ),

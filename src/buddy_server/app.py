@@ -111,7 +111,7 @@ def transport_security(settings: Settings) -> TransportSecuritySettings:
 def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPServer, list[str]]:
     ctx = ToolContext(bridge, bus, AddonCatalogService(settings.home / "addon-catalog"))
     # Instructions only mention registered tools, so collect the names before creating the server.
-    available = set(register_tools(NameCollector(), ctx, settings.allow_python))
+    available = set(register_tools(NameCollector(), ctx, settings.allow_python, settings.allow_addon_install))
     secrets = [settings.mcp_token(), read_token(settings.bridge_token_path) or ""]
     mcp = MCPServer(
         "FreeCAD Buddy",
@@ -120,7 +120,7 @@ def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPSer
         log_level="WARNING",
         middleware=[ToolCallLog(bus, Masker(secrets))],
     )
-    names = register_tools(mcp, ctx, settings.allow_python)
+    names = register_tools(mcp, ctx, settings.allow_python, settings.allow_addon_install)
     register_prompts(mcp, ctx, set(names))
     return mcp, names
 

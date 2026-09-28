@@ -71,6 +71,7 @@ EXAMPLES: dict[str, dict[str, Any]] = {
     "set_view": {"view": "iso", "fit": True},
     "search_addons": {"query": "grid", "kind": "any"},
     "get_addon": {"addon_id": "lattice2"},
+    "install_addon": {"addon_id": "lattice2"},
     "sweep": {"profile": "Sketch_HandleSection", "path": "Sketch_HandlePath", "purpose": "Handle"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
@@ -94,7 +95,7 @@ async def _tools() -> list[Any]:
     from buddy_server.config import Settings
     from buddy_server.events import EventBus
 
-    settings = Settings(home=Path(tempfile.gettempdir()), allow_python=True)
+    settings = Settings(home=Path(tempfile.gettempdir()), allow_python=True, allow_addon_install=True)
     bus = EventBus()
     mcp, _ = build_mcp(settings, Bridge(settings, bus), bus)
     return await mcp.list_tools()

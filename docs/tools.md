@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-38 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
+39 Tools (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`).
 Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Tool | Zweck |
@@ -40,6 +40,7 @@ Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Para
 | [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
 | [`search_addons`](#search_addons) | Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit |
 | [`get_addon`](#get_addon) | Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung, |
+| [`install_addon`](#install_addon) | Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user |
 | [`get_printer_profile`](#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
 | [`set_printer_profile`](#set_printer_profile) | Druckerprofil ändern (dauerhaft gespeichert). |
 | [`check_printability`](#check_printability) | Druckbarkeit prüfen: gültiger Solid, Bauraum, Überhänge, Wandstärke, zu kleine Details. |
@@ -729,6 +730,24 @@ Abhängigkeiten (FreeCAD, Addons, Python), Kompatibilität, Installationsstatus 
 |---|---|---|---|---|
 | `addon_id` | string | ja | `—` | Id oder Name aus search_addons, z. B. 'lattice2' |
 | `readme` | boolean | nein | `true` | README-Auszug aus dem Repository laden |
+
+Beispiel:
+
+```json
+{
+  "addon_id": "lattice2"
+}
+```
+
+## install_addon
+
+Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user
+a confirmation dialog - ask in the chat first. Workbenches need a FreeCAD restart afterwards.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `addon_id` | string | ja | `—` | Id from search_addons/get_addon |
+| `wait_seconds` | integer | nein | `300` | How long to wait for completion |
 
 Beispiel:
 

@@ -32,8 +32,7 @@ Enthaltene Aufgaben: #2.4, #2.5
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #2.4 | Installation: Opt-in Server (`--allow-addon-install` / `FREECAD_BUDDY_ALLOW_ADDON_INSTALL`) und FreeCAD (Einstellung `Mod/FreeCADBuddy/AllowAddonInstall`, Workbench-Befehl). Modaler Bestätigungsdialog im Hauptthread mit Standard „Abbrechen“. Job-Muster gegen Timeouts. Installation über `AddonInstaller` (in `QThread` per `moveToThread`, nur das Signal `success` zählt, dazu Fallback `Mod/<id>` vorhanden) bzw. `MacroInstaller.run()` (synchron, lokal). Vorher `NetworkManager.InitializeNetworkManager()` im Hauptthread und `allow_list` setzen, um den blockierenden Constraints-Abruf zu vermeiden. Vorprüfungen: installiert, inkompatibel, Python-Abhängigkeiten laut OF-03 | Geplant | `mehrere` | #2.3 ✅ | 5 | AC-08, AC-09 |
-| #2.5 | Tests: nicht registriert ohne Opt-in, Ablehnung → `user_declined`, Zustimmung (simuliert) → installiert und im Manifest, Abbruch → kein Rest, Kompatibilitätstest der genutzten Addon-Manager-API (Symbolliste aus dem Spike) | Geplant | `core`, `bridge` | #2.4 | 3 | AC-08, AC-09 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
@@ -41,6 +40,8 @@ Enthaltene Aufgaben: #2.4, #2.5
 |---|---|---|---|
 | #2.1 | Spike (Code-Analyse AM 2026.8.18, Katalog einmal mit Ralfs Zustimmung geladen: 176 Addons/262 Makros, SHA-256 geprüft). Ergebnisse: Katalogformat (Einträge je Branch, Details nur im `package_xml`), Installiert-Logik (`Mod/<id>` nicht leer; Makro-Datei im Makro-Ordner), Installer-Signale (`run()`-Rückgabe unzuverlässig), Netzwerk nur im Hauptthread initialisierbar, Offline-Bug im AM. Entscheidung OF-02: Suche im Server, Status/Installation in der Bridge | in 98 notiert | 2026-09-28 |
 | #2.2 | `src/buddy_server/addon_catalog.py` (Parser, Kompatibilität, Ranking Name > Tag > Beschreibung, alle Begriffe müssen passen; `package_xml` ohne DOCTYPE/ENTITY gegen XXE) und `addon_service.py` (Download mit SHA-256, Cache unter `<Buddy-Home>/addon-catalog`, täglicher Abgleich über `.sha256`, offline mit Cache und Warnung, sonst `catalog_unavailable`, falsche Prüfsumme `catalog_checksum` ohne Teil-Update). Tool `search_addons`, Bridge-Methode `addons.status`. Fixture aus dem echten Katalog (`tests/fixtures/addon_catalog`) | in 98 notiert | 2026-09-28 |
+| #2.4 | Installation: `buddy_core/addons/install.py` mit Job-Modell (`addons.install` gibt sofort eine Job-Id zurück, `addons.install_status` pollt). Der modale Dialog läuft per `QTimer.singleShot` im Hauptthread, Standard „Abbrechen“. Workbenches über `AddonInstaller` im `QThread` (nur `success` zählt, Fallback `Mod/<id>`, `allow_list=[]`), Makros über `MacroInstaller`. Ein fehlgeschlagener Job entfernt das neu angelegte `Mod/<id>`. Opt-in in FreeCAD (Einstellung `AllowAddonInstall`, Befehl „Addon-Installation umschalten“, Env) und im Server (`--allow-addon-install`, Env). Tool `install_addon` mit Vorprüfungen und Polling bis `wait_seconds`. Texte englisch (Spec-Stand 3) | in 98 notiert | 2026-09-28 |
+| #2.5 | Tests: `tests/core/test_addons_install.py` (7, mit Fake-Backend; dazu Kompatibilitätstest der AM-API, der echte `Addon`-Objekte aus dem Fixture baut), `tests/server/test_addon_install_tool.py` (8: Opt-in, Vorprüfungen, doppeltes Opt-in gegen Headless-Bridge), Bridge-Registry-Test. Der Import-Wächter erlaubt AM-Module nur in `install.py` | keins | 2026-09-28 |
 | #2.3 | Tool `get_addon`: Details, Kompatibilität, Status, README-Auszug (bereinigt, gekürzt, als Fremdtext markiert, Regel im Thema `addons`) | keins | 2026-09-28 |
 
 ## Geplante Abnahmeprüfungen
@@ -56,8 +57,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 2
-> - Nächste Session: S4
+> - Offene Aufgaben: 0 (Phase abgeschlossen)
+> - Nächste Session: S5 (Phase 3)
 > - Relevante Dateien: `Mod/AddonManager/*` im FreeCAD-Installationsverzeichnis, `buddy_bridge/methods.py`
 > - Architektur-Deltas: Job-Muster, Adapter-Modul, Sicherheitsmodell in `98-architecture-update.md`
-> - Startpunkt: #2.4
+> - Startpunkt: #3.1 in `03-design-tools.md`

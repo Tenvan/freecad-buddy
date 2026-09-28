@@ -5,6 +5,42 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 4 — 2026-09-28
+
+**Ziel:** Phase 2, Addon-Installation mit doppeltem Opt-in, Dialog, Job-Muster und Aufräumen. Zusätzlich Ralfs neue Vorgabe: MCP-Ausgaben auf Englisch.
+
+**Erledigt:**
+- #2.4 `install.py` (Job-Modell, Dialog, AM-Backend, Fake-Backend-Schnittstelle), Opt-ins in FreeCAD und im Server, Tool `install_addon`.
+- #2.5 Tests (Core, Server, Bridge). Kompatibilitätstest der AM-API mit echten Objekten aus dem Fixture. Import-Wächter mit gezielter Ausnahme für den Adapter.
+- Spec-Stand 3: R-13, AC-17, #5.4 und OF-09 aufgenommen. Die neuen S4-Texte sind bereits englisch, der Bestand folgt in S6.
+- Ralf hat die manuelle Probe von `search_addons` als einwandfrei bestätigt.
+
+**Release-Änderungen:**
+- `[feature][addons]` `install_addon` (opt-in auf beiden Seiten) installiert Addons und Makros über FreeCADs Addon Manager nach Bestätigung im FreeCAD-Dialog.
+- `[feature][bridge]` Workbench-Befehl „Addon-Installation umschalten“.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- AM-Module lassen sich auch im headless FreeCAD-Python importieren. `AddonCatalog.get_addon_from_id` und `Addon.from_macro(Macro.from_cache(...))` funktionieren offline, das ist ideal für den Kompatibilitätstest.
+- Beim asynchronen Workbench-Install muss das Aufräumen am Job-Ende passieren, nicht im `finally` des Starts.
+- `ruff format` bricht lange Zeilen um. Ersetzungsskripte deshalb auf String-Inhalte zielen lassen, nicht auf ganze Statements.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Job-Muster und Sicherheitsmodell (98, bestätigt)
+- Nicht übernehmen: Details des Fake-Backends
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 90 Tests Projekt-Python ✅, 152 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: G9 (Dialog, Ablehnen und Zustimmen an einem echten Addon) ist offen und braucht Ralf mit beiden Opt-ins und einem FreeCAD-Neustart.
+
+**Nächste Session:**
+- S5: #3.1 Grid-Recherche (Kandidaten aus S3: HexFill, FreeGrid, Gridfinity, CarteGrid, lattice2, Waben-Makros), #3.2 Vorschlagsliste (Tool-Budget klären), #3.3 `hole_grid`.
+
+---
+
 ## Session 3 — 2026-09-28
 
 **Ziel:** Phase 2, Spike Addon-Manager-API, Katalogsuche und Details.

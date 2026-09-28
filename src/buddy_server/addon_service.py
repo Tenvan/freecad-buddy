@@ -131,6 +131,13 @@ class AddonCatalogService:
             self._loaded_at = stamp
         return self._entries
 
+    def raw(self, entry: catalog.AddonEntry) -> dict[str, Any]:
+        """The catalog record the Addon Manager needs: primary branch (addon) or macro cache entry."""
+        name = catalog.MACRO_CACHE if entry.kind == "macro" else catalog.ADDON_CACHE
+        data = json.loads((self.cache_dir / name).read_text(encoding="utf-8"))
+        record = data[entry.id]
+        return record if entry.kind == "macro" else record[0]
+
     def find(self, addon_id: str) -> catalog.AddonEntry | None:
         wanted = addon_id.strip().lower()
         return next((e for e in self.entries() if e.id.lower() == wanted or e.name.lower() == wanted), None)

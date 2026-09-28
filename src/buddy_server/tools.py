@@ -6,8 +6,10 @@ so the model stays PartDesign-first and editable by a human.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
+import time
 from collections.abc import Callable
 from typing import Annotated, Any, Literal, Protocol
 
@@ -120,7 +122,28 @@ def _version(status: dict[str, Any] | None) -> tuple[int, int, int] | None:
     return major, minor, patch
 
 
-def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> list[str]:
+def _install_blocker(entry: AddonEntry, status: dict[str, Any]) -> str | None:
+    """Why Buddy refuses to install ``entry`` (the Addon Manager can still do it), or ``None``."""
+    version = _version(status)
+    if _installed_flag(entry, status):
+        return f"'{entry.id}' is already installed (updates stay with the Addon Manager)"
+    if version is not None and not entry.compatible_with(version):
+        return f"'{entry.id}' is not compatible with FreeCAD {'.'.join(map(str, version))}"
+    if entry.python_dependencies:
+        packages = ", ".join(entry.python_dependencies[:5])
+        return f"'{entry.id}' needs Python packages ({packages}); Buddy does not run pip"
+    if entry.addon_dependencies:
+        return f"'{entry.id}' depends on other addons ({', '.join(entry.addon_dependencies[:5])})"
+    if entry.kind == "preference_pack":
+        return "Preference packs can only be searched, not installed, through Buddy"
+    if entry.sparse:
+        return f"'{entry.id}' is installed via git only"
+    return None
+
+
+def register_tools(
+    mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool, allow_addon_install: bool = False
+) -> list[str]:
     names: list[str] = []
 
     def tool(fn: Any) -> Any:
@@ -654,6 +677,51 @@ def register_tools(mcp: ToolRegistrar, ctx: ToolContext, allow_python: bool) -> 
             details["readme"] = text
             details["readme_note"] = UNTRUSTED_NOTE if text else "README nicht abrufbar"
         return details
+
+    if allow_addon_install:
+
+        @tool
+        async def install_addon(
+            addon_id: Annotated[str, Field(description="Id from search_addons/get_addon")],
+            wait_seconds: Annotated[
+                int, Field(ge=0, le=900, description="How long to wait for completion")
+            ] = 300,
+        ) -> dict[str, Any]:
+            """Install an addon or macro through FreeCAD's Addon Manager (opt-in only). FreeCAD shows the user
+            a confirmation dialog - ask in the chat first. Workbenches need a FreeCAD restart afterwards."""
+            service, state = await ctx.catalog()
+            entry = service.find(addon_id)
+            if entry is None:
+                raise ToolError(f"[not_found] No addon '{addon_id}' in the catalog\nHint: use search_addons")
+            status = await ctx.installed()
+            if status is None:
+                raise ToolError("[bridge_unavailable] FreeCAD is not reachable - cannot install")
+            reason = _install_blocker(entry, status)
+            if reason:
+                raise ToolError(
+                    f"[validation] {reason}\nHint: install it with FreeCAD's Addon Manager instead"
+                )
+            job = await ctx.call(
+                "install_addon", "addons.install", addon_id=entry.id, kind=entry.kind, entry=service.raw(entry),
+                details=entry.details(_version(status)), branch=entry.branch,
+            )  # fmt: skip
+            deadline = time.monotonic() + wait_seconds
+            while not job["done"] and time.monotonic() < deadline:
+                await asyncio.sleep(1)
+                job = await ctx.call("install_addon", "addons.install_status", job_id=job["job_id"])
+            if not job["done"]:
+                job["hint"] = (
+                    "Still running (dialog open or downloading) - call install_addon again for the status."
+                )
+            if job["state"] == "declined":
+                raise ToolError(
+                    "[user_declined] Installation declined in the FreeCAD dialog - nothing changed"
+                )
+            if job["state"] == "failed":
+                raise ToolError(
+                    f"[install_failed] {job['message']}\nHint: retry with FreeCAD's Addon Manager"
+                )
+            return {**job, "catalog": state}
 
     # --- 3D printing ------------------------------------------------------------------------------
     @tool

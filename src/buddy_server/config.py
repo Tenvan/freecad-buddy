@@ -23,6 +23,7 @@ class Settings:
     bridge_port: int = DEFAULT_BRIDGE_PORT
     home: Path = field(default_factory=buddy_home)
     allow_python: bool = field(default_factory=lambda: _env_flag("FREECAD_BUDDY_ALLOW_PYTHON"))
+    allow_addon_install: bool = field(default_factory=lambda: _env_flag("FREECAD_BUDDY_ALLOW_ADDON_INSTALL"))
     host: str = LOCAL_HOST
     bridge_host: str = LOCAL_HOST
     connect_timeout: float = 3.0
