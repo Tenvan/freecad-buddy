@@ -166,6 +166,16 @@ def revert_document(document: str | None = None) -> ToolResult:
     return result
 
 
+def _transformation_steps(objects: Any) -> set[str]:
+    """Names of the sub-transformations claimed by MultiTransforms among ``objects``."""
+    return {
+        step.Name
+        for obj in objects
+        if obj.TypeId == "PartDesign::MultiTransform"
+        for step in obj.Transformations
+    }
+
+
 def _node(obj: Any) -> dict[str, Any]:
     node: dict[str, Any] = {
         **describe(obj),
@@ -175,7 +185,14 @@ def _node(obj: Any) -> dict[str, Any]:
     }
     if obj.TypeId == "PartDesign::Body":
         node["tip"] = obj.Tip.Label if obj.Tip else None
-        node["features"] = [_node(child) for child in obj.Group if not child.TypeId.startswith("App::Origin")]
+        steps = _transformation_steps(obj.Group)
+        node["features"] = [
+            _node(child)
+            for child in obj.Group
+            if not child.TypeId.startswith("App::Origin") and child.Name not in steps
+        ]
+    elif obj.TypeId == "PartDesign::MultiTransform":
+        node["transformations"] = [_node(step) for step in obj.Transformations]
     elif obj.TypeId == "Sketcher::SketchObject":
         obj.solve()
         node["dof"] = obj.DoF
@@ -186,6 +203,8 @@ def _node(obj: Any) -> dict[str, Any]:
 def model_tree(document: str | None = None) -> dict[str, Any]:
     doc = resolve_document(document)
     in_body = {child.Name for obj in doc.Objects if obj.TypeId == "PartDesign::Body" for child in obj.Group}
+    # older files keep the grid steps in the document root – they still belong under their MultiTransform
+    in_body |= _transformation_steps(doc.Objects)
     # Filter origin elements by membership, not by type: FreeCAD 26.3 added an App::Point ("Origin001")
     # to every origin, and a type list would miss the next addition as well.
     origin_parts = {
@@ -266,7 +285,11 @@ def _assembly_details(obj: Any) -> dict[str, Any]:
         }
         details["placement"] = [round(v, 4) for v in obj.Placement.Base]
     if obj.TypeId == "Part::FeaturePython" and hasattr(obj, "Diameter") and hasattr(obj, "Type"):
-        details["fastener"] = {"type": obj.Type, "diameter": obj.Diameter, "thread": getattr(obj, "Thread", False)}
+        details["fastener"] = {
+            "type": obj.Type,
+            "diameter": obj.Diameter,
+            "thread": getattr(obj, "Thread", False),
+        }
     return details
 
 
@@ -276,9 +299,12 @@ def delete_object(ref: str, document: str | None = None) -> ToolResult:
     result = ToolResult()
     with transaction(doc, f"Löschen: {obj.Label}"):
         label = obj.Label
-        for body in (p for p in obj.InList if p.TypeId == "PartDesign::Body"):
-            body.removeObject(obj)
-        doc.removeObject(obj.Name)
+        # a MultiTransform owns its steps (FreeCAD's GUI deletes them together as well)
+        steps = list(obj.Transformations) if obj.TypeId == "PartDesign::MultiTransform" else []
+        for target in (obj, *steps):
+            for body in (p for p in target.InList if p.TypeId == "PartDesign::Body"):
+                body.removeObject(target)
+            doc.removeObject(target.Name)
         result.data["deleted"] = label
     return result
 

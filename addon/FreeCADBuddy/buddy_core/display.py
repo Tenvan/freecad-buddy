@@ -7,6 +7,7 @@ Override per user: ``Preferences/Mod/FreeCADBuddy`` → ``LineWidth`` / ``PointS
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 import FreeCAD
@@ -23,6 +24,19 @@ def _gui_up() -> bool:
 def style() -> tuple[float, float]:
     params = FreeCAD.ParamGet(_PARAM_GROUP)
     return params.GetFloat("LineWidth", LINE_WIDTH), params.GetFloat("PointSize", POINT_SIZE)
+
+
+def show_only(shown: Any, hidden: Iterable[Any]) -> None:
+    """Show ``shown`` and hide ``hidden`` – on the object and, with GUI, on its view provider.
+
+    ``shown`` goes first: making a PartDesign feature visible in the GUI hides the other features
+    of its body, the explicit hiding afterwards covers everything outside that rule (headless too).
+    """
+    for obj, visible in ((shown, True), *((obj, False) for obj in hidden)):
+        obj.Visibility = visible
+        view_object = getattr(obj, "ViewObject", None) if _gui_up() else None
+        if view_object is not None:
+            view_object.Visibility = visible
 
 
 def apply_selection_style(obj: Any) -> bool:

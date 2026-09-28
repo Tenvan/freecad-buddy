@@ -33,3 +33,14 @@ def test_objects_without_view_provider_are_skipped(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(display, "_gui_up", lambda: True)
     obj: Any = SimpleNamespace(ViewObject=None)
     assert display.apply_selection_style(obj) is False
+
+
+def test_show_only_sets_object_and_view_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(display, "_gui_up", lambda: True)
+    shown: Any = SimpleNamespace(Visibility=False, ViewObject=SimpleNamespace(Visibility=False))
+    hidden: Any = SimpleNamespace(Visibility=True, ViewObject=SimpleNamespace(Visibility=True))
+
+    display.show_only(shown, [hidden])
+
+    assert shown.Visibility and shown.ViewObject.Visibility
+    assert not hidden.Visibility and not hidden.ViewObject.Visibility
