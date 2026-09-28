@@ -15,6 +15,12 @@ def main() -> int:
     os.add_dll_directory(bin_dir)
     sys.path[:0] = [bin_dir, os.path.join(args.freecad_home, "lib"), args.addon_dir]
 
+    import FreeCAD  # noqa: F401  (its init puts the user Mod dirs - maybe another FreeCADBuddy - in front)
+
+    sys.path.insert(0, args.addon_dir)
+    for name in [m for m in sys.modules if m.split(".")[0] in ("buddy_core", "buddy_bridge")]:
+        del sys.modules[name]
+
     from buddy_bridge import headless
 
     return headless.main(rest)

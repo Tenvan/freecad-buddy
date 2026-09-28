@@ -26,6 +26,12 @@ def main() -> int:
     import FreeCAD  # noqa: F401  (initialises the application before any test module imports)
     import pytest
 
+    # FreeCAD's init puts the user Mod dirs in front; an installed FreeCADBuddy (e.g. a junction to the
+    # main checkout) would then shadow the checkout under test. Put ours first again and drop stale imports.
+    sys.path.insert(0, args.addon_dir)
+    for name in [m for m in sys.modules if m.split(".")[0] in ("buddy_core", "buddy_bridge")]:
+        del sys.modules[name]
+
     return pytest.main(["-p", "no:cacheprovider", *pytest_args])
 
 
