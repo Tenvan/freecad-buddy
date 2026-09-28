@@ -5,6 +5,39 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2c — 2026-09-28 (Ralfs Direktaufträge: Auswahlgrößen, kompakter Chat)
+
+**Ziel:** Zwei Rückmeldungen aus dem Live-Test umsetzen.
+
+**Erledigt:**
+- Auswahlgrößen: Body und jedes Buddy-Feature bekommen LineWidth 4 und PointSize 8 (`buddy_core/display.py`, aufgerufen in `create_body` und `features._new`). Überschreibbar über `Preferences/Mod/FreeCADBuddy` (`LineWidth`, `PointSize`). Hintergrund: FreeCADs globale Vorgaben greifen laut Ralf bei per Python erzeugten PartDesign-Objekten nicht (`02550bf`).
+- Chat: Antwort-Blasen zeigen nur noch die Kernwerte als Text (erstellt/geändert, DoF, Volumen, Befunde, Kernwerte, Hinweise; bei Fehlern Code, Meldung und Hinweise). Das vollständige JSON steht erst in der Detailansicht (Enter) (`7834599`). Präzisierung von R-11, kein neuer Umfang.
+
+**Release-Änderungen:**
+- `[feature][core]` Dickere Kanten (4) und größere Punkte (8) an Body und Features für die Auswahl in der 3D-Ansicht.
+- `[feature][tui]` Kompakte Antworten im Chat, vollständiges JSON per Enter.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Die Wirkung der Auswahlgrößen lässt sich nur in der GUI prüfen. Headless ist nur die Logik getestet (`tests/core/test_display.py`, GUI per Monkeypatch).
+- Ungeprüft: ob PartDesign die ViewObject-Werte beim Tip-Wechsel neu vom Vorgänger übernimmt. Buddy setzt sie deshalb an jedem Feature.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: keine
+- Doku-Delta: keins
+- Nicht übernehmen: —
+
+**Validierung:**
+- `uv run poe check` (Exit-Code geprüft): ruff ✅, pyright ✅, 67 Tests Projekt-Python ✅, 141 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: Auswahlgrößen und kompakter Chat werden in Ralfs nächstem Live-Aufbau gesichtet.
+
+**Nächste Session:**
+- FreeCAD und `freecad-buddy` neu starten, Platte aufbauen und sichten. Danach S3, Live-Katalog nur mit Zustimmung.
+
+---
+
 ## Session 2b — 2026-09-28 (Live-Test mit Claude Code, Ansicht nach dem ersten Basis-Feature)
 
 **Ziel:** Platte direkt über die MCP-Tools in Claude Code bauen und Ralfs Rückmeldung zur Startansicht umsetzen.
