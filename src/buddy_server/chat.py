@@ -127,7 +127,12 @@ class CallItem(ListItem):
         body: list[RenderableType] = []
         if done.warnings:
             body.append(Text("\n".join(f"⚠ {w}" for w in done.warnings), style="yellow"))
-        body.append(_code(done.response) if done.response else Text(done.summary))
+        if done.compact:
+            body.append(Text(done.compact))
+            if done.response and done.response.strip() != done.compact.strip():
+                body.append(Text("Enter: vollständige Antwort", style="dim italic"))
+        else:
+            body.append(_code(done.response) if done.response else Text(done.summary))
         self._response.update(Group(*body))
 
 

@@ -49,7 +49,8 @@ class ToolCallLog:
         response = describe_result(result, self._mask)
         self._bus.publish(
             ToolFinished(call_id, name, time.monotonic() - started, response.ok, response.summary,
-                         response.warnings, response=response.text, error_code=response.error_code)
+                         response.warnings, response=response.text, error_code=response.error_code,
+                         compact=response.compact)
         )  # fmt: skip
         return result
 

@@ -79,3 +79,34 @@ def test_jsonl_log_writes_masked_records_and_rotates(tmp_path: Path) -> None:
     records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
     assert {r["type"] for r in records} <= {"request", "response"}
     assert any(r.get("session") == "claude-code #1" for r in records)
+
+
+def test_compact_text_shows_key_facts_instead_of_json() -> None:
+    from buddy_server.payloads import compact_text
+
+    pad = {"ok": True, "created": [{"label": "Pad_Plate"}], "warnings": [], "hints": [],
+           "feature": {"label": "Pad_Plate"}, "volume": 99999.99999999997, "view": "iso"}  # fmt: skip
+    text = compact_text(pad)
+    assert "erstellt: Pad_Plate" in text and "Volumen 100\u202f000,0 mm³" in text and "view: iso" in text
+    assert "{" not in text
+
+    sketch = {"ok": True, "created": [], "modified": [{"label": "Sketch_Plate"}],
+              "sketch": {"sketch": "Sketch_Plate", "dof": 0, "fully_constrained": True}}  # fmt: skip
+    assert "Sketch_Plate: DoF 0 (vollständig bestimmt)" in compact_text(sketch)
+
+    check = {"ok": True, "issues": [], "hints": ["Unterkante fasen"], "stats": {"volume": 98994.69}}
+    assert "keine Befunde" in compact_text(check) and "→ Unterkante fasen" in compact_text(check)
+    assert len(compact_text({f"k{i}": i for i in range(50)}).splitlines()) <= 6
+
+
+def test_error_compact_keeps_code_and_hints() -> None:
+    error = CallToolResult(
+        content=[
+            TextContent(
+                type="text", text="[recompute_failed] Pad ungültig\nHinweis: Länge prüfen\nDetails: {}"
+            )
+        ],
+        is_error=True,
+    )
+    shown = describe_result(error, Masker())
+    assert shown.compact == "[recompute_failed] Pad ungültig\nHinweis: Länge prüfen"

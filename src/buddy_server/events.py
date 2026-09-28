@@ -60,6 +60,8 @@ class ToolFinished(Event):
     response: str = ""
     """Masked, size-limited response text (result JSON or error message)."""
     error_code: str = ""
+    compact: str = ""
+    """Key facts of the response as a few lines of text (chat bubble)."""
 
 
 @dataclass(frozen=True)

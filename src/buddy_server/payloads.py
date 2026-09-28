@@ -87,6 +87,78 @@ def summarize(result: Any) -> tuple[str, tuple[str, ...]]:
     return (" ".join(parts) or "ok"), warnings
 
 
+_SKIP_KEYS = {"ok", "created", "modified", "warnings", "hints", "feature", "sketch", "volume", "geometry",
+              "constraints", "profile", "path"}  # fmt: skip
+MAX_COMPACT_LINES = 6
+
+
+def _number(value: float) -> str:
+    text = f"{value:,.1f}" if abs(value) >= 100 else f"{round(value, 3):g}"
+    return text.replace(",", "\u202f").replace(".", ",")
+
+
+def _scalar(value: Any) -> str | None:
+    if isinstance(value, bool):
+        return "ja" if value else "nein"
+    if isinstance(value, int | float):
+        return _number(float(value)) if isinstance(value, float) else str(value)
+    if isinstance(value, str):
+        if not value:
+            return None
+        return value if len(value) <= 80 else value[:79] + "…"
+    if value is None:
+        return "–"
+    return None
+
+
+def _labels(entries: Any) -> str:
+    labels = [str(e.get("label", e.get("name", "?"))) for e in entries if isinstance(e, Mapping)]
+    return ", ".join(labels[:4]) + (f" (+{len(labels) - 4})" if len(labels) > 4 else "")
+
+
+def compact_text(result: Any) -> str:
+    """Key facts of a tool result as a few lines of plain text (the full JSON stays in the detail view)."""
+    if isinstance(result, str):
+        lines = [line for line in result.splitlines() if line.strip()]
+        return "\n".join(lines[:3]) + (f"\n… (+{len(lines) - 3} Zeilen)" if len(lines) > 3 else "")
+    if isinstance(result, list):
+        return f"{len(result)} Einträge"
+    if not isinstance(result, Mapping):
+        return _scalar(result) or "ok"
+    lines: list[str] = []
+    if result.get("created"):
+        lines.append(f"✚ erstellt: {_labels(result['created'])}")
+    elif result.get("modified"):
+        lines.append(f"✎ geändert: {_labels(result['modified'])}")
+    sketch = result.get("sketch")
+    if isinstance(sketch, Mapping) and "dof" in sketch:
+        state = "vollständig bestimmt" if sketch.get("fully_constrained") else "unterbestimmt"
+        lines.append(f"✎ {sketch.get('sketch', 'Skizze')}: DoF {sketch['dof']} ({state})")
+    if isinstance(result.get("volume"), int | float):
+        lines.append(f"▣ Volumen {_number(float(result['volume']))} mm³")
+    if isinstance(result.get("issues"), list):
+        issues = result["issues"]
+        codes = ", ".join(str(i.get("code", "?")) for i in issues[:4] if isinstance(i, Mapping))
+        lines.append(f"{'✓ keine Befunde' if not issues else f'✗ {len(issues)} Befunde: {codes}'}")
+    facts: list[str] = []
+    for key, value in result.items():
+        if key in _SKIP_KEYS or key == "issues":
+            continue
+        shown = _scalar(value)
+        if shown is not None:
+            facts.append(f"{key}: {shown}")
+        elif isinstance(value, list):
+            facts.append(f"{key}: {len(value)} Einträge")
+        elif isinstance(value, Mapping):
+            inner = [f"{k} {s}" for k, v in value.items() if (s := _scalar(v)) is not None][:3]
+            if inner:
+                facts.append(f"{key}: {', '.join(inner)}")
+    if facts:
+        lines.append(" · ".join(facts[:4]))
+    lines += [f"→ {hint}" for hint in result.get("hints", [])[:2] if isinstance(result.get("hints"), list)]
+    return "\n".join(lines[:MAX_COMPACT_LINES]) or "ok"
+
+
 @dataclass(frozen=True)
 class Response:
     ok: bool
@@ -94,6 +166,7 @@ class Response:
     summary: str
     warnings: tuple[str, ...] = ()
     error_code: str = ""
+    compact: str = ""
 
 
 def _image_placeholder(item: Mapping[str, Any]) -> str:
@@ -120,7 +193,9 @@ def describe_result(result: Any, mask: Masker) -> Response:
         message = mask.text("\n".join(texts))
         match = _ERROR_CODE.match(message)
         code = match.group(1) if match else "error"
-        return Response(False, message, code, error_code=code)
+        lines = message.splitlines()
+        compact = "\n".join([lines[0], *[line for line in lines[1:] if line.startswith("Hinweis")][:2]])
+        return Response(False, message, code, error_code=code, compact=compact)
     structured = data.get("structuredContent")
     if isinstance(structured, Mapping) and set(structured) == {"result"}:
         structured = structured["result"]
@@ -133,6 +208,7 @@ def describe_result(result: Any, mask: Masker) -> Response:
         structured = texts
     body = images[0] if images and not texts else render_json(mask(structured))
     summary, warnings = summarize(structured)
+    compact = mask.text(compact_text(structured))
     if images:
-        summary = " ".join(images)
-    return Response(True, body, summary, tuple(mask.text(w) for w in warnings))
+        summary = compact = " ".join(images)
+    return Response(True, body, summary, tuple(mask.text(w) for w in warnings), compact=compact)
