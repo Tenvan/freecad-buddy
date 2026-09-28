@@ -44,6 +44,9 @@ class SessionsChanged(Event):
 class ToolStarted(Event):
     call_id: int
     name: str
+    arguments: str = "{}"
+    """Masked, pretty-printed request arguments."""
+    session: str = ""
 
 
 @dataclass(frozen=True)
@@ -54,6 +57,9 @@ class ToolFinished(Event):
     ok: bool
     summary: str
     warnings: tuple[str, ...] = ()
+    response: str = ""
+    """Masked, size-limited response text (result JSON or error message)."""
+    error_code: str = ""
 
 
 @dataclass(frozen=True)

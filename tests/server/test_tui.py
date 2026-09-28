@@ -7,12 +7,14 @@ fixtures in this directory, so no headless FreeCAD bridge is ever started.
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import cast
 
-from textual.widgets import Label, RichLog
+from textual.widgets import Label, RichLog, Static, TextArea
 
+from buddy_server.chat import CallItem, DetailScreen, ToolChat
 from buddy_server.config import Settings
-from buddy_server.events import BridgeState, Console, EventBus, SessionsChanged, ToolFinished
+from buddy_server.events import BridgeState, Console, EventBus, SessionsChanged, ToolFinished, ToolStarted
 from buddy_server.runner import ServerRunner
 from buddy_server.tui import BuddyApp
 
@@ -86,33 +88,108 @@ def test_sessions_changed_updates_status_bar() -> None:
     asyncio.run(scenario())
 
 
-def test_tool_finished_appears_in_tool_log() -> None:
+def _chat(app: BuddyApp) -> ToolChat:
+    return app.query_one("#tool-log", ToolChat)
+
+
+def test_request_and_response_bubbles_with_state_colors() -> None:
     async def scenario() -> None:
         app, runner = _make_app()
-        async with app.run_test() as pilot:
-            runner.bus.publish(ToolFinished(1, "pad", 0.012, True, "+Pad_Base"))
-            await pilot.pause()
-            text = _log_text(app.query_one("#tool-log", RichLog))
-            assert "pad" in text
-            assert "ok" in text
-            assert "+Pad_Base" in text
+        async with app.run_test(size=(140, 50)) as pilot:
+            runner.bus.publish(ToolStarted(1, "pad", '{\n  "sketch": "Sketch_Plate"\n}', "claude-code #1"))
+            await pilot.pause(0.2)
+            item = _chat(app).records[1].item
+            assert item is not None and item.has_class("state-running")
+            request = item.query_one(".request", Static)
+            assert "pad" in str(request.border_title) and "claude-code #1" in str(request.border_title)
+
+            runner.bus.publish(
+                ToolFinished(1, "pad", 0.18, True, "+Pad_Plate", response='{\n  "created": "Pad_Plate"\n}')
+            )
+            runner.bus.publish(ToolStarted(2, "fillet", "{}", "claude-code #1"))
+            runner.bus.publish(
+                ToolFinished(2, "fillet", 0.05, True, "ok", ("Radius reduziert",), response="{}")
+            )
+            runner.bus.publish(ToolStarted(3, "pocket", "{}", "claude-code #1"))
+            runner.bus.publish(
+                ToolFinished(3, "pocket", 0.02, False, "recompute_failed", response="[recompute_failed] kaputt",
+                             error_code="recompute_failed")
+            )  # fmt: skip
+            await pilot.pause(0.2)
+
+            records = _chat(app).records
+            assert [records[i].state for i in (1, 2, 3)] == ["ok", "warning", "error"]
+            items = {i: records[i].item for i in (1, 2, 3)}
+            assert all(item is not None for item in items.values())
+            for i, state in ((1, "ok"), (2, "warning"), (3, "error")):
+                assert cast(CallItem, items[i]).has_class(f"state-{state}")
+            response = cast(CallItem, items[1]).query_one(".response", Static)
+            assert "180 ms" in str(response.border_title)
+            assert "Sketch_Plate" in records[1].detail() and "Pad_Plate" in records[1].detail()
 
     asyncio.run(scenario())
 
 
-def test_tool_log_is_capped_and_reconnect_still_works_afterwards() -> None:
+def test_enter_opens_full_detail_and_escape_closes() -> None:
+    long_response = "\n".join(f'"line_{i}": {i},' for i in range(500))
+
+    async def scenario() -> None:
+        app, runner = _make_app()
+        async with app.run_test(size=(140, 50)) as pilot:
+            runner.bus.publish(ToolStarted(1, "get_model_tree", "{}", "claude-code #1"))
+            runner.bus.publish(ToolFinished(1, "get_model_tree", 0.3, True, "ok", response=long_response))
+            await pilot.pause(0.2)
+            chat = _chat(app)
+            chat.focus()
+            chat.index = 0
+            await pilot.press("enter")
+            await pilot.pause()
+            assert isinstance(app.screen, DetailScreen)
+            text = app.screen.query_one("#detail-text", TextArea).text
+            assert "line_499" in text and "get_model_tree" in text
+            await pilot.press("escape")
+            await pilot.pause()
+            assert not isinstance(app.screen, DetailScreen)
+
+    asyncio.run(scenario())
+
+
+def test_v_toggles_compact_list() -> None:
     async def scenario() -> None:
         app, runner = _make_app()
         async with app.run_test() as pilot:
+            runner.bus.publish(ToolFinished(1, "pad", 0.012, True, "+Pad_Base"))
+            await pilot.pause(0.2)
+            await pilot.press("v")
+            assert _chat(app).has_class("compact")
+            line = _chat(app).records[1].line().plain
+            assert "pad" in line and "ok" in line and "+Pad_Base" in line
+            await pilot.press("v")
+            assert not _chat(app).has_class("compact")
+
+    asyncio.run(scenario())
+
+
+def test_tool_chat_is_capped_under_load_and_stays_usable() -> None:
+    big = "x" * 50_000
+
+    async def scenario() -> None:
+        app, runner = _make_app()
+        async with app.run_test() as pilot:
+            started = time.monotonic()
             for i in range(10_000):
-                runner.bus.publish(ToolFinished(i, "pad", 0.001, True, "x"))
-            await pilot.pause()
-            log = app.query_one("#tool-log", RichLog)
-            assert len(log.lines) <= 1000
+                runner.bus.publish(ToolStarted(i, "pad", "{}", "s"))
+                runner.bus.publish(ToolFinished(i, "pad", 0.001, True, "x", response=big))
+            await pilot.pause(0.5)
+            chat = _chat(app)
+            assert len(chat.records) <= 1000
+            assert len(chat.query(CallItem)) <= 1000
+            assert 9_999 in chat.records
 
             await pilot.press("r")
             await pilot.pause()
             assert runner.bridge.reconnect_calls == 1
+            assert time.monotonic() - started < 60
 
     asyncio.run(scenario())
 

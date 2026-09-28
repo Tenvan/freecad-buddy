@@ -32,6 +32,9 @@ def ensure_port_free(host: str, port: int) -> None:
             ) from None
 
 
+SHUTDOWN_GRACE_SECONDS = 2
+
+
 class ServerRunner:
     def __init__(self, settings: Settings, bus: EventBus, bridge: Bridge | None = None) -> None:
         self.settings = settings
@@ -58,6 +61,8 @@ class ServerRunner:
             log_level="warning",
             lifespan="on",
             access_log=False,
+            # Never wait forever for clients that keep connections or streams open.
+            timeout_graceful_shutdown=SHUTDOWN_GRACE_SECONDS,
         )
         self._server = uvicorn.Server(config)
         self._server.install_signal_handlers = lambda: None  # type: ignore[method-assign]  # front end owns Ctrl+C
@@ -77,5 +82,9 @@ class ServerRunner:
             self.bridge.close()
 
     def stop(self) -> None:
+        """Graceful stop; a second call forces the exit without waiting for open connections."""
+        AppStatus.should_exit = True  # sse_starlette cannot see uvicorn's flag without its signal handlers
         if self._server is not None:
+            if self._server.should_exit:
+                self._server.force_exit = True
             self._server.should_exit = True

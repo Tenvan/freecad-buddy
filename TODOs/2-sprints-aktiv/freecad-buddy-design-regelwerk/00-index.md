@@ -104,8 +104,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [ ] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
 - [ ] AC-11: `hole_grid` erfüllt R-09 für `rect`. Das Sieb der Testplatte (34 × 27 Löcher Ø 1 mm, Raster 3 mm) lässt sich mit einem Aufruf erzeugen. Eine Parameteränderung (z. B. Raster 4 mm) aktualisiert das Modell. `hex` gemäß OF-05.
 - [ ] AC-12: Höchstens 40 öffentliche Tools. `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
-- [ ] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
-- [ ] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
+- [x] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
+- [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
 - [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`hole_grid` in der GUI weiterbearbeitbar) und G11 (Chat-Log in der TUI verständlich) sind abgenommen oder per Scope-Entscheidung verschoben.
 
 ## Offene Fragen
@@ -136,8 +136,8 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-09 | Ablehnungsgründe, Aufräumen | #2.4, #2.5 / P2 | Headless-Core-Test | offen |
 | AC-10 | Grid-Recherche dokumentiert | #3.1 / P3 | Dokument, Live-Suche nur mit Ralfs Zustimmung | offen |
 | AC-11 | `hole_grid` | #3.3 / P3 | Headless-Core-Test + E2E Testplatte + G10 | offen |
-| AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | offen |
-| AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | offen |
+| AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | **erfüllt** (`test_request_and_response_bubbles_with_state_colors`; Pilot-Test mit Widget-Assertions statt Snapshot-Plugin); Sichtung G11 offen |
+| AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | **erfüllt** (`test_payloads.py`, `test_tool_chat_is_capped_under_load_and_stays_usable`, `test_enter_opens_full_detail_and_escape_closes`) |
 | AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | offen |
 | AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G11 | #5.3 / P5 | Nutzerabnahme | offen |
 
@@ -155,7 +155,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[███░░░░░░░] 26% — 5 von 19 Aufgaben erledigt
+[████░░░░░░] 42% — 8 von 19 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -168,7 +168,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 5 | [██████████] 100% |
 | 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
-| 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 3 | 0 | [░░░░░░░░░░] 0% |
+| 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |
 | 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 3 | 0 | [░░░░░░░░░░] 0% |
 
 ## 📅 Session-Übersicht
@@ -176,8 +176,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
 | S1 | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | ✅ Erledigt (2026-09-28) |
-| **→ S2** | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | **Nächste** |
-| S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | Geplant |
+| S2 | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | ✅ Erledigt (2026-09-28) |
+| **→ S3** | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | **Nächste** |
 | S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | Geplant |
 | S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | Geplant |
 | S6 | Phase 5 | Doku, Release 0.2.0, GUI-Abnahme G1–G11 | Geplant |

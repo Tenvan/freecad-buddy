@@ -6,6 +6,7 @@ asyncio loop and renders the events published on its ``EventBus``.
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import time
 from typing import ClassVar
@@ -18,6 +19,7 @@ from textual.message import Message
 from textual.widgets import Footer, Header, Label, RichLog
 from textual.worker import Worker
 
+from buddy_server.chat import CallItem, DetailScreen, ToolChat
 from buddy_server.config import Settings
 from buddy_server.events import (
     BridgeState,
@@ -28,10 +30,12 @@ from buddy_server.events import (
     ServerStarted,
     SessionsChanged,
     ToolFinished,
+    ToolStarted,
 )
 from buddy_server.runner import ServerRunner
 
 MAX_LOG_LINES = 1000
+QUIT_TIMEOUT_SECONDS = 5
 
 _BRIDGE_LABELS = {"connected": "verbunden", "waiting": "wartet", "error": "Fehler"}
 _BRIDGE_CLASSES = {"connected": "state-connected", "waiting": "state-waiting", "error": "state-error"}
@@ -72,6 +76,7 @@ class BuddyApp(App[None]):
         width: 100%;
         border: round $primary;
     }
+    #tool-log:focus { border: round $accent; }
     #tool-log { height: 3fr; }
     #message-log { height: 2fr; }
     """
@@ -79,6 +84,7 @@ class BuddyApp(App[None]):
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("r", "reconnect", "Neu verbinden"),
         Binding("c", "copy_claude_command", "Claude-Befehl kopieren"),
+        Binding("v", "toggle_view", "Chat/Liste"),
         Binding("p", "toggle_python", "execute_python umschalten"),
         Binding("q", "quit_app", "Beenden"),
     ]
@@ -89,6 +95,7 @@ class BuddyApp(App[None]):
         self.runner = runner or ServerRunner(settings, EventBus())
         self._session_count = 0
         self._server_worker: Worker[None] | None = None
+        self._quitting = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -98,12 +105,14 @@ class BuddyApp(App[None]):
             yield Label("Sessions: 0", id="status-sessions")
             yield Label(self._python_label_text(), id="status-python")
         with Vertical(id="panels"):
-            yield RichLog(id="tool-log", max_lines=MAX_LOG_LINES, markup=False)
+            yield ToolChat(id="tool-log")
             yield RichLog(id="message-log", max_lines=MAX_LOG_LINES, markup=False)
         yield Footer()
 
     def on_mount(self) -> None:
-        self.query_one("#tool-log", RichLog).border_title = "Tool-Aufrufe"
+        chat = self.query_one("#tool-log", ToolChat)
+        chat.border_title = "Tool-Aufrufe – Enter: Details, v: Chat/Liste"
+        chat.focus()
         self.query_one("#message-log", RichLog).border_title = "Meldungen"
         self.runner.bus.subscribe(lambda event: self.post_message(BusEvent(event)))
         self._start_server_worker(self.runner)
@@ -139,8 +148,8 @@ class BuddyApp(App[None]):
             case ServerFailed():
                 self._set_endpoint_failed(event.message)
                 self._write_message(event.at, f"FEHLER: {event.message}", error=True)
-            case ToolFinished():
-                self._write_tool_line(event)
+            case ToolStarted() | ToolFinished():
+                self.query_one("#tool-log", ToolChat).add(event)
             case Console():
                 self._write_message(
                     event.at, event.text, error=event.level == "error", warning=event.level == "warning"
@@ -169,16 +178,9 @@ class BuddyApp(App[None]):
         label.update(f"MCP: {self.settings.url} - FEHLER: {message}")
         label.set_classes("state-error")
 
-    def _write_tool_line(self, event: ToolFinished) -> None:
-        stamp = time.strftime("%H:%M:%S", time.localtime(event.at))
-        status = "ok" if event.ok else "FEHLER"
-        line = f"{stamp}  {event.name}  {status}  {event.duration * 1000:.0f} ms  {event.summary}"
-        log = self.query_one("#tool-log", RichLog)
-        if event.ok:
-            log.write(line)
-        else:
-            color = self.get_css_variables()["error"]
-            log.write(Text(line, style=f"bold {color}"))
+    def on_list_view_selected(self, message: ToolChat.Selected) -> None:
+        if isinstance(message.item, CallItem):
+            self.push_screen(DetailScreen(message.item.record))
 
     def _write_message(self, at: float, text: str, *, error: bool = False, warning: bool = False) -> None:
         stamp = time.strftime("%H:%M:%S", time.localtime(at))
@@ -192,6 +194,9 @@ class BuddyApp(App[None]):
             log.write(line)
 
     # -- key bindings ---------------------------------------------------------
+
+    def action_toggle_view(self) -> None:
+        self.query_one("#tool-log", ToolChat).toggle_class("compact")
 
     def action_reconnect(self) -> None:
         # Bridge.reconnect() itself publishes a BridgeState event, which is how the
@@ -215,8 +220,14 @@ class BuddyApp(App[None]):
         self._start_server_worker(self.runner)
 
     async def action_quit_app(self) -> None:
+        if self._quitting:  # second q: do not wait any longer
+            self.runner.stop()
+            self.exit()
+            return
+        self._quitting = True
+        self.notify("Server wird beendet …", title="Beenden")
         self.runner.stop()
         if self._server_worker is not None:
             with contextlib.suppress(Exception):
-                await self._server_worker.wait()
+                await asyncio.wait_for(self._server_worker.wait(), QUIT_TIMEOUT_SECONDS)
         self.exit()

@@ -5,6 +5,44 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2 — 2026-09-28
+
+**Ziel:** Phase 4, TUI-Chat-Log. Zusätzlich Ralfs Zwischenmeldung: `q` hängt.
+
+**Erledigt:**
+- #4.1 MCP-Middleware `ToolCallLog` erzeugt `ToolStarted`/`ToolFinished` mit Argumenten, Antwort, Fehlercode und Session. `ToolContext` publiziert keine Events mehr. `payloads.py` für Maskierung, Platzhalter, Grenzen und Zusammenfassung.
+- #4.2 Chat-Ansicht `chat.py` mit Detailansicht und Umschaltung auf die Liste.
+- #4.3 `--log-file` (JSONL), Headless-Ausgabe von Anfrage und Antwort, Tests.
+- Bugfix Beenden: Obergrenzen beim Stoppen (uvicorn-Grace 2 s, zweites `q`, TUI-Wartezeit 5 s, Exit trotz hängender Threads mit Diagnose). Den Hänger selbst konnte ich nicht reproduzieren.
+
+**Release-Änderungen:**
+- `[feature][server]` Tool-Log als farbiger Chat mit Anfrage und Antwort, Detailansicht (Enter), Umschaltung auf die Liste (v) und maskierten Geheimnissen.
+- `[feature][server]` `--log-file` schreibt Tool-Aufrufe als JSONL mit.
+- `[bugfix][server]` `q` beendet die TUI zuverlässig. Ein zweites `q` beendet sofort.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Die `ServerMiddleware` des MCP-SDK 2.2 ist der richtige Ort für Request-Logging: Sie sieht die Rohargumente und das fertige `CallToolResult`.
+- In SDK 2.x sind die Konstruktoren von `mcp.types` snake_case (`mime_type`, `is_error`, `structured_content`); `model_dump(by_alias=True)` liefert die camelCase-Wire-Form.
+- Die Ursache des `q`-Hängers ist unbestätigt. Kandidaten: ein Bridge-Aufruf, der in `asyncio.to_thread` blockiert, oder eine Verbindung, die Claude Code offen hält. Kommt die Diagnosezeile „beende trotz hängender Threads (…)“, nennt sie den Thread.
+- Heredocs mit Python-Code scheitern in Git Bash gelegentlich am Quoting. Längere Skripte deshalb als Datei im Scratchpad ablegen.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Logging auf Protokollebene (98, bestätigt)
+- Nicht übernehmen: CSS-Details der Chat-Ansicht
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 63 Tests Projekt-Python ✅, 137 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: G11 (Chat-Log sichten) und die Bestätigung des `q`-Fixes durch Ralf stehen aus.
+
+**Nächste Session:**
+- S3 (Phase 2): #2.1 Spike zur Addon-Manager-API. Live-Katalogabruf nur mit Ralfs Zustimmung.
+
+---
+
 ## Session 1 — 2026-09-28
 
 **Ziel:** Phase 1 – Design-Regelwerk, kompakte Instructions, `get_design_rules`, Resource.

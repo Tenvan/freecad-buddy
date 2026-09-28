@@ -22,15 +22,16 @@ Enthaltene Aufgaben: #4.1, #4.2, #4.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #4.1 | Neues Event `ToolStarted(call_id, name, arguments, session)`, `ToolFinished` erweitert um `result` bzw. `error` (Code, Nachricht, Hinweis). Zentrale Aufbereitung: Maskierung (Schlüssel wie token/authorization/password sowie Werte im Token-Format), Bilder als `[PNG n KB]`, Größenlimit pro Payload für die Anzeige, Volltext im Speicher begrenzt | Geplant | `server` | — | 2 | AC-14, AC-15 |
-| #4.2 | Chat-Ansicht in der TUI (Textual): Anfrage-Blase (Akzentfarbe) mit Tool, Session und formatiertem JSON. Antwort-Blase grün, gelb bei Warnungen, rot bei Fehler, mit Dauer. Laufende Aufrufe mit Spinner. Syntax-Highlighting für JSON, Kürzung mit „… (+N Zeilen)“, Detailansicht per Enter bzw. Klick (Modal mit vollem JSON, kopierbar), Umschalten per `v` auf Einzeilen-Liste (OF-08), höchstens 1 000 Einträge. Virtualisierte Darstellung, falls der Lasttest das verlangt | Geplant | `server` | #4.1 | 4 | AC-14, AC-15 |
-| #4.3 | Optionales JSONL-Log `--log-file` (OF-07) mit Rotation, gleiche maskierte Daten. Headless-Ausgabe (`--headless`) zeigt Anfrage und Antwort kompakt. Tests: Pilot-Snapshot, Maskierung, Bild-Platzhalter, Lasttest, JSONL-Inhalt | Geplant | `server` | #4.2 | 2 | AC-15 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #4.1 | Die Events kommen jetzt aus einer MCP-Middleware (`calllog.ToolCallLog`) statt aus `ToolContext`. Sie sieht jeden `tools/call` mit den Originalargumenten und der fertigen Antwort, dadurch sind alle Tools abgedeckt, auch die, die der Server selbst beantwortet. `payloads.py` übernimmt maskieren (Schlüssel, bekannte Tokens, Bearer, tokenartige Strings), Bild-Platzhalter, 200 000-Zeichen-Grenze und Zusammenfassung. Die Session wird als `<clientInfo.name> #n` beschriftet | in 98 notiert | 2026-09-28 |
+| #4.2 | `chat.py`: `ToolChat` (ListView) mit `CallItem` aus Anfrage- und Antwort-Blase. Die Rahmenfarbe zeigt den Zustand (läuft, ok, Warnung, Fehler), JSON wird hervorgehoben, Inhalte auf 8 Zeilen gekürzt. Enter öffnet `DetailScreen` (TextArea, `c` kopiert), `v` schaltet auf die Einzeilen-Liste um. Events werden gepuffert und einmal pro Frame angewendet, höchstens 1 000 Einträge | keins | 2026-09-28 |
+| #4.3 | `--log-file` (JSONL, maskiert, Rotation ab 10 MB auf `.1`). Headless-Ausgabe zeigt `→ Anfrage` und `← Antwort`. Tests: `test_payloads.py` (5), Chat-Tests in `test_tui.py` (Farben, Detailansicht, Umschalten, Last 10 000 × 50 KB) | keins | 2026-09-28 |
+| Bugfix | `q` in der TUI hing laut Ralf. Nicht reproduzierbar, weder mit offenem SSE-Stream noch mit echter TUI, Bridge und Client. Abgesichert an drei Stellen: uvicorn `timeout_graceful_shutdown=2`, `AppStatus.should_exit` beim Stop, zweites `q` erzwingt das Beenden, TUI wartet höchstens 5 s, hängende Threads werden nach 2 s genannt und der Prozess endet trotzdem. Tests: `test_stop_finishes_quickly_while_a_client_holds_the_sse_stream`, `test_q_exits_promptly_with_real_server_and_client`, `test_cli_exits_even_if_a_thread_is_stuck` | keins | 2026-09-28 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -44,8 +45,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
-> - Nächste Session: S2
+> - Offene Aufgaben: 0 (S2 erledigt)
+> - Nächste Session: S3 (Phase 2, Addon-Manager)
 > - Relevante Dateien: `src/buddy_server/events.py`, `src/buddy_server/tui.py`, `src/buddy_server/tools.py`
 > - Architektur-Deltas: Payload-Aufbereitung im EventBus
-> - Startpunkt: #4.1
+> - Startpunkt: #2.1 in `02-addon-manager.md`

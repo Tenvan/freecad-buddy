@@ -9,11 +9,14 @@ from typing import Any
 from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 
+from buddy_bridge.tokens import read_token
 from buddy_server import __version__
 from buddy_server.bridge import Bridge
+from buddy_server.calllog import ToolCallLog
 from buddy_server.config import Settings
 from buddy_server.design_rules import build_instructions
 from buddy_server.events import Console, EventBus, SessionsChanged
+from buddy_server.payloads import Masker
 from buddy_server.prompts import register_prompts
 from buddy_server.tools import NameCollector, ToolContext, register_tools
 
@@ -108,8 +111,13 @@ def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPSer
     ctx = ToolContext(bridge, bus)
     # Instructions only mention registered tools, so collect the names before creating the server.
     available = set(register_tools(NameCollector(), ctx, settings.allow_python))
+    secrets = [settings.mcp_token(), read_token(settings.bridge_token_path) or ""]
     mcp = MCPServer(
-        "FreeCAD Buddy", instructions=build_instructions(available), version=__version__, log_level="WARNING"
+        "FreeCAD Buddy",
+        instructions=build_instructions(available),
+        version=__version__,
+        log_level="WARNING",
+        middleware=[ToolCallLog(bus, Masker(secrets))],
     )
     names = register_tools(mcp, ctx, settings.allow_python)
     register_prompts(mcp, ctx, set(names))

@@ -23,7 +23,7 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 | Planung | RPC-Vertrag | Job-Muster für lang laufende Methoden (Addon-Installation), alle übrigen Methoden bleiben synchron mit bestehenden Timeouts | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
 | Planung | Security | Die Addon-Installation braucht dasselbe doppelte Opt-in wie `execute_python` plus Bestätigung im FreeCAD-Dialog. Tests arbeiten offline mit Fixtures | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
 | Planung | Core / Tools | Die Kategorie Design-Tools umfasst zusammengesetzte Core-Funktionen mit einer Transaktion. Sie entstehen nur im Code, Vorschläge kommen über `propose_design_tool` | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
-| Planung | Server / EventBus | Tool-Events tragen aufbereitete Payloads (maskiert, gekürzt, Bilder ersetzt). TUI, Headless-Ausgabe und JSONL-Log lesen nur diese Daten | `docs/architecture.md` | `docs/architecture.md` | offen (vorgeschlagen) |
+| S2 | Server / EventBus | Tool-Events entstehen in der MCP-Middleware `ToolCallLog` (Protokollebene) statt in `ToolContext`, sie tragen aufbereitete Payloads (`payloads.py`: maskiert, gekürzt, Bilder ersetzt). TUI, Headless-Ausgabe und JSONL-Log lesen nur diese Daten | `docs/architecture.md` | `docs/architecture.md` | offen (bestätigt in S2) |
 
 ## Neue oder geänderte Architekturregeln
 

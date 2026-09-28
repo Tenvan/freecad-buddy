@@ -58,9 +58,17 @@ uv run freecad-buddy
 uv run freecad-buddy --print-claude-command
 ```
 
-Tasten in der TUI: `r` Bridge neu verbinden, `c` Claude-Befehl kopieren, `p` `execute_python` umschalten (Server-Neustart), `q` beenden.
+Die TUI zeigt jeden Tool-Aufruf als Chat: Die Anfrage-Blase enthält Tool, Client und Argumente, die Antwort-Blase das Ergebnis. Sie ist grün bei Erfolg, gelb bei Warnungen und rot bei Fehlern, jeweils mit Dauer. Lange Inhalte werden gekürzt, Screenshots erscheinen als Platzhalter, Tokens werden maskiert.
 
-Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless` (ohne TUI, Log auf stderr), `--allow-python`.
+Tasten in der TUI:
+- `Enter`: vollständige Anfrage und Antwort, darin kopiert `c`
+- `v`: zwischen Chat und Einzeilen-Liste wechseln
+- `r`: Bridge neu verbinden
+- `c`: Claude-Befehl kopieren
+- `p`: `execute_python` umschalten (mit Server-Neustart)
+- `q`: beenden (ein zweites `q` beendet sofort)
+
+Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless` (ohne TUI, Log auf stderr), `--allow-python`, `--log-file <pfad>` (Tool-Aufrufe als JSONL, maskiert, rotiert ab 10 MB).
 
 ## Nutzung
 
