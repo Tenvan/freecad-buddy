@@ -5,6 +5,104 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 4a — 2026-09-28 (Ralfs Direktauftrag: Opt-in-Standard, Button-Paare)
+
+**Ziel:** `--allow-addon-install` als Standard; die Schalter in FreeCAD wie „Bridge starten/stoppen“ als zwei Buttons.
+
+**Erledigt:**
+- Server: `allow_addon_install` standardmäßig an, `--allow-addon-install/--no-allow-addon-install`, Env `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0` schaltet ab.
+- Bridge: `commands.py` mit `_Setting`/`_SetSetting`; je ein aktiver Button für an und aus (Autostart, Python, Addon-Installation). `Toggle*`-Befehle entfallen. Erzwingt eine Umgebungsvariable den Zustand, warnt die Konsole statt still nichts zu tun.
+- Headless-Bridge bietet `addons.install` nie an (kein Dialog möglich). Der Doppel-Opt-in-Test hing sonst von Ralfs FreeCAD-Einstellung ab.
+
+**Release-Änderungen:**
+- `[feature][server]` `install_addon` ist serverseitig standardmäßig verfügbar, FreeCAD-Freischaltung und Dialog bleiben.
+- `[feature][bridge]` Workbench-Schalter als Button-Paare (an/aus).
+
+**Erkenntnisse:**
+- Die Headless-Bridge liest die echten FreeCAD-Einstellungen des Nutzers. Tests dürfen sich darauf nicht verlassen.
+
+**Validierung:**
+- `poe check` grün: ruff, pyright 0 Fehler, 91 Projekt-Python-Tests, 157 FreeCAD-Python-Tests.
+- GUI: Buttons in der Workbench offen (Teil von G9).
+
+**Nächste Session:**
+- S5 (Phase 3).
+
+---
+
+## Session 4 — 2026-09-28
+
+**Ziel:** Phase 2, Addon-Installation mit doppeltem Opt-in, Dialog, Job-Muster und Aufräumen. Zusätzlich Ralfs neue Vorgabe: MCP-Ausgaben auf Englisch.
+
+**Erledigt:**
+- #2.4 `install.py` (Job-Modell, Dialog, AM-Backend, Fake-Backend-Schnittstelle), Opt-ins in FreeCAD und im Server, Tool `install_addon`.
+- #2.5 Tests (Core, Server, Bridge). Kompatibilitätstest der AM-API mit echten Objekten aus dem Fixture. Import-Wächter mit gezielter Ausnahme für den Adapter.
+- Spec-Stand 3: R-13, AC-17, #5.4 und OF-09 aufgenommen. Die neuen S4-Texte sind bereits englisch, der Bestand folgt in S6.
+- Ralf hat die manuelle Probe von `search_addons` als einwandfrei bestätigt.
+
+**Release-Änderungen:**
+- `[feature][addons]` `install_addon` (opt-in auf beiden Seiten) installiert Addons und Makros über FreeCADs Addon Manager nach Bestätigung im FreeCAD-Dialog.
+- `[feature][bridge]` Workbench-Befehl „Addon-Installation umschalten“.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- AM-Module lassen sich auch im headless FreeCAD-Python importieren. `AddonCatalog.get_addon_from_id` und `Addon.from_macro(Macro.from_cache(...))` funktionieren offline, das ist ideal für den Kompatibilitätstest.
+- Beim asynchronen Workbench-Install muss das Aufräumen am Job-Ende passieren, nicht im `finally` des Starts.
+- `ruff format` bricht lange Zeilen um. Ersetzungsskripte deshalb auf String-Inhalte zielen lassen, nicht auf ganze Statements.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Job-Muster und Sicherheitsmodell (98, bestätigt)
+- Nicht übernehmen: Details des Fake-Backends
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 90 Tests Projekt-Python ✅, 152 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: G9 (Dialog, Ablehnen und Zustimmen an einem echten Addon) ist offen und braucht Ralf mit beiden Opt-ins und einem FreeCAD-Neustart.
+
+**Nächste Session:**
+- S5: #3.1 Grid-Recherche (Kandidaten aus S3: HexFill, FreeGrid, Gridfinity, CarteGrid, lattice2, Waben-Makros), #3.2 Vorschlagsliste (Tool-Budget klären), #3.3 `hole_grid`.
+
+---
+
+## Session 3 — 2026-09-28
+
+**Ziel:** Phase 2, Spike Addon-Manager-API, Katalogsuche und Details.
+
+**Erledigt:**
+- #2.1 Spike per Code-Analyse (Agent) plus ein einmaliger Katalog-Download mit Ralfs Zustimmung. OF-02 ist abweichend von der Annahme entschieden: Suche im Server, Status und Installation in der Bridge.
+- #2.2 Katalog-Parser, Service mit Cache, SHA-256 und Offline-Fallback, Tool `search_addons`, Bridge-Methode `addons.status`, Fixture aus dem echten Katalog.
+- #2.3 Tool `get_addon` mit README-Auszug als markiertem Fremdtext.
+- Probe auf dem vollständigen Katalog (438 Einträge): Die Suche „grid“ liefert FreeGrid, Gridfinity, CarteGrid und das Makro „BSurf from grid“, „perforation“ liefert HexFill, „honeycomb“ drei Makros plus HexFill. Das ist Vorarbeit für die Grid-Recherche (S5).
+
+**Release-Änderungen:**
+- `[feature][server]` `search_addons`: den offiziellen Addon-Katalog durchsuchen, mit Kompatibilität und Installationsstatus, offline aus dem Cache.
+- `[feature][server]` `get_addon`: Details, Abhängigkeiten und README-Auszug eines Addons oder Makros.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- AM-Fallen für S4: Die Rückgabe von `AddonInstaller.run()` ist auch bei Fehlern `True`, nur `success` zählt. Der Konstruktor lädt ohne `allow_list` blockierend `constraints.txt`. `NetworkManager.InitializeNetworkManager()` muss im Hauptthread laufen. Downloads kommen von `addons.freecad.org/CatalogCache`.
+- Der AM ignoriert offline seinen lokalen Cache (`new_cache_available` wirft außerhalb des `try`).
+- Fremdinhalte (package.xml, README) sind Angriffsfläche: XML ohne DTD, README als Fremdtext markiert und nicht als Anweisung verwendet.
+- Tool-Budget wird knapp, siehe Risiko im Sprint-Index.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Aufteilung Server/Bridge für Addons (98, bestätigt)
+- Nicht übernehmen: Zeilennummern aus dem Spike
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 82 Tests Projekt-Python ✅, 144 Tests FreeCAD-Python ✅.
+- GUI-/manuelle Abnahme: keine in dieser Session. Live-Suche in Claude Code nach Server-Neustart möglich.
+
+**Nächste Session:**
+- S4: #2.4 Installation mit Opt-in, Dialog, Job-Muster; #2.5 Tests.
+
+---
+
 ## Session 2c — 2026-09-28 (Ralfs Direktaufträge: Auswahlgrößen, kompakter Chat)
 
 **Ziel:** Zwei Rückmeldungen aus dem Live-Test umsetzen.

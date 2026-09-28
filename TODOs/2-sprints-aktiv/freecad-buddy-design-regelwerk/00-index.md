@@ -1,10 +1,14 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
 
-> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 2 freigegeben
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-28 │ Status: 🔵 Aktiv – Spec-Stand 4 freigegeben
 
 ## Spezifikation
 
-> Spec-Stand: 2 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen; Stand 2 (R-12, AC-16) durch Ralfs Auftrag im Chat, 2026-09-28 („gleich in Regelwerk einbauen“)
+> Spec-Stand: 4 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-28, inklusive der Annahmen OF-01 bis OF-08 als Entscheidungen; Stand 2 (R-12, AC-16) durch Ralfs Auftrag im Chat, 2026-09-28 („gleich in Regelwerk einbauen“); Stand 3 (R-13, AC-17) durch Ralfs Auftrag im Chat, 2026-09-28 („keinen deutschen Text mehr im MCP-Server“); Stand 4 (R-07 geändert) durch Ralfs Auftrag im Chat, 2026-09-28 („--allow-addon-install als default setzen“)
+>
+> **Delta Stand 4 (2026-09-28):** Der Server bietet `install_addon` standardmäßig an (abschaltbar mit `--no-allow-addon-install` oder `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0`). Die Freischaltung in FreeCAD und der Bestätigungsdialog jeder Installation bleiben Pflicht, eine Headless-Bridge bietet die Installation nie an. Die FreeCAD-Schalter (Autostart, Python, Addon-Installation) sind je zwei Buttons wie „Bridge starten/stoppen“. Neu: Änderung an R-07, AC-08 unverändert.
+>
+> **Delta Stand 3 (2026-09-28):** Alle Ausgaben des MCP-Servers sind neutral auf Englisch, das umfasst Tool-Beschreibungen, Ergebnisse, Fehler, Hinweise, Regelwerk, Instructions und Prompts. Neuer Code gilt ab sofort, der Bestand wird am Sprint-Schluss umgestellt (#5.4). Doku, TODOs und Chat bleiben deutsch. Neu: R-13, AC-17, #5.4.
 >
 > **Delta Stand 2 (2026-09-28):** Ansichtsregel. Das Bauteil soll immer komplett sichtbar und leicht isometrisch dargestellt werden, als erster und letzter Schritt. Neu: R-12, AC-16, Aufgabe #1.6 und das Tool `set_view`. Der übrige Umfang bleibt unverändert.
 
@@ -45,11 +49,12 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | R-04 | **Design-Tool-Regel:** Eine Aufgabe gilt als wiederkehrend-komplex, wenn sie im Projekt mindestens zum zweiten Mal vorkommt oder ≥ 5 Tool-Aufrufe braucht. Dann prüft der Agent in dieser Reihenfolge: vorhandenes Design-Tool → fertiges Addon (`search_addons`) → `propose_design_tool`. Eine Einmallösung aus Einzelschritten ist erlaubt, der Vorschlag trotzdem Pflicht. |
 | R-05 | **Vorschlagsliste:** `propose_design_tool` speichert Vorschläge dauerhaft. Gleichnamige Vorschläge werden zusammengeführt und gezählt. Die TUI zeigt neue Vorschläge an. Umgesetzt wird ein Vorschlag als Buddy-Tool im Code, nicht zur Laufzeit. |
 | R-06 | **Addon-Suche:** `search_addons` und `get_addon` durchsuchen Workbenches, Makros und Preference Packs aus dem offiziellen Katalog. Sie zeigen Kompatibilität mit dem laufenden FreeCAD, Installationsstatus, Lizenz und Quelle. Der Cache wird mit FreeCADs Addon Manager geteilt. |
-| R-07 | **Addon-Installation:** `install_addon` ist nur verfügbar, wenn sowohl der Server (`--allow-addon-install` bzw. Env) als auch FreeCAD (Einstellung plus Workbench-Befehl) freigeschaltet sind. Jede Installation braucht deine Bestätigung in einem modalen FreeCAD-Dialog mit Name, Quelle, Lizenz, Abhängigkeiten und Standardknopf „Abbrechen“. Installiert wird über FreeCADs Installer, sodass der Addon Manager das Addon danach als installiert führt. |
+| R-07 | **Addon-Installation:** `install_addon` ist nur verfügbar, wenn sowohl der Server (standardmäßig an, abschaltbar mit `--no-allow-addon-install` bzw. Env `=0`) als auch FreeCAD (Einstellung, Workbench-Button „Addon-Installation erlauben“) freigeschaltet sind. Jede Installation braucht deine Bestätigung in einem modalen FreeCAD-Dialog mit Name, Quelle, Lizenz, Abhängigkeiten und Standardknopf „Abbrechen“. Installiert wird über FreeCADs Installer, sodass der Addon Manager das Addon danach als installiert führt. |
 | R-08 | **Lange Laufzeit:** Die Installation blockiert weder die GUI noch läuft sie in Bridge-Timeouts. Der Agent erhält Fortschritt bzw. Endergebnis, auch den nötigen FreeCAD-Neustart. |
 | R-09 | **`hole_grid`:** Ein Aufruf erzeugt Parameter im VarSet, eine vollständig bestimmte Skizze mit Startloch, ein Pocket und ein Raster. Layout `rect`, `hex` laut OF-05. Eingaben: Feldgröße oder Anzahl, Lochdurchmesser, Raster, Randabstand, Tiefe bzw. durchgehend. Das Ergebnis ist ein Undo-Schritt und bleibt über Parameter änderbar. |
 | R-11 | **Chat-Log in der TUI:** Jeder Tool-Aufruf erscheint als Paar aus Anfrage-Blase (Tool, Argumente als formatiertes JSON, MCP-Session) und Antwort-Blase (Ergebnis bzw. Fehler mit Code und Hinweis, Warnungen, Dauer). Farben unterscheiden Anfrage, Erfolg, Warnung und Fehler. Die Anfrage erscheint schon beim Start, die Antwort ergänzt sie danach, laufende Aufrufe sind sichtbar. Lange Inhalte sind gekürzt und in einer Detailansicht vollständig lesbar. Binärdaten wie Screenshots erscheinen als Platzhalter mit Größe. Geheimnisse (Tokens, Authorization) erscheinen nie. Die Oberfläche bleibt bei 1 000 Einträgen und großen Antworten flüssig. Optional wird als JSONL-Datei mitgeschrieben (OF-07). |
 | R-12 | **Ansichtsregel (Stand 2):** Nach dem ersten Basis-Feature eines Bodys (erstes `pad` bzw. additives `revolve`) setzt FreeCAD Buddy die Ansicht selbst auf iso mit `fit`, damit Ralf den Aufbau live verfolgen kann (Präzisierung Ralf, 2026-09-28: „sobald das Basis Body gesetzt ist“). Als letzten Schritt verlangt das Regelwerk `set_view`. In beiden Fällen ist das Bauteil komplett sichtbar und leicht isometrisch. Das Tool `set_view` setzt die Live-Ansicht in FreeCAD dauerhaft (iso, dimetric, trimetric, Normalansichten; `fit` passt alles ein). Ohne GUI kommt `unsupported`. |
+| R-13 | **Englische Ausgaben (Stand 3):** Alles, was der MCP-Server an Clients liefert, ist neutral auf Englisch: Instructions, Regelwerk, Prompts, Tool- und Parameterbeschreibungen, Ergebnisse, Warnungen, Hinweise und Fehlermeldungen, auch die aus Core und Bridge. Doku, TODOs, Code-Kommentare in Deutsch und der Chat mit Ralf bleiben deutsch. Offen (OF-09): FreeCAD-Oberfläche (Workbench-Befehle, Bestätigungsdialog, Konsole) und TUI. |
 | R-10 | **Budget und Doku:** höchstens 40 öffentliche Tools. `docs/tools.md` kennzeichnet Design-Tools als eigene Kategorie. |
 
 ## Nicht-Ziele
@@ -100,16 +105,17 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [x] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
 - [ ] AC-04: Die Design-Tool-Regel ist mit Kriterium und Reihenfolge (R-04) in Instructions und Thema `design_tools` formuliert. `design_part` verweist darauf.
 - [ ] AC-05: `propose_design_tool` legt Vorschläge dauerhaft ab, führt gleichnamige zusammen (Zähler) und meldet sie in der TUI. Die Liste ist über ein Tool abrufbar.
-- [ ] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
-- [ ] AC-07: `get_addon(id)` liefert Lizenz, Maintainer, Repository, letzte Aktualisierung, Abhängigkeiten (FreeCAD, Addons, Python) und einen README-Auszug.
+- [x] AC-06: `search_addons(query, kind)` liefert gerankte Treffer mit Id, Name, Art, Kurzbeschreibung, Kompatibilität mit dem laufenden FreeCAD, Installationsstatus und Quelle. Ohne Netz, aber mit Cache gibt es Treffer plus Warnung. Ohne Netz und ohne Cache kommt ein verständlicher Fehler. Eine falsche Prüfsumme wird erkannt.
+- [x] AC-07: `get_addon(id)` liefert Lizenz, Maintainer, Repository, letzte Aktualisierung, Abhängigkeiten (FreeCAD, Addons, Python) und einen README-Auszug.
 - [ ] AC-08: Ohne beide Opt-ins ist `install_addon` nicht nutzbar. Mit Opt-ins erscheint der Dialog. Bei Ablehnung kommt `user_declined` und nichts ändert sich. Bei Zustimmung wird über FreeCADs Installer installiert, das Addon gilt im Addon Manager als installiert und das Ergebnis nennt den Neustart. Weder GUI noch Bridge laufen in einen Timeout (R-08). Nachweis headless mit Fixture-Addon und simulierter Bestätigung, GUI über G9.
-- [ ] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
+- [x] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
 - [ ] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
 - [ ] AC-11: `hole_grid` erfüllt R-09 für `rect`. Das Sieb der Testplatte (34 × 27 Löcher Ø 1 mm, Raster 3 mm) lässt sich mit einem Aufruf erzeugen. Eine Parameteränderung (z. B. Raster 4 mm) aktualisiert das Modell. `hex` gemäß OF-05.
 - [ ] AC-12: Höchstens 40 öffentliche Tools. `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
 - [x] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
 - [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
 - [x] AC-16 (Stand 2): Die Ansichtsregel ist eine Kernregel der Instructions und steht direkt nach „get_model_tree lesen“. `set_view` ist registriert und setzt die Live-Ansicht, ohne GUI liefert es `unsupported`. Das erste Basis-Feature setzt die Ansicht automatisch (G12).
+- [ ] AC-17 (Stand 3): Keine deutschsprachigen Texte mehr in MCP-Ausgaben. Ein Test prüft Instructions, Regelwerk, Prompts, Tool-Schemas und typische Ergebnisse bzw. Fehler auf deutsche Wörter und Umlaute.
 - [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`hole_grid` in der GUI weiterbearbeitbar) G11 (Chat-Log in der TUI verständlich) und G12 (Ansicht nach `set_view` komplett und isometrisch) sind abgenommen oder per Scope-Entscheidung verschoben.
 
 ## Offene Fragen
@@ -117,12 +123,13 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | ID | Frage | Betroffen | Annahme bis Klärung | Verantwortlich |
 |---|---|---|---|---|
 | OF-01 | Längenbudget der Instructions: Wie viel übernimmt Claude Code? | #1.1, AC-01 | ≤ 2 000 Zeichen; wird in #1.1 an aktueller Doku geprüft | Agent (Recherche) |
-| OF-02 | Wo läuft die Katalogsuche: in FreeCAD über die Addon-Manager-Module oder im Server? | #2.1, #2.2 | ✅ Entschieden: In FreeCAD (Core), damit Cache, Kompatibilitätslogik und Installationsstatus identisch mit dem Addon Manager sind; Spike #2.1 bestätigt die technische Machbarkeit | Agent, Bestätigung Ralf |
+| OF-02 | Wo läuft die Katalogsuche: in FreeCAD über die Addon-Manager-Module oder im Server? | #2.1, #2.2 | ✅ Entschieden nach Spike #2.1 (2026-09-28), abweichend von der Annahme: **Suche und Details im Server** (eigener Cache mit SHA-256-Prüfung, asynchroner Download, blockiert die GUI nie, funktioniert offline); **Status und Installation in der Bridge** (`Mod/`, Makro-Ordner, AM-Installer). Grund: Der AM lädt offline seinen lokalen Cache nicht (Bug), schreibt beim Abruf seine Hash-Preference und blockiert den Hauptthread bis zu ~100 s | Agent (Spike), zur Kenntnis an Ralf |
 | OF-03 | Addons mit Python-Abhängigkeiten | #2.4, AC-09 | ✅ Entschieden: Ablehnen mit Hinweis auf den Addon Manager (keine pip-Installation über MCP) | Ralf |
 | OF-04 | Makros und Preference Packs installierbar oder nur suchbar? | #2.4 | ✅ Entschieden: Suchen: alle Arten. Installieren: Workbenches und Makros mit demselben Dialog, Preference Packs nur suchen | Ralf |
 | OF-05 | `hole_grid` mit Layout `hex` (versetzte Reihen) im Umfang? | #3.3, AC-11 | ✅ Entschieden: Ja, als zweites Raster mit halbem Versatz (vermutet machbar mit zwei MultiTransforms, ungeprüft); scheitert der Spike, nur `rect` plus Vorschlag | Ralf |
 | OF-07 | Chat-Log zusätzlich als JSONL-Datei mitschreiben? | #4.3, AC-15 | ✅ Entschieden: Ja, per `--log-file <pfad>` (Standard aus), rotierend ab 10 MB | Ralf |
 | OF-08 | Nur Chat-Ansicht oder umschaltbar auf die bisherige Einzeilen-Liste? | #4.2 | ✅ Entschieden: Umschaltbar per Taste `v`, Standard Chat | Ralf |
+| OF-09 | Gilt „Englisch“ auch für FreeCAD-Oberfläche (Workbench-Befehle, Bestätigungsdialog, Konsole) und TUI? | #5.4 | Nein, nur MCP-Ausgaben; UI bleibt deutsch bis zur Entscheidung | Ralf |
 | OF-06 | Versionsnummer | #5.2 | ✅ Entschieden: 0.2.0 | Ralf |
 
 ## Umsetzung und Nachweis
@@ -134,16 +141,17 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | **erfüllt** (`test_rules_only_name_registered_tools`, `test_printing_numbers_follow_the_profile`, `test_every_topic_of_r03_is_covered`) |
 | AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | **teilweise**: Regel formuliert und Kernregel (`test_instructions_are_compact_and_complete`); Tool-Schritte erscheinen, sobald `hole_grid`, `search_addons` und `propose_design_tool` existieren (S3–S5) |
 | AC-05 | Vorschlagsliste mit Zusammenführung und TUI | #3.2 / P3 | Unit- + Textual-Pilot-Test | offen |
-| AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | offen |
-| AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | offen |
-| AC-08 | Installation mit doppeltem Opt-in und Dialog | #2.4, #2.5 / P2 | Headless-Test mit Fixture-Addon und simulierter Bestätigung + G9 | offen |
-| AC-09 | Ablehnungsgründe, Aufräumen | #2.4, #2.5 / P2 | Headless-Core-Test | offen |
+| AC-06 | Suche mit Cache, Offline- und Prüfsummenfall | #2.1, #2.2 / P2 | Headless-Core-Test mit Fake-Katalog | **erfüllt** (`test_addon_service.py`: Download, Cache, offline mit/ohne Cache, falsche Prüfsumme; `test_addon_catalog.py`: Ranking; E2E `test_search_and_details_over_mcp`) |
+| AC-07 | Addon-Details | #2.3 / P2 | Headless-Core-Test | **erfüllt** (`get_addon` mit Lizenz, Maintainer, Repository, Aktualisierung, Abhängigkeiten, Kompatibilität, Status und bereinigtem README-Auszug; E2E) |
+| AC-08 | Installation mit doppeltem Opt-in und Dialog | #2.4, #2.5 / P2 | Headless-Test mit Fixture-Addon und simulierter Bestätigung + G9 | **automatisiert erfüllt** (`test_addons_install.py`: Dialog, Ablehnung, Installation, Doppelstart; `test_addon_install_tool.py`: Server-Opt-in, doppeltes Opt-in gegen Headless-Bridge); G9 in der GUI offen |
+| AC-09 | Ablehnungsgründe, Aufräumen | #2.4, #2.5 / P2 | Headless-Core-Test | **erfüllt** (Vorprüfungen installiert/inkompatibel/Python-Pakete/Addon-Abhängigkeiten/git; kein Rest nach Fehler oder Ausnahme) |
 | AC-10 | Grid-Recherche dokumentiert | #3.1 / P3 | Dokument, Live-Suche nur mit Ralfs Zustimmung | offen |
 | AC-11 | `hole_grid` | #3.3 / P3 | Headless-Core-Test + E2E Testplatte + G10 | offen |
 | AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | **erfüllt** (`test_request_and_response_bubbles_with_state_colors`; Pilot-Test mit Widget-Assertions statt Snapshot-Plugin); Sichtung G11 offen |
 | AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | **erfüllt** (`test_payloads.py`, `test_tool_chat_is_capped_under_load_and_stays_usable`, `test_enter_opens_full_detail_and_escape_closes`) |
 | AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | offen |
 | AC-16 | Ansichtsregel und `set_view` | #1.6 / P1 | Unit-Test (Instructions) + Bridge-Test headless + G12 | **erfüllt** automatisiert (`test_view_rule_is_first_core_rule_after_reading_the_tree`, `test_set_view_without_gui_is_unsupported`); G12 offen |
+| AC-17 | MCP-Ausgaben englisch | #5.4 / P5 | Unit-Test (Sprachprüfung) | offen – neuer Code ab S4 englisch |
 | AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G12 | #5.3 / P5 | Nutzerabnahme | offen |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
@@ -154,28 +162,32 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 |---|---|---|---|
 | 2026-09-28 | Regelwerk kompakt in Instructions, vollständig über `get_design_rules` und MCP-Resource, aus einer Quelle (Ralf) | Clients könnten kürzen (vermutet); weniger Kontext pro Session | server |
 | 2026-09-28 | Addon-Installation nur mit doppeltem Opt-in und Bestätigungsdialog in FreeCAD, über FreeCADs Installer (Ralf) | Addons sind fremder Code im FreeCAD-Prozess; der Addon Manager bleibt konsistent | mehrere |
+| 2026-09-28 | Server-Opt-in für `install_addon` standardmäßig an; FreeCAD-Schalter als Button-Paare (Ralf) | Eine Freischaltung weniger im Alltag; FreeCAD-Opt-in und Dialog bleiben die eigentliche Sperre | server, bridge |
 | 2026-09-28 | Design-Tool-Regel mit Vorschlagsliste; Design-Tools entstehen als Buddy-Tools im Code, nicht zur Laufzeit (Ralf) | Laufzeit-Skripte bräuchten Code-Ausführung; Code-Tools sind testbar | server, core |
 | 2026-09-28 | Tool-Log wird zur farbigen Chat-Ansicht mit Anfrage und Antwort (Ralf) | Nachvollziehbarkeit der Agentenarbeit | server |
 | 2026-09-28 | Ansichtsregel: erster und letzter Schritt `set_view` iso, alles sichtbar (Ralf, Spec-Stand 2) | Der Nutzer sieht immer das ganze Bauteil | core, server |
+| 2026-09-28 | MCP-Ausgaben neutral auf Englisch, Doku bleibt deutsch (Ralf, Spec-Stand 3) | Neutral für beliebige Clients und LLMs | server, core |
 | 2026-09-28 | GUI-Abnahme G1–G8 aus dem Vorgänger-Sprint wird als Phase 5 mitgeführt (Ralf) | Abnahme zusammen mit neuen GUI-Prüfungen G9/G10 | keiner |
 
 ## Gesamtfortschritt
 
-[████░░░░░░] 45% — 9 von 20 Aufgaben erledigt
+[███████░░░] 67% — 14 von 21 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
 *Keine Blocker.*
+
+**Risiko Tool-Budget (R-10, ≤ 40):** Aktuell 37 öffentliche Tools plus `execute_python`. Geplant sind noch `install_addon` (opt-in), `propose_design_tool`, `list_design_tool_proposals` und `hole_grid` → 41 bis 42. Vorschlag für S5: Die Vorschlagsliste in `propose_design_tool` integrieren (ohne Argumente = Liste) und opt-in-Tools nicht mitzählen. Entscheidung Ralf in S5.
 
 ## Phasen-Übersicht
 
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
 | 1 — Design-Regelwerk & Instructions | [01-design-regelwerk.md](01-design-regelwerk.md) | `server` | 0 | 6 | [██████████] 100% |
-| 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 5 | 0 | [░░░░░░░░░░] 0% |
+| 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 0 | 5 | [██████████] 100% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 3 | 0 | [░░░░░░░░░░] 0% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |
-| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 3 | 0 | [░░░░░░░░░░] 0% |
+| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 4 | 0 | [░░░░░░░░░░] 0% |
 
 ## 📅 Session-Übersicht
 
@@ -183,10 +195,10 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 |---|---|---|---|
 | S1 | Phase 1 | Regelwerk-Quelle, kompakte Instructions, `get_design_rules`, Resource | ✅ Erledigt (2026-09-28) |
 | S2 | Phase 4 | TUI-Chat-Log: Events mit Payload, Chat-Blasen, Detailansicht, JSONL | ✅ Erledigt (2026-09-28) |
-| **→ S3** | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | **Nächste** |
-| S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | Geplant |
-| S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | Geplant |
-| S6 | Phase 5 | Doku, Release 0.2.0, GUI-Abnahme G1–G11 | Geplant |
+| S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | ✅ Erledigt (2026-09-28) |
+| S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | ✅ Erledigt (2026-09-28) |
+| **→ S5** | Phase 3 | Grid-Recherche, `propose_design_tool`, `hole_grid` | **Nächste** |
+| S6 | Phase 5 | Englische MCP-Ausgaben, Doku, Release 0.2.0, GUI-Abnahme G1–G12 | Geplant |
 
 ## 🔗 Dependency-Übersicht
 

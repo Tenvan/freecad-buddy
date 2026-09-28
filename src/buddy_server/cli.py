@@ -44,6 +44,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="execute_python freischalten (wie FREECAD_BUDDY_ALLOW_PYTHON=1)",
     )
     parser.add_argument(
+        "--allow-addon-install",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="install_addon anbieten (Standard an; aus mit --no-allow-addon-install oder "
+        "FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0). FreeCAD braucht eigene Freischaltung und fragt jedes Mal nach",
+    )
+    parser.add_argument(
         "--log-file",
         type=Path,
         metavar="PFAD",
@@ -58,6 +65,8 @@ def settings_from(args: argparse.Namespace) -> Settings:
     settings = Settings(port=args.port, bridge_port=args.bridge_port)
     if args.allow_python:
         settings.allow_python = True
+    if args.allow_addon_install is not None:
+        settings.allow_addon_install = args.allow_addon_install
     return settings
 
 

@@ -1,0 +1,239 @@
+{
+ "lattice2": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/DeepSOIC/Lattice2",
+   "git_ref": "master",
+   "zip_url": "https://github.com/DeepSOIC/Lattice2/archive/refs/heads/master.zip",
+   "note": null,
+   "branch_display_name": "master",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n  <name>Lattice2 Workbench</name>\n  <description>Tools and arrays of all sorts and kinds, and local coordinate systems</description>\n  <version>1.1</version>\n  <date>2025-12-13</date>\n  <maintainer email=\"vv.titov@gmail.com\">DeepSOIC</maintainer>\n  <license file=\"LICENSE\">LGPL-2.0-or-later</license>\n  <url type=\"repository\" branch=\"master\">https://github.com/DeepSOIC/Lattice2</url>\n  <url type=\"bugtracker\">https://github.com/DeepSOIC/Lattice2/issues</url>\n  <url type=\"documentation\" branch=\"master\">https://github.com/DeepSOIC/Lattice2/wiki</url>\n  <icon>PyResources/icons/Lattice2.svg</icon> <!-- If you include your icon here, you don't have to submit it to the main FreeCAD repo -->\n\n  <content>\n    <workbench>\n      <classname>Lattice2Workbench</classname>\n      <subdirectory>./</subdirectory>\n      <tag>array</tag>\n      <tag>assembly</tag>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-07-15T20:36:38+02:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/lattice2/0-master.zip",
+   "git_hash": "9595449b80a634179ecaeae2525b91c93dc52cb1",
+   "git_tag": null
+  }
+ ],
+ "Gridfinity": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/Stu142/FreeCAD-Gridfinity-Workbench",
+   "git_ref": "master",
+   "zip_url": "https://github.com/Stu142/FreeCAD-Gridfinity-Workbench/archive/refs/heads/master.zip",
+   "note": null,
+   "branch_display_name": "master",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n\n  <name>Gridfinity Workbench</name>\n\n  <description>This Workbench will generate several variations of parametric Gridfinity bins and baseplates that can be easily customized. </description>\n\n  <version>0.12.4</version>\n\n  <date>2026-03-03</date>\n\n  <license file=\"LICENSE\">lgpl-2.1-or-later</license>\n\n  <url branch=\"master\" type=\"repository\">https://github.com/Stu142/FreeCAD-Gridfinity-Workbench</url>\n\n  <url type=\"readme\">https://github.com/Stu142/FreeCAD-Gridfinity-Workbench/blob/master/README.md</url>\n\n  <author email=\"stu142design@gmail.com\">Stuart</author>\n\n  <icon>freecad/gridfinity_workbench/icons/gridfinity_workbench_icon.svg</icon>\n\n  <content>\n    <workbench>\n      <classname>GridfinityWorkbench</classname>\n      <subdirectory>./</subdirectory>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-03-03T22:14:59-04:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/Gridfinity/0-master.zip",
+   "git_hash": "6caeb02812bf3b389110c205c6fd48638353e957",
+   "git_tag": "v0.12.4"
+  }
+ ],
+ "FreeGrid": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/instancezero/in3dca-freegrid.git",
+   "git_ref": "main",
+   "zip_url": "https://github.com/instancezero/in3dca-freegrid.git/archive/refs/heads/main.zip",
+   "note": null,
+   "branch_display_name": "main",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n\n  <name>FreeGrid Workbench</name>\n\n  <description>A simple tools workbench for generating FreeGrid storage system components.</description>\n\n  <version>2.2.0</version>\n\n  <date>2025-01-22</date>\n\n  <maintainer>Alan Langford</maintainer>\n\n  <maintainer>Michael K Johnson</maintainer>\n\n  <maintainer email=\"hasecilu@tuta.io\">hasecilu</maintainer>\n\n  <license file=\"LICENSE\">AGPL-3.0-or-later</license>\n\n  <pythonmin>3.6.0</pythonmin>\n\n  <url type=\"website\">https://in3d.ca/freegrid-an-open-grid-based-3d-printed-storage-system/</url>\n\n  <url branch=\"main\" type=\"repository\">https://github.com/instancezero/in3dca-freegrid</url>\n\n  <url type=\"bugtracker\">https://github.com/instancezero/in3dca-freegrid/issues</url>\n\n  <url type=\"readme\">https://github.com/instancezero/in3dca-freegrid/blob/main/README.md</url>\n\n  <url type=\"documentation\">https://wiki.freecad.org/FreeGrid_Workbench</url>\n\n  <url type=\"discussion\">https://forum.freecad.org/viewtopic.php?p=613002</url>\n\n  <author>Alan Langford</author>\n\n  <tag>storage</tag>\n\n  <tag>parametric</tag>\n\n  <tag>3d-printing</tag>\n\n  <icon>freecad/freegrid/resources/icons/FreeGrid.svg</icon>\n\n  <content>\n    <workbench>\n      <name>FreeGrid Workbench</name>\n      <icon>resources/icons/FreeGrid.svg</icon>\n      <subdirectory>freecad/freegrid</subdirectory>\n      <classname>FreeGridWorkbench</classname>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2025-01-28T13:42:45-06:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/FreeGrid/0-main.zip",
+   "git_hash": "949de5740deb175e6974a2f3c65b253ea823b28e",
+   "git_tag": null
+  }
+ ],
+ "CarteGrid": [
+  {
+   "freecad_min": {
+    "version_as_list": [
+     1,
+     1,
+     0,
+     ""
+    ]
+   },
+   "freecad_max": null,
+   "repository": "https://github.com/MarcBresson/CarteGrid",
+   "git_ref": "main",
+   "zip_url": "https://github.com/MarcBresson/CarteGrid/archive/refs/heads/main.zip",
+   "note": null,
+   "branch_display_name": "main",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n  <name>CarteGrid - Batch export from varset</name>\n  <description>Generate and batch-export multiple variations of a parametric model, to whatever\n    format FreeCAD can produce. Define a parameter grid over an App::VarSet, preview\n    the resulting variations and their names, then export a chosen set of objects per\n    variation.</description>\n  <version>1.3.1</version>\n  <date>2026-07-08</date>\n  <maintainer email=\"m.bresson@mailo.eu\">Marc Bresson</maintainer>\n  <author email=\"m.bresson@mailo.eu\">Marc Bresson</author>\n  <license file=\"LICENSE\">MIT</license>\n  <url type=\"repository\" branch=\"main\">https://github.com/MarcBresson/cartegrid</url>\n  <url type=\"bugtracker\">https://github.com/MarcBresson/cartegrid/issues</url>\n  <url type=\"documentation\">https://cartegrid.readthedocs.io/</url>\n  <url type=\"readme\">https://github.com/MarcBresson/CarteGrid/blob/main/README.md</url>\n  <icon>Resources/icons/favicon.svg</icon>\n  <content>\n    <other />\n  </content>\n  <freecadmin>1.1.0</freecadmin>\n  <pythonmin>3.11</pythonmin>\n  <tag>parametric</tag>\n  <tag>varset</tag>\n  <tag>batch</tag>\n  <tag>export</tag>\n  <tag>variations</tag>\n  <tag>grid</tag>\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-09-09T08:45:35+02:00",
+   "curated": false,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/CarteGrid/0-main.zip",
+   "git_hash": "7abbcab0f8e436d02d29a827b289ca1fda37bd41",
+   "git_tag": null
+  }
+ ],
+ "3D_Printing_Tools": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/mark1791/3D_Printing_Tools",
+   "git_ref": "master",
+   "zip_url": "https://github.com/mark1791/3D_Printing_Tools/archive/refs/heads/master.zip",
+   "note": null,
+   "branch_display_name": "master",
+   "metadata": null,
+   "last_update_time": "2019-06-30T23:01:34+01:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/3D_Printing_Tools/0-master.zip",
+   "git_hash": "e7ea9cd05dc11d5503115522b87cac7704eafc0e",
+   "git_tag": null
+  }
+ ],
+ "btl": [
+  {
+   "freecad_min": null,
+   "freecad_max": {
+    "version_as_list": [
+     1,
+     0,
+     99,
+     ""
+    ]
+   },
+   "repository": "https://github.com/knipknap/better-tool-library",
+   "git_ref": "main",
+   "zip_url": "https://github.com/knipknap/better-tool-library/archive/refs/heads/main.zip",
+   "note": null,
+   "branch_display_name": "main",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\">\n  <name>Better Tool Library</name>\n  <description>A FreeCAD Path Addon to manage your tool library.</description>\n  <icon>btl/resources/icons/tool-library.svg</icon>\n  <version>0.9.9</version>\n  <maintainer email=\"knipknap@gmail.com\">Samuel Abels</maintainer>\n  <license file=\"LICENSE\">MIT</license>\n  <url type=\"repository\" branch=\"main\">https://github.com/knipknap/better-tool-library</url>\n  <url type=\"readme\">https://github.com/knipknap/better-tool-library/blob/main/README.md</url>\n\n  <content>\n    <workbench>\n      <classname>BetterToolLibrary</classname>\n      <subdirectory>./</subdirectory>\n      <freecadmin>0.19.0</freecadmin>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "scipy~=1.11.2\n",
+    "metadata_txt": "pylibs=\n",
+    "icon_data": ""
+   },
+   "last_update_time": "2025-08-28T07:51:06-03:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/btl/0-main.zip",
+   "git_hash": "756ca1675e342cb6398c695835e52d55db9b46ea",
+   "git_tag": null
+  }
+ ],
+ "BillOfMaterials": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/APEbbers/BillOfMaterials-WB",
+   "git_ref": "main",
+   "zip_url": "https://github.com/APEbbers/BillOfMaterials-WB/archive/refs/heads/main.zip",
+   "note": null,
+   "branch_display_name": "main",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n\n  <name>Bill of Materials Workbench</name>\n\n  <description>A workbench to create Bill of Materials (BoM) independent of the assembly workbench of your choice.</description>\n\n  <version>1.3.3</version>\n\n  <date>2024-01-03</date>\n\n  <maintainer email=\"business@apebbers.nl\">Paul Ebbers</maintainer>\n\n  <license file=\"LICENSE\">LGPL-3.0-or-later</license>\n\n  <pythonmin>3.8.0</pythonmin>\n\n  <url type=\"website\">https://github.com/APEbbers/BillOfMaterials-WB/wiki</url>\n\n  <url branch=\"main\" type=\"repository\">https://github.com/APEbbers/BillOfMaterials-WB</url>\n\n  <url type=\"readme\">https://github.com/APEbbers/BillOfMaterials-WB/blob/main/README.md</url>\n\n  <icon>Resources/Icons/BillOfMaterialsWB.svg</icon>\n\n  <content>\n    <workbench>\n      <freecadmin>0.21.0</freecadmin>\n      <icon>Resources/Icons/BillOfMaterialsWB.svg</icon>\n      <depend optional=\"False\" type=\"automatic\">Spreadsheet</depend>\n      <depend optional=\"False\" type=\"automatic\">TechDraw</depend>\n      <depend optional=\"True\" type=\"python\">openpyxl</depend>\n      <depend optional=\"False\" type=\"python\">inspect</depend>\n      <depend optional=\"False\" type=\"python\">tkinter</depend>\n      <depend optional=\"False\" type=\"python\">getpass</depend>\n      <depend optional=\"False\" type=\"python\">matplotlib</depend>\n      <depend optional=\"False\" type=\"python\">math</depend>\n      <!-- <depend optional=\"False\" type=\"python\">shapely</depend> -->\n      <classname>BillOfMaterialsWB</classname>\n      <subdirectory>./</subdirectory>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-07-25T22:18:56+02:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/BillOfMaterials/0-main.zip",
+   "git_hash": "8d1e428ea211139a3985340c7677dc6a73632b63",
+   "git_tag": "v1.3.3"
+  },
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/APEbbers/BillOfMaterials-WB",
+   "git_ref": "Develop",
+   "zip_url": "https://github.com/APEbbers/BillOfMaterials-WB/archive/refs/heads/Develop.zip",
+   "note": null,
+   "branch_display_name": "Develop",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n\n  <name>Bill of Materials Workbench</name>\n\n  <description>A workbench to create Bill of Materials (BoM) independent of the assembly workbench of your choice.</description>\n\n  <version>1.3.3</version>\n\n  <date>2024-01-03</date>\n\n  <maintainer email=\"business@apebbers.nl\">Paul Ebbers</maintainer>\n\n  <license file=\"LICENSE\">LGPL-3.0-or-later</license>\n\n  <pythonmin>3.8.0</pythonmin>\n\n  <url type=\"website\">https://github.com/APEbbers/BillOfMaterials-WB/wiki</url>\n\n  <url branch=\"main\" type=\"repository\">https://github.com/APEbbers/BillOfMaterials-WB</url>\n\n  <url type=\"readme\">https://github.com/APEbbers/BillOfMaterials-WB/blob/main/README.md</url>\n\n  <icon>Resources/Icons/BillOfMaterialsWB.svg</icon>\n\n  <content>\n    <workbench>\n      <freecadmin>0.21.0</freecadmin>\n      <icon>Resources/Icons/BillOfMaterialsWB.svg</icon>\n      <depend optional=\"False\" type=\"automatic\">Spreadsheet</depend>\n      <depend optional=\"False\" type=\"automatic\">TechDraw</depend>\n      <depend optional=\"True\" type=\"python\">openpyxl</depend>\n      <depend optional=\"False\" type=\"python\">inspect</depend>\n      <depend optional=\"False\" type=\"python\">tkinter</depend>\n      <depend optional=\"False\" type=\"python\">getpass</depend>\n      <depend optional=\"False\" type=\"python\">matplotlib</depend>\n      <depend optional=\"False\" type=\"python\">math</depend>\n      <!-- <depend optional=\"False\" type=\"python\">shapely</depend> -->\n      <classname>BillOfMaterialsWB</classname>\n      <subdirectory>./</subdirectory>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-07-25T22:19:50+02:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/BillOfMaterials/1-Develop.zip",
+   "git_hash": "fab825a967a2289ccd3679036217b2aff1cf1293",
+   "git_tag": null
+  }
+ ],
+ "parts_library": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/FreeCAD/FreeCAD-library",
+   "git_ref": "master",
+   "zip_url": "https://github.com/FreeCAD/FreeCAD-library/archive/refs/heads/master.zip",
+   "note": null,
+   "branch_display_name": "master",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n  <name>Parts Library</name>\n  <description>A community-maintained library of ready-made parts for FreeCAD, in FCStd, STEP, STL and BREP formats, organized by family: mechanical, electrical, electronic, architectural, medical, hydraulic, HVAC, piping and more. Includes the PartsLibrary macro, which adds a browser panel to FreeCAD from which parts can be inserted into the active document by double-clicking them. Note that the library is very large (several gigabytes) and may take a long time to download.</description>\n  <version>2026.07.30</version>\n  <date>2026-07-30</date>\n  <maintainer email=\"no-one@freecad.org\">FreeCAD Community</maintainer>\n  <author email=\"yorik@uncreated.net\">Yorik van Havre</author>\n  <license file=\"LICENSE-Assets\">CC-BY-3.0</license>\n  <license file=\"LICENSE-Code\">LGPL-2.1-or-later</license>\n  <icon>thumbnails/icon-grid.svg</icon>\n\n  <url type=\"repository\" branch=\"master\">https://github.com/FreeCAD/FreeCAD-library</url>\n  <url type=\"readme\">https://github.com/FreeCAD/FreeCAD-library/blob/master/README.md</url>\n  <url type=\"bugtracker\">https://github.com/FreeCAD/FreeCAD-library/issues</url>\n  <url type=\"discussion\">https://forum.freecad.org/viewtopic.php?f=19&amp;t=4205</url>\n\n  <tag>Models</tag>\n  <tag>STEP</tag>\n  <tag>Fasteners</tag>\n  <tag>Electronics</tag>\n  <tag>Architecture</tag>\n\n  <content>\n    <other>\n      <name>Parts</name>\n      <description>The parts themselves, as FCStd documents with STEP, STL and BREP exports alongside them, grouped into per-family subdirectories. Each part is copyrighted by its own author under CC-BY 3.0; see the repository history for attribution.</description>\n      <subdirectory>./</subdirectory>\n    </other>\n    <macro>\n      <name>PartsLibrary</name>\n      <description>Adds a dockable browser panel to the FreeCAD interface for browsing the library and inserting parts into the active document. Its update, config and push buttons additionally require the GitPython package.</description>\n      <subdirectory>./</subdirectory>\n      <file>PartsLibrary.FCMacro</file>\n    </macro>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-09-27T21:47:22+02:00",
+   "curated": true,
+   "sparse_cache": true,
+   "relative_cache_path": "./CatalogCache/parts_library/0-master.zip",
+   "git_hash": "13b72b471f641f4a665644718a4b223ad572edda",
+   "git_tag": null
+  }
+ ],
+ "A2plus": [
+  {
+   "freecad_min": null,
+   "freecad_max": null,
+   "repository": "https://github.com/kbwbe/A2plus",
+   "git_ref": "master",
+   "zip_url": "https://github.com/kbwbe/A2plus/archive/refs/heads/master.zip",
+   "note": null,
+   "branch_display_name": "master",
+   "metadata": {
+    "package_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<package format=\"1\" xmlns=\"https://wiki.freecad.org/Package_Metadata\">\n  <name>A2plus</name>\n  <description>Another assembly workbench for FreeCAD, following and extending Hamish's Assembly 2 workbench hence Assembly2plus. The main goal of A2plus is to create a very simple, easy to use, and not over-featured workbench for FreeCAD assemblies. Using the KISS principle: KEEP IT SIMPLE, STUPID</description>\n  <version>0.4.68</version>\n  <date>2024-10-01</date>\n  <maintainer email=\"kbwbe@gmx.de\">kbwbe</maintainer>\n  <license file=\"LICENSE\">LGPL-2.1-or-later</license>\n  <url type=\"repository\" branch=\"master\">https://github.com/kbwbe/A2plus</url>\n  <url type=\"bugtracker\">https://github.com/kbwbe/A2plus/issues</url>\n  <icon>icons/a2p_Workbench.svg</icon>\n\n  <content>\n    <workbench>\n      <classname>A2plusWorkbench</classname>\n      <subdirectory>./</subdirectory>\n      <tag>assembly</tag>\n      <freecadmin>0.19</freecadmin>\n    </workbench>\n  </content>\n\n</package>\n",
+    "requirements_txt": "",
+    "metadata_txt": "",
+    "icon_data": ""
+   },
+   "last_update_time": "2026-02-15T17:12:54+01:00",
+   "curated": true,
+   "sparse_cache": false,
+   "relative_cache_path": "./CatalogCache/A2plus/0-master.zip",
+   "git_hash": "ae69e4d52fe264449c22453e71fea529f58e74bc",
+   "git_tag": null
+  }
+ ]
+}

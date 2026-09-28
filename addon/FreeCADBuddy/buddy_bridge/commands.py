@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 import FreeCADGui
@@ -19,6 +21,14 @@ def _start() -> None:
             f"Bridge konnte nicht auf Port {bridge.port} starten: {error}. "
             "Port belegt? Einstellung 'Port' unter Mod/FreeCADBuddy anpassen.",
         )
+
+
+def _restart_bridge() -> None:
+    """Rebuild the method registry – the bridge reads the opt-ins only when it starts."""
+    bridge = service.get_service()
+    if bridge.running:
+        bridge.stop()
+        _start()
 
 
 class _StartBridge:
@@ -57,48 +67,91 @@ class _BridgeStatus:
         return True
 
 
-class _ToggleAutostart:
+@dataclass(frozen=True)
+class _Setting:
+    """An on/off setting shown as two buttons, like starting and stopping the bridge."""
+
+    name: str
+    enabled: Callable[[], bool]
+    store: Callable[[bool], None]
+    on_text: str
+    off_text: str
+    restart_bridge: bool = False
+
+
+@dataclass(frozen=True)
+class _SetSetting:
+    setting: _Setting
+    value: bool
+    menu_text: str
+    tool_tip: str
+
     def GetResources(self) -> dict[str, Any]:
-        return {
-            "MenuText": "Autostart umschalten",
-            "ToolTip": "Bridge beim Start von FreeCAD automatisch starten",
-        }
+        return {"MenuText": self.menu_text, "ToolTip": self.tool_tip}
 
     def Activated(self) -> None:
-        enabled = not service.autostart_enabled()
-        service.set_autostart(enabled)
-        service.console("info", f"Autostart {'aktiviert' if enabled else 'deaktiviert'}")
+        setting = self.setting
+        setting.store(self.value)
+        if setting.restart_bridge:
+            _restart_bridge()
+        state = setting.enabled()
+        service.console("info", f"{setting.name} {setting.on_text if state else setting.off_text}")
+        if state != self.value:
+            service.console("warning", f"{setting.name} bleibt an: per Umgebungsvariable erzwungen")
 
     def IsActive(self) -> bool:
-        return True
+        return self.setting.enabled() != self.value
 
 
-class _TogglePython:
-    def GetResources(self) -> dict[str, Any]:
-        return {
-            "MenuText": "Python-Ausführung umschalten",
-            "ToolTip": "execute_python auf FreeCAD-Seite erlauben/sperren (wirkt nach Neustart der Bridge)",
-        }
-
-    def Activated(self) -> None:
-        enabled = not service.python_allowed()
-        service.set_python_allowed(enabled)
-        bridge = service.get_service()
-        if bridge.running:
-            bridge.stop()
-            _start()
-        service.console("info", f"Python-Ausführung {'erlaubt' if enabled else 'gesperrt'}")
-
-    def IsActive(self) -> bool:
-        return True
+_AUTOSTART = _Setting(
+    "Autostart", service.autostart_enabled, service.set_autostart, "aktiviert", "deaktiviert"
+)
+_PYTHON = _Setting(
+    "Python-Ausführung",
+    service.python_allowed,
+    service.set_python_allowed,
+    "erlaubt",
+    "gesperrt",
+    restart_bridge=True,
+)
+_ADDON_INSTALL = _Setting(
+    "Addon-Installation",
+    service.addon_install_allowed,
+    service.set_addon_install_allowed,
+    "erlaubt",
+    "gesperrt",
+    restart_bridge=True,
+)
 
 
 COMMANDS: dict[str, Any] = {
     "Buddy_StartBridge": _StartBridge(),
     "Buddy_StopBridge": _StopBridge(),
     "Buddy_BridgeStatus": _BridgeStatus(),
-    "Buddy_ToggleAutostart": _ToggleAutostart(),
-    "Buddy_TogglePython": _TogglePython(),
+    "Buddy_EnableAutostart": _SetSetting(
+        _AUTOSTART, True, "Autostart an", "Bridge beim Start von FreeCAD automatisch starten"
+    ),
+    "Buddy_DisableAutostart": _SetSetting(
+        _AUTOSTART, False, "Autostart aus", "Bridge beim Start von FreeCAD nicht mehr automatisch starten"
+    ),
+    "Buddy_AllowPython": _SetSetting(
+        _PYTHON, True, "Python erlauben", "execute_python auf FreeCAD-Seite erlauben (startet die Bridge neu)"
+    ),
+    "Buddy_BlockPython": _SetSetting(
+        _PYTHON, False, "Python sperren", "execute_python auf FreeCAD-Seite sperren (startet die Bridge neu)"
+    ),
+    "Buddy_AllowAddonInstall": _SetSetting(
+        _ADDON_INSTALL,
+        True,
+        "Addon-Installation erlauben",
+        "install_addon auf FreeCAD-Seite erlauben; jede Installation fragt trotzdem nach (startet die Bridge neu)",
+    ),
+    "Buddy_BlockAddonInstall": _SetSetting(
+        _ADDON_INSTALL,
+        False,
+        "Addon-Installation sperren",
+        "install_addon auf FreeCAD-Seite sperren (startet die Bridge neu)",
+    ),
 }
 
 

@@ -20,10 +20,19 @@ ALLOWED_MODULES = frozenset(sys.stdlib_module_names) | {
     "buddy_bridge",
 }
 FORBIDDEN_QT_MODULES = frozenset({"PySide6", "PySide2"})
+# FreeCAD's own Addon Manager (ships with FreeCAD) - only the install adapter may import it.
+ADDON_MANAGER_MODULES = frozenset(
+    {"NetworkManager", "AddonCatalog", "Addon", "addonmanager_installer", "addonmanager_macro"}
+)
+ADDON_MANAGER_ADAPTER = Path("addon") / "FreeCADBuddy" / "buddy_core" / "addons" / "install.py"
 
 
 def _top_level_module(dotted_name: str) -> str:
     return dotted_name.split(".", 1)[0]
+
+
+def _allowed_addon_manager(path: Path, module: str) -> bool:
+    return module in ADDON_MANAGER_MODULES and path.relative_to(REPO_ROOT) == ADDON_MANAGER_ADAPTER
 
 
 def _iter_forbidden_imports() -> list[str]:
@@ -34,6 +43,8 @@ def _iter_forbidden_imports() -> list[str]:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     module = _top_level_module(alias.name)
+                    if _allowed_addon_manager(path, module):
+                        continue
                     if module in FORBIDDEN_QT_MODULES or module not in ALLOWED_MODULES:
                         violations.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}:{module}")
             elif isinstance(node, ast.ImportFrom):
@@ -41,6 +52,8 @@ def _iter_forbidden_imports() -> list[str]:
                 if node.level > 0 or node.module is None:
                     continue
                 module = _top_level_module(node.module)
+                if _allowed_addon_manager(path, module):
+                    continue
                 if module in FORBIDDEN_QT_MODULES or module not in ALLOWED_MODULES:
                     violations.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}:{module}")
     return violations

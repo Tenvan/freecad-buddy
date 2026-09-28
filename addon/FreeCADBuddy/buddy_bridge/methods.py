@@ -15,6 +15,8 @@ from buddy_bridge import __version__
 from buddy_bridge.registry import MethodRegistry
 from buddy_core import body, compat, documents, features, select, view
 from buddy_core import parameters as model_parameters
+from buddy_core.addons import install as addon_install
+from buddy_core.addons import status as addon_status
 from buddy_core.documents import resolve_document
 from buddy_core.errors import validation
 from buddy_core.printing import check, export, profile
@@ -113,6 +115,9 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "select.preview": (select.select_geometry, {}),
     "view.set": (view.set_view, {}),
     "view.screenshot": (view.screenshot, {"timeout": 60.0}),
+    "addons.status": (addon_status.addon_status, {}),
+    "addons.install": (addon_install.start_install, {}),
+    "addons.install_status": (addon_install.install_status, {}),
     "print.get_profile": (profile.get_printer_profile, {}),
     "print.set_profile": (profile.set_printer_profile, {}),
     "print.check": (check.check_printability, {"timeout": 120.0}),
@@ -121,14 +126,18 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
 }
 
 
-OPT_IN_METHODS = frozenset({"python.execute"})
+PYTHON_METHODS = frozenset({"python.execute"})
+ADDON_INSTALL_METHODS = frozenset({"addons.install", "addons.install_status"})
+OPT_IN_METHODS = PYTHON_METHODS | ADDON_INSTALL_METHODS
 
 
-def build_registry(allow_python: bool = False) -> MethodRegistry:
-    """All methods; ``python.execute`` only with an explicit opt-in on the FreeCAD side."""
+def build_registry(allow_python: bool = False, allow_addon_install: bool = False) -> MethodRegistry:
+    """All methods; ``python.execute`` and addon installation only with an opt-in on the FreeCAD side."""
     registry = MethodRegistry()
     for name, (fn, options) in METHODS.items():
-        if name in OPT_IN_METHODS and not allow_python:
+        if name in PYTHON_METHODS and not allow_python:
+            continue
+        if name in ADDON_INSTALL_METHODS and not allow_addon_install:
             continue
         registry.add(name, fn, **options)
     return registry
