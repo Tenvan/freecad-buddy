@@ -100,6 +100,10 @@ def test_model_tree_and_label_lint(doc: Any, part: Any) -> None:
     body_node = next(n for n in tree["objects"] if n["label"] == "Part")
     assert [f["label"] for f in body_node["features"]] == ["Sketch_Base", "Sketch001"]
     assert [issue["label"] for issue in tree["label_issues"]] == ["Sketch001"]
+    # origin axes, planes and (since 26.3) the origin point never appear as top-level objects
+    origin_features = {f.Name for f in part.Origin.OriginFeatures}
+    assert not origin_features & {n["name"] for n in tree["objects"]}
+    assert all(n["type"] in ("PartDesign::Body", "App::VarSet") for n in tree["objects"])
 
 
 def test_undo_and_delete(doc: Any, part: Any) -> None:

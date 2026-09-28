@@ -111,13 +111,18 @@ def _node(obj: Any) -> dict[str, Any]:
 def model_tree(document: str | None = None) -> dict[str, Any]:
     doc = resolve_document(document)
     in_body = {child.Name for obj in doc.Objects if obj.TypeId == "PartDesign::Body" for child in obj.Group}
+    # Filter origin elements by membership, not by type: FreeCAD 26.3 added an App::Point ("Origin001")
+    # to every origin, and a type list would miss the next addition as well.
+    origin_parts = {
+        feature.Name
+        for obj in doc.Objects
+        if obj.TypeId.startswith("App::Origin")
+        for feature in getattr(obj, "OriginFeatures", [])
+    }
     top_level = [
         obj
         for obj in doc.Objects
-        if obj.Name not in in_body
-        and not obj.TypeId.startswith("App::Origin")
-        and not obj.TypeId.startswith("App::Line")
-        and not obj.TypeId.startswith("App::Plane")
+        if obj.Name not in in_body and obj.Name not in origin_parts and not obj.TypeId.startswith("App::Origin")
     ]
     return {
         "document": {"name": doc.Name, "label": doc.Label, "file": doc.FileName},

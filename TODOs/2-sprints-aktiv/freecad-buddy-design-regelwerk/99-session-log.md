@@ -16,6 +16,7 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 - TUI-Test: Feste Pause durch Warten auf die Bedingung ersetzt, er war unter Last geflakt.
 
 **Release-Änderungen:**
+- `[bugfix][core]` Modellbaum zeigt den Ursprungspunkt von FreeCAD 26.3 nicht mehr als eigenes Objekt.
 - `[feature][core]` Nach dem ersten `pad` bzw. `revolve` eines Bodys springt die FreeCAD-Ansicht auf iso und zeigt das ganze Bauteil, damit sich der Aufbau live verfolgen lässt.
 
 **Blocker:**
@@ -23,7 +24,7 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 **Erkenntnisse:**
 - Deterministische Server-Logik ist verlässlicher als eine Regel, die der Agent befolgen muss, wenn der Zeitpunkt eindeutig ist (erstes Solid).
-- Offen und ungeprüft: Auf oberster Ebene des Dokuments liegt `Origin001` („Ursprungspunkt“, `App::Point`), angelegt vermutlich nicht von Buddy.
+- `Origin001` („Ursprungspunkt“, `App::Point`) ist der Ursprungspunkt, den FreeCAD 26.3 in jedes Body-Origin legt. `model_tree` hat Origin-Elemente nach Typ gefiltert (`App::Line`, `App::Plane`) und den neuen Typ deshalb auf oberster Ebene angezeigt. Jetzt wird nach Zugehörigkeit zu `OriginFeatures` gefiltert. Der Regressionstest schlägt ohne den Fix fehl und ist mit dem Fix grün.
 
 **Architektur-Erkenntnisse:**
 - Betroffene Architektur-Doku: keine
