@@ -11,7 +11,7 @@ from typing import Any
 
 import FreeCAD
 
-from buddy_core import naming, select, values, view
+from buddy_core import display, naming, select, values, view
 from buddy_core.body import body_of, origin_feature, resolve_body
 from buddy_core.documents import resolve_document, resolve_object
 from buddy_core.errors import RECOMPUTE_FAILED, CoreError, validation
@@ -35,6 +35,7 @@ def _profile(doc: Any, sketch_ref: str) -> tuple[Any, Any]:
 def _new(body: Any, type_id: str, prefix: str, purpose: str | None, fallback: str) -> Any:
     feature = body.newObject(type_id, prefix)
     feature.Label = naming.make_label(body.Document, prefix, purpose or fallback)
+    display.apply_selection_style(feature)
     return feature
 
 

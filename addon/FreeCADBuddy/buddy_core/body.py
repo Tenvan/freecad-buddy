@@ -6,7 +6,7 @@ from typing import Any
 
 import FreeCAD
 
-from buddy_core import naming
+from buddy_core import display, naming
 from buddy_core.documents import resolve_document, resolve_object
 from buddy_core.errors import AMBIGUOUS, CoreError, not_found, validation
 from buddy_core.result import ToolResult, describe
@@ -56,6 +56,7 @@ def create_body(label: str, document: str | None = None) -> ToolResult:
     with transaction(doc, f"Body anlegen: {label}"):
         body = doc.addObject("PartDesign::Body", "Body")
         body.Label = naming.unique_label(doc, naming.sanitize(label) or "Part")
+        display.apply_selection_style(body)
         result.add_created(body)
     if FreeCAD.GuiUp:
         import FreeCADGui
