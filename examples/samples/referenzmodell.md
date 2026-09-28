@@ -101,12 +101,13 @@ Herleitung:
 5. Tool-Aufrufe zählen, also die Zeilen mit `"type": "request"` im JSONL-Log.
 6. Ergebnis unten eintragen.
 
-Referenzlösung: `… referenzmodell.py build --stage <N>`. Stufe 4 braucht 34 Tool-Aufrufe. Den Screenshot erneuerst du mit `… screenshot`, er zeigt immer die aktuelle Stufe.
+Referenzlösung: `… referenzmodell.py build --stage <N>`. Stufe 5 braucht 47 Tool-Aufrufe (Stufe 4: 34). Den Screenshot erneuerst du mit `… screenshot`, er zeigt immer die aktuelle Stufe.
 
 ## Ergebnisse
 
 | Datum | Stufe | Modell / Thinking | Client | Score | Tool-Aufrufe | Fehler/Undo | Bemerkung |
 |---|---|---|---|---|---|---|---|
+| 2026-09-28 | 5 | Referenzskript | Skript (`build`) | 31/31 | 47 | 0 | Baseline, Fasteners 0.5.67, Assembly4 0.61.1 |
 | 2026-09-28 | 4 | Referenzskript | Skript (`build`) | 19/19 | 34 | 0 | Baseline (Kasten 100 mm, M10-Stifte) |
 | 2026-09-28 | 4 | Referenzskript | Skript (`build`) | 19/19 | 34 | 0 | Baseline, Kasten 28 mm, Stifte Ø 5 mm bündig, nicht mehr vergleichbar |
 | 2026-09-28 | 2 | Referenzskript | Skript (`build`) | 12/12 | 17 | 0 | Baseline, alter Stufenschnitt (mit Eckbohrungen), nicht mehr vergleichbar |

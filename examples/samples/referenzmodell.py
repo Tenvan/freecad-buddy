@@ -547,21 +547,24 @@ async def _check_assembly(call: Client, results: list[dict[str, Any]], p: Mappin
     members = [await call("get_object", ref=m["name"], document=DOCUMENT) for m in group]
     linked = sorted(m["linked_object"]["label"] for m in members if "linked_object" in m)
     _check(results, stage, "Assembly mit Kasten und Deckel", linked == ["Box", "Plate"], str(linked))
-    top = p["Plate_Thickness"]
-    wanted = sorted((round(x, 2), round(y, 2)) for x, y in pin_positions(p))
-    for kind, z in (("ISO7089", top), ("ISO4032", top + WASHER_THICKNESS)):
-        parts = [m for m in members if _kind(m) == kind and m["fastener"]["diameter"] == "M10"]
-        places = sorted((round(m["placement"][0], 2), round(m["placement"][1], 2)) for m in parts)
-        heights = sorted({round(m["attachment"]["offset"][2], 2) for m in parts if "attachment" in m})
-        _check(results, stage, f"4 × {kind} M10 auf den Stiften", places == wanted,
-               f"{len(parts)} Stück, Lagen {places}")  # fmt: skip
-        _check(results, stage, f"{kind} Einbauhöhe", heights == [round(z, 2)], f"z {heights} (Soll {z})")
+    # heights are measured in the assembled state - the build leaves the exploded configuration active
     try:
         assembled = await _placements(call, members, "Assembled")
         exploded = await _placements(call, members, "Exploded")
         await call("undo", steps=2, document=DOCUMENT)
     except RuntimeError as error:
-        _check(results, stage, "Explosionsansicht „Exploded“", False, str(error)[:200])
+        assembled, exploded = {}, {}
+        _check(results, stage, "Konfigurationen Assembled/Exploded", False, str(error)[:200])
+    top = p["Plate_Thickness"]
+    wanted = sorted((round(x, 2), round(y, 2)) for x, y in pin_positions(p))
+    for kind, z in (("ISO7089", top), ("ISO4032", top + WASHER_THICKNESS)):
+        parts = [m for m in members if _kind(m) == kind and m["fastener"]["diameter"] == "M10"]
+        places = sorted((round(m["placement"][0], 2), round(m["placement"][1], 2)) for m in parts)
+        heights = sorted({round(assembled[m["name"]], 2) for m in parts if m["name"] in assembled})
+        _check(results, stage, f"4 × {kind} M10 auf den Stiften", places == wanted,
+               f"{len(parts)} Stück, Lagen {places}")  # fmt: skip
+        _check(results, stage, f"{kind} Einbauhöhe", heights == [round(z, 2)], f"z {heights} (Soll {z})")
+    if not exploded:
         return
     rises: dict[str, set[float]] = {}
     for member in members:
