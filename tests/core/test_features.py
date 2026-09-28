@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from buddy_core import features, select
+from buddy_core import documents, features, select
 from buddy_core.errors import RECOMPUTE_FAILED, CoreError
 
 from .conftest import profile, set_params, sketch_on
@@ -170,6 +170,36 @@ def test_grid_pattern_as_multitransform_follows_parameters(doc: Any, part: Any) 
     set_params(doc, Count_X=6)
     assert abs(feature.Shape.Volume - (60 * 40 * 5 - 24 * hole_volume)) < 1e-3
     assert abs(feature.Shape.BoundBox.XLength - 60) < 1e-6  # field stays centred inside the plate
+
+
+def test_grid_pattern_shows_only_the_multitransform_and_nests_its_steps(doc: Any, part: Any) -> None:
+    _box(doc, width=60, depth=40, height=5)
+    sketch = sketch_on(doc, purpose="Hole", offset=5)
+    profile(doc, sketch, "circle", diameter=2, center=[-20, -10])
+    hole = features.pocket(sketch.Name, mode="through_all", purpose="Hole", document=doc.Name).to_dict()
+    pocket = doc.getObject(hole["feature"]["name"])
+
+    grid = features.pattern(
+        [pocket.Name], "grid", length=40, count=3, length2=20, count2=2, purpose="Cells", document=doc.Name
+    ).to_dict()
+
+    feature = doc.getObject(grid["feature"]["name"])
+    steps = list(feature.Transformations)
+    assert part.Tip is feature and feature.Visibility
+    assert not pocket.Visibility
+    assert len(steps) == 2 and not any(step.Visibility for step in steps)
+    assert all(step in part.Group for step in steps)  # in the body like FreeCAD's own command
+
+    tree = documents.model_tree(doc.Name)
+    assert [o["name"] for o in tree["objects"]] == [part.Name]
+    body_node = tree["objects"][0]
+    assert not {step.Name for step in steps} & {f["name"] for f in body_node["features"]}
+    grid_node = next(f for f in body_node["features"] if f["name"] == feature.Name)
+    assert [s["name"] for s in grid_node["transformations"]] == [step.Name for step in steps]
+
+    step_names = [step.Name for step in steps]
+    documents.delete_object(feature.Name, document=doc.Name)
+    assert not any(doc.getObject(name) for name in step_names)
 
 
 def test_pattern_of_pattern_is_rejected_with_hint(doc: Any, part: Any) -> None:

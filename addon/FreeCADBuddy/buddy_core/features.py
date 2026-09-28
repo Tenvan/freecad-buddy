@@ -435,8 +435,11 @@ def pattern(
     result = ToolResult()
     with transaction(doc, f"{prefix}: {', '.join(o.Label for o in originals)}"):
         feature = _new(body, type_id, prefix, purpose, "_".join(o.Label for o in originals))
+        steps = []
         if kind == "grid":
-            steps = []
+            # Like FreeCAD's MultiTransform task panel: the steps stay in the body (with empty
+            # Originals they are no solid features, so neither Tip nor base chain), the
+            # MultiTransform claims them in the tree and only the MultiTransform is shown.
             for suffix, (axis_name, extent, number) in (
                 ("X", (direction, length, count)),
                 ("Y", (direction2, length2, count2)),
@@ -444,9 +447,6 @@ def pattern(
                 step = body.newObject("PartDesign::LinearPattern", "LinearPattern")
                 step.Label = naming.make_label(doc, "LinearPattern", f"{feature.Label}_{suffix}")
                 _linear(doc, body, step, axis_name, extent, number, "" if suffix == "X" else "2")
-                body.removeObject(
-                    step
-                )  # sub-transformations belong to the MultiTransform, not the body chain
                 steps.append(step)
             feature.Originals = originals
             feature.Transformations = steps
@@ -461,6 +461,8 @@ def pattern(
             feature.Axis = (origin_feature(body, axis), [""])
             values.apply(feature, "Angle", values.resolve(doc, angle, "angle"), unit="deg")
             _occurrences(doc, feature, count)
+        # every newObject in the GUI hides the rest of the body, so the visibility is set last
+        display.show_only(feature, [*originals, *steps])
         _finish(doc, feature, result)
     return result
 
