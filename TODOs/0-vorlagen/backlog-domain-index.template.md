@@ -20,6 +20,13 @@ Domain-Backlog für <DOMAIN>. Tickets sind nach Priorität gelistet. Jedes Ticke
 | Status | Ticket | Pfad | Architektur-Impact | Kurzbeschreibung |
 |---|---|---|---|---|
 
+## Eingang
+
+Schnelle Erfassung ohne Spezifikation; Triage bei jeder Sprint-Planung (siehe `TODOs/README.md` → Backlog-Eingang).
+
+| ID | Datum | Domäne | Typ | Beschreibung | Quelle | Roadmap |
+|---|---|---|---|---|---|---|
+
 ## Hinweise
 
 - Tickets ohne klare Sprint-Zuordnung leben hier.

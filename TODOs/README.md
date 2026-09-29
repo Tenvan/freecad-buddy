@@ -8,6 +8,7 @@ Zentrale Ablage für alle Tasks, Pläne und Backlog-Einträge des Projekts **Fre
 TODOs/
 ├── README.md                          # diese Datei
 ├── master-todo.md                     # manuell gepflegter Gesamtindex (kein Generator vorhanden)
+├── roadmap.md                         # Reihenfolge der kommenden Sprints, je Sprint eine Domäne
 │
 ├── 0-vorlagen/                        # Templates für neue Sprints/Tickets
 ├── 1-backlog/<domain>/                # Backlog je Domain mit 00-index.md
@@ -27,10 +28,11 @@ TODOs/
 2-sprints-aktiv/<sprint-name>/
         ├── 00-index.md
         ├── 01-<phase>.md … 0N-<phase>.md
+        ├── 97-review.md
         ├── 98-architecture-update.md
         └── 99-session-log.md
        │
-       │  Bei Abschluss: Selbst-Move mit Datum-Präfix
+       │  Bei Abschluss (erst nach Review-Gate): Selbst-Move mit Datum-Präfix
        ▼
 3-sprints-erledigt/YYYY-MM-<sprint-name>/
        │
@@ -38,6 +40,42 @@ TODOs/
        ▼
 4-archiv/<YYYY>/<sprint-name>/
 ```
+
+## Arbeitsweise
+
+Verbindlich ab 2026-09-29 für neue Sprints. Die Reihenfolge der Sprints und die Domänen-Tabelle stehen in [`roadmap.md`](roadmap.md).
+
+### Backlog-Eingang
+
+- Jede Idee und jedes Problem wird **sofort** als eine Zeile im Abschnitt „Eingang“ des Backlog-Index eingetragen: ID (`E-NN`), Datum, Domäne, Typ (`idee` / `problem` / `schuld`), ein Satz, Quelle. Eine Spezifikation ist dafür nicht nötig.
+- Der Agent trägt Befunde außerhalb des Session-Umfangs selbst ein, statt sie nebenbei zu beheben.
+- Triage bei jeder Sprint-Planung: Zeile wird zu einem Ticket (SDD), an ein bestehendes Ticket angehängt oder gelöscht. Übernommene Zeilen verweisen auf ihr Ticket, bis dieses umgesetzt ist.
+
+### Sprint-Zuschnitt
+
+- **Eine Domäne je Sprint.** Frameworks/Abhängigkeiten (`infra`), `server`, `bridge`, `core`, `tui`, `regelwerk` und `abnahme` werden nicht gemischt. Einzige Ausnahme ist der Feature-Durchstich (`core` + dünner Server-Wrapper + generierte Tool-Doku, siehe Roadmap).
+- **Klein:** höchstens 3 Sessions und etwa 6 Aufgaben je Sprint, eine Spezifikation. Größere Vorhaben werden auf mehrere Sprints verteilt.
+- **Nicht mischen:** Feature, Refactoring, Regelwerk und Infrastruktur stehen nie im selben Sprint.
+- **WIP-Grenze:** höchstens ein Umsetzungs-Sprint aktiv; zusätzlich darf ein Sprint auf Abnahme durch Ralf warten.
+- **Start-Commit:** Der Sprint-Index nennt den Commit, auf dem der Sprint startet. Er ist die Basis des Review-Gates.
+
+### Session-Regeln (niedrige Komplexität)
+
+- Eine Session setzt genau ein Session-Paket um und endet mit grünem `uv run poe check` und einem Commit.
+- Neuer oder geänderter Code bleibt bei zyklomatischer Komplexität ≤ 10 (`uv run ruff check --select C901 .`); die bestehende Baseline darf nicht wachsen.
+- Dateien über 400 Zeilen wachsen nicht weiter; eine nötige Aufteilung geht als `schuld` in den Eingang.
+- Keine neue Abhängigkeit und kein Framework-Update außerhalb eines `infra`-Sprints.
+- Der Session-Log-Eintrag enthält die Zeile `Komplexität:` (neue `C901`-Befunde, gewachsene Dateien, oder „unverändert“).
+
+### Review-Gate (Sprint-Abnahme)
+
+Ein Sprint ist erst abgenommen, wenn **alle** im Sprint erstellten oder geänderten Dateien reviewt sind:
+
+1. In einer frischen Session die Dateiliste erzeugen: `git diff --name-status <Start-Commit>..HEAD` und in `97-review.md` eintragen (Vorlage `sprint-review.template.md`).
+2. Jede Datei vollständig lesen und bewerten: Korrektheit, Komplexität, Lesbarkeit und Konsistenz mit dem umgebenden Code, passende Tests und Doku.
+3. Unterstützend `/code-review high` über den Sprint-Bereich und `/simplify` laufen lassen; deren Befunde fließen in dieselbe Tabelle.
+4. Befunde im Sprint-Umfang sofort beheben (danach `uv run poe check`), alle anderen in den Eingang.
+5. Ralf bestätigt die Abnahme im Chat; das Datum steht in `97-review.md`. Erst danach wird der Sprint nach `3-sprints-erledigt/` verschoben.
 
 ## Release-Änderungen
 
@@ -54,6 +92,7 @@ Eine Release-Queue (`pending-release-log.md`) ist in diesem Projekt derzeit **ni
 | Index-Datei | `00-index.md` | – |
 | Phasen-Datei | `<NN>-<thema>.md` lowercase | `01-vorbereitung.md` |
 | Session-Log | `99-session-log.md` | – |
+| Sprint-Review | `97-review.md` | – |
 | Architektur-Update | `98-architecture-update.md` | – |
 | Backlog-Ticket | `<thema>.md` lowercase kebab-case | `kommissionierung-update.md` |
 | Templates | `<typ>.template.md` | `sprint-phase.template.md` |
@@ -155,6 +194,7 @@ Neue Sprints/Tickets aus den Templates in `0-vorlagen/` ableiten:
 | `sprint-phase.template.md` | Phasen-Datei |
 | `sprint-session-log.template.md` | Session-Log |
 | `architecture-update.template.md` | Architektur-Deltas und Abschlussprüfung für `docs/architecture.md` |
+| `sprint-review.template.md` | Review-Gate: Dateiliste, Bewertung je Datei, Abnahme |
 | `backlog-domain-index.template.md` | `00-index.md` einer Backlog-Domain |
 | `backlog-ticket.template.md` | Einzelnes Backlog-Ticket |
 

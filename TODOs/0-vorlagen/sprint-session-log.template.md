@@ -29,6 +29,9 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 - Doku-Delta: <Welche stabile Architekturregel, Modulgrenze, Datenfluss-, Integrations-, Security-, Test- oder Deployment-Erkenntnis muss in 98-architecture-update.md?>
 - Nicht übernehmen: <Temporäre Implementierungsdetails oder Code-Samples, die nicht in die Architektur-Doku gehören.>
 
+**Komplexität:**
+- <Neue C901-Befunde, gewachsene Dateien über 400 Zeilen, oder „unverändert“>
+
 **Validierung:**
 - <Tests, Builds, manuelle Prüfung oder nicht ausgeführt mit Begründung>
 - <Browser-/manuelle Abnahme: Prüfumfang, Nutzerbestätigung oder ausdrückliche Agentenfreigabe und Ergebnis; alternativ offen oder keine erforderlich. Gültige Nachweise übernehmen, nicht automatisch wiederholen.>

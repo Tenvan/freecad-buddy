@@ -11,7 +11,8 @@ Quelle: <Eigene Spezifikation oder verlinkte Quelltickets mit Spec-Stand und bes
 ## Ausgangslage
 
 Backlog-Quelle: `<TODOs/1-backlog/<domain>/<ticket>.md>`.
-Branch: `<branch-name>`.
+Roadmap: `<R-Nummer aus TODOs/roadmap.md>` │ Domäne: `<core / bridge / server / tui / regelwerk / infra / abnahme>`.
+Branch: `<branch-name>` │ Start-Commit: `<hash>`.
 
 <Kurz beschreiben: Ist-Zustand, technische Lücke, wichtigste Risiken und warum dieser Sprint jetzt notwendig ist.>
 
@@ -105,6 +106,10 @@ Pflicht zum Sprint-Abschluss:
 
 ## Sprint-Abschluss / Definition of Done
 
+- [ ] Sprint berührt nur seine Domäne (bzw. einen Feature-Durchstich) und hatte höchstens 3 Sessions.
+- [ ] Review-Gate in [97-review.md](97-review.md) vollständig: jede seit dem Start-Commit geänderte Datei reviewt, Befunde behoben oder im Eingang.
+- [ ] Keine neuen `C901`-Befunde gegenüber dem Start-Commit.
+- [ ] Abnahme durch Ralf im Chat bestätigt und in `97-review.md` eingetragen.
 - [ ] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
 - [ ] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
 - [ ] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
@@ -114,6 +119,7 @@ Pflicht zum Sprint-Abschluss:
 - [ ] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
 - [ ] `98-architecture-update.md` ausgewertet.
 - [ ] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [ ] Status in `TODOs/roadmap.md` auf ✅ gesetzt.
 - [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben.
 - [ ] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
 

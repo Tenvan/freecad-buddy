@@ -3,6 +3,10 @@
 > **Manuell gepflegt** (kein Index-Generator im Projekt).
 > Quelle: alle `00-index.md` unter `TODOs/1-backlog/`, `TODOs/2-sprints-aktiv/`, `TODOs/3-sprints-erledigt/`.
 
+## Roadmap
+
+Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.md) (nächster Schritt R0: Abschluss der beiden aktiven Sprints).
+
 ## Aktive Sprints
 
 | Name | Pfad | Status | Notiz |
