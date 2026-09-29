@@ -151,6 +151,12 @@ TOPICS: tuple[Topic, ...] = (
                 "angle instead of the ISO defaults when the screw or the print needs it.",
                 requires=("hole",),
             ),
+            Rule(
+                "Axes and planes away from the origin: datum kind='line' as axis for revolve, helix and polar "
+                "patterns, kind='lcs' as a shifted or tilted sketch plane, kind='point' as external geometry; "
+                "offsets as parameters like datum_plane.",
+                requires=("datum",),
+            ),
         ),
     ),
     Topic(
@@ -175,6 +181,34 @@ TOPICS: tuple[Topic, ...] = (
                 "Real external threads with thread (native helix, ISO profile) on an existing cylinder; repeat "
                 "them with pattern. Printed threads below M6 are weak - see printing.",
                 requires=("thread",),
+            ),
+            Rule(
+                "Transitions between cross-sections (funnels, adapters) with loft: every section on its own "
+                "plane - origin plane or datum_plane with an offset parameter.",
+                requires=("loft",),
+            ),
+            Rule(
+                "Springs, cable guides and custom grooves with helix (pitch plus height or turns; profile beside "
+                "the axis in a plane that contains it). Tapped holes: hole with threaded=true and "
+                "model_thread=true cuts the real thread (about 1.5 s per hole) - single holes only, rasters "
+                "stay cosmetic.",
+                requires=("helix", "hole"),
+            ),
+            Rule(
+                "Spheres, tori, ellipsoids, wedges and quick helper volumes with primitive (sizes as parameters, "
+                "placed by plane, center and offset); boxes, cylinders and prisms as sketch plus pad, because "
+                "the profile stays editable.",
+                requires=("primitive",),
+            ),
+            Rule(
+                "Tilted walls: draft with a selector (faces:vertical) pivoting on the bed plane, or taper on a "
+                "single pad/pocket; up_to_first extrudes or cuts until the next face without a face reference.",
+                requires=("draft", "pad", "pocket"),
+            ),
+            Rule(
+                "Combine bodies of the same printable part with boolean (fuse, cut, common); the tool bodies "
+                "stay editable inside the boolean. Clearances between separate parts: shape_binder plus pocket.",
+                requires=("boolean", "shape_binder"),
             ),
         ),
     ),

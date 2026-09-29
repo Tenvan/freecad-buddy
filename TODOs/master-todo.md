@@ -7,7 +7,7 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 12/16 Aufgaben (S1–S4: alle 6 Tools, Taper, `model_thread`, 57 Tools), Spec-Stand 1 freigegeben; offen: Regelwerk, Doku/Version, Gesamtcheck, GUI-Abnahme AC-11 (Freigabe Ralf); nächste Session S5 |
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 15/16 Aufgaben (S1–S5: 6 neue Tools, Taper, `model_thread`, Regelwerk, Doku, Version 0.3.0, 57 Tools); offen nur #5.4 GUI-Abnahme G13 (wartet auf Ralf); danach Sprint-Abschluss S6 |
 
 ## Backlog (nach Domain)
 

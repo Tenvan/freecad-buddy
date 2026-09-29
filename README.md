@@ -6,7 +6,7 @@ MCP-Server mit Terminal-Oberfläche für FreeCAD: Ein Agent (z. B. Claude Code) 
 
 | Thema | FreeCAD Buddy |
 |---|---|
-| Werkzeuge | 51 Intent-Level-Tools in 11 Gruppen statt einer API-Kopie; `execute_python` nur per Opt-in |
+| Werkzeuge | 57 Intent-Level-Tools in 11 Gruppen statt einer API-Kopie; jedes Standard-Werkzeug der PartDesign-Leiste ist abgedeckt (inkl. Loft, Helix, Primitive, Boolean, Draft, Datum); `execute_python` nur per Opt-in |
 | Design-Tools | Wiederkehrende Aufgaben in einem Aufruf: `fill_pattern` für Sieb-, Loch-, Lüftungs- und Wabenraster (runde oder Sechseck-Zellen), parametrisch und ohne Addon; fehlende Tools schlägt der Agent mit `propose_design_tool` vor |
 | Addons | `search_addons`/`get_addon` durchsuchen den offiziellen FreeCAD-Katalog (offline aus dem Cache); `install_addon` installiert nach Bestätigung im FreeCAD-Dialog |
 | Agentenführung | Design-Regelwerk nach Themen mit Werten aus dem Druckerprofil; alle MCP-Ausgaben englisch, FreeCAD-Oberfläche und TUI deutsch |

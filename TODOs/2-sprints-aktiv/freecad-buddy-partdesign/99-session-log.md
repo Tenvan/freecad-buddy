@@ -5,6 +5,44 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 5 — 2026-09-29 (Regelwerk, Doku, Version 0.3.0)
+
+**Ziel:** #5.1, #5.2, #5.3; #5.4 vorbereiten.
+
+**Erledigt:**
+- #5.1 Regelwerk: `features` + 5 Regeln (loft, helix/model_thread, primitive, draft/taper/up_to_first, boolean), `references` + Datum-Regel.
+- #5.2 `docs/architecture.md` (alle sieben Deltas aus 98), README, `CHANGELOG.md` 0.3.0, Version 0.3.0 (pyproject, uv.lock, Server, Bridge, Core), `docs/acceptance.md` G13, `docs/tools.md` regeneriert (57 Tools).
+- #5.3 Gesamtcheck grün; Regelwerk-Test erweitert (Parameter-Namen und Enum-Werte der Tools sind gültige Bezeichner in Regeltexten).
+- #5.4 vorbereitet: G13 beschrieben; Prüfung wartet auf Ralfs Freigabe (Blocker im Index).
+
+**Release-Änderungen:**
+- `[doc][server]` Regelwerk-Themen `features` und `references` um die neuen Tools ergänzt.
+- `[doc][docs]` Architektur, README, CHANGELOG 0.3.0, Abnahme-Katalog G13.
+- `[misc][release]` Version 0.3.0.
+
+**Blocker:**
+- #5.4 GUI-Abnahme G13 — wartet auf Ralf (Freigabe oder Scope-Entscheidung).
+
+**Erkenntnisse:**
+- Nach einem Versionswechsel will `uv run` die Umgebung neu synchronisieren und scheitert an der laufenden `freecad-buddy.exe` (Ralfs MCP-Server). `uv run --no-sync` umgeht das; der Server wird nicht angefasst. Beim nächsten Serverstart synchronisiert `uv` von selbst.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: alle Deltas übernommen, 98 auf „übernommen“ mit Abschlussnotiz.
+- Nicht übernehmen: nichts offen.
+
+**Validierung:**
+- `pytest tests/server/test_design_rules.py tests/server/test_language.py tests/tools`: 109 passed, nachdem `_profile_kinds` im Regelwerk-Test auch Tool-Parameter und Enum-Werte als gültige Bezeichner akzeptiert (`model_thread`, `up_to_first`).
+- `uv run --no-sync poe check`: ruff ✅, ruff format ✅, pyright 0 Fehler ✅, 183 Projekt-Python-Tests ✅, 249 FreeCAD-Python-Tests ✅.
+- Browser-/manuelle Abnahme: G13 offen, keine Prüfung ohne Freigabe.
+
+**Nächste Session:**
+- S6: G13 nach Ralfs Entscheidung, dann Definition of Done, Sprint nach `3-sprints-erledigt/2026-09-freecad-buddy-partdesign/`, Ticket und Backlog-Index abschließen, `master-todo.md`.
+- Dateien: `00-index.md`, `05-regelwerk-doku-abschluss.md`, `docs/acceptance.md`, `TODOs/1-backlog/freecad-buddy/partdesign-vollstaendigkeit.md`.
+- Architektur-Deltas: keine offen.
+
+---
+
 ## Session 4 — 2026-09-29 (`boolean`, `draft`)
 
 **Ziel:** #4.1 und #4.2.

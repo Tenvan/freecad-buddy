@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.0 — 2026-09-29
+
+Aus dem Sprint `freecad-buddy-partdesign`: jedes Standard-Werkzeug der PartDesign-Leiste ist jetzt über ein Tool erreichbar (57 Tools).
+
+### Neu
+
+- `loft`: additiver und subtraktiver Loft über zwei oder mehr Skizzen auf eigenen Ebenen (Trichter, Adapter, Übergänge); Skizzen auf derselben Ebene werden vorab abgelehnt.
+- `helix`: additive und subtraktive Helix mit Steigung und Höhe oder Windungen, Kegelwinkel und Linksgewinde; Achse wie bei `revolve`. `thread` nutzt intern denselben Helix-Kern.
+- `primitive`: Box, Zylinder, Kugel, Kegel, Ellipsoid, Torus, Prisma und Keil, additiv oder subtraktiv, Maße als Durchmesser und Ausdehnungen, Lage über Ebene, `center` und `offset`, alles parametrisch.
+- `datum`: Datum Point, Datum Line und LCS mit parametrischer Lage; eine Datum Line ist Achse für `revolve`, `helix` und `pattern(polar)`, ein LCS ist Skizzenebene für `create_sketch`.
+- `boolean`: fuse, cut und common zwischen Bodies desselben Bauteils; die Werkzeug-Bodies bleiben in der Boolean-Gruppe editierbar.
+- `draft`: Flächen per Selektor um eine Neutral Plane neigen (Standard Druckbett); der Selektor wird nach Parameteränderungen nachgeführt. Neuer Selektor `faces:vertical`.
+- `pad`/`pocket`: Taper-Winkel und Modus `up_to_first`.
+- `hole`: `model_thread` schneidet die echte Gewindegeometrie eines Gewindelochs (etwa 1,5 s je Loch, nur für Einzelgewinde).
+- Regelwerk: die Themen `features` und `references` nennen die neuen Tools mit Einsatzregeln.
+
+### Behoben
+
+- `pattern`: die Beschreibung des Winkels war deutsch.
+
 ## 0.2.0 — 2026-09-29
 
 Aus den Sprints `freecad-buddy-referenzen` und `freecad-buddy-design-regelwerk`.

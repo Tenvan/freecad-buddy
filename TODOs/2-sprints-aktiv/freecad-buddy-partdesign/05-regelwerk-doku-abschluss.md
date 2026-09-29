@@ -22,16 +22,15 @@ Enthaltene Aufgaben: #5.1, #5.2, #5.3, #5.4
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #5.1 | Regelwerk-Themen `features` und `references`: neue Tools mit Einsatzregel (Loft für Übergänge, Helix für Federn und Sondergewinde, Primitive nur für Kugel/Torus/Ellipsoid/Keil und Hilfskörper, Boolean nur innerhalb eines Bauteils, Datum statt Solid-Flächen); Tests `test_rules_only_name_registered_tools`, `test_every_topic_of_r03_is_covered` | Geplant | `server` | #2.1–#4.2 | — | AC-09 |
-| #5.2 | `python tools/gen_tool_docs.py` → `docs/tools.md`; `docs/architecture.md` aus 98; README-Tool-Zahl; `CHANGELOG.md`; Version (OF-05, vermutet 0.3.0) in `pyproject.toml`, Server, Bridge, Core | Geplant | `docs/architecture.md` | #5.1 | — | AC-09, AC-10 |
-| #5.3 | Gesamtcheck `uv run poe check`; Stichprobe: jedes neue Tool ein Undo-Schritt, Labels nach Konvention, `test_language.py` grün | Geplant | `keine` | #5.2 | — | AC-10 |
-| #5.4 | GUI-Abnahme AC-11 (Loft, Helix, Primitiv in der GUI öffnen, Parameter ändern, Recompute) – nur nach Freigabe durch Ralf; Nachweis in der Tabelle unten | Geplant | `keine` | #5.3 | — | AC-11 |
+| #5.4 | GUI-Abnahme AC-11 = G13 in `docs/acceptance.md` (Trichter, Feder, Kugelknauf in der GUI öffnen, Parameter ändern, Recompute) – nur nach Freigabe durch Ralf; Nachweis in der Tabelle unten | Blockiert (wartet auf Freigabe/Prüfung durch Ralf) | `keine` | #5.3 | — | AC-11 |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #5.1 | Regelwerk: Thema `features` um fünf Regeln (loft, helix + model_thread, primitive, draft/taper/up_to_first, boolean) und Thema `references` um die Datum-Regel erweitert, jeweils mit `requires`; Tests `test_rules_only_name_registered_tools`, `test_every_topic_of_r03_is_covered`, `test_language.py` grün | keins | 2026-09-29 |
+| #5.2 | `docs/tools.md` regeneriert (57 Tools); `docs/architecture.md` mit allen sieben Deltas aus 98; README (57 Tools, PartDesign-Abdeckung); `CHANGELOG.md` 0.3.0; Version 0.3.0 in `pyproject.toml`, `uv.lock`, Server, Bridge, Core; `docs/acceptance.md` um G13 ergänzt | in `docs/architecture.md` übernommen (98) | 2026-09-29 |
+| #5.3 | Gesamtcheck `uv run poe check` grün (siehe Session-Log S5); jedes neue Tool ist ein Undo-Schritt (Core-Tests nutzen `documents.undo` gegen `boolean`, `hole`, `draft`), Labels nach Konvention (`Loft_`, `Helix_`, `HelixCut_`, `<Primitive>_`/`<Primitive>Cut_`, `DatumPoint_`/`DatumLine_`/`LCS_`, `Boolean_`, `Draft_`) | keins | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -45,8 +44,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 4
-> - Nächste Session: S5
-> - Relevante Dateien: `src/buddy_server/design_rules.py`, `docs/architecture.md`, `CHANGELOG.md`
-> - Architektur-Deltas: alle aus `98-architecture-update.md` übernehmen
-> - Startpunkt: #5.1
+> - Offene Aufgaben: 1 (#5.4, wartet auf Ralf)
+> - Nächste Session: S6 (Abnahme und Sprint-Abschluss), erst nach Ralfs Freigabe oder Scope-Entscheidung zu G13
+> - Relevante Dateien: `docs/acceptance.md` (G13), `00-index.md` (AC-11, Definition of Done)
+> - Architektur-Deltas: alle übernommen
+> - Startpunkt: #5.4 – Ralf fragen: G13 selbst prüfen, dem Agenten übertragen („Agent führt, ich schaue“) oder per Scope-Entscheidung in `gui-abnahme.md` verschieben

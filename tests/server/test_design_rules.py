@@ -40,12 +40,18 @@ def test_instructions_stay_in_budget_with_every_planned_tool() -> None:
 
 
 def _profile_kinds() -> set[str]:
-    """Profile kinds of add_profile (e.g. u_path) are valid identifiers in the rules, too."""
+    """Profile kinds of add_profile (e.g. u_path), tool parameters (e.g. model_thread) and enum
+    values (e.g. up_to_first) are valid identifiers in the rules, too."""
     settings = Settings()
     bus = EventBus()
     mcp, _ = build_mcp(settings, Bridge(settings, bus), bus)
     tools = {tool.name: tool for tool in asyncio.run(mcp.list_tools())}
-    return set(tools["add_profile"].input_schema["properties"]["kind"]["enum"])
+    known = set(tools["add_profile"].input_schema["properties"]["kind"]["enum"])
+    for tool in tools.values():
+        for name, prop in tool.input_schema["properties"].items():
+            known.add(name)
+            known.update(value for value in prop.get("enum", []) if isinstance(value, str))
+    return known
 
 
 @pytest.mark.parametrize("allow_python", [False, True])

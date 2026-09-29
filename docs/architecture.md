@@ -135,8 +135,8 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 
 ## Semantische Selektoren
 
-- Grammatik `<face|faces|edge|edges>:<filter>[,<filter>…]` (UND-verknüpft): Richtungen `top/bottom/front/back/left/right`, `normal=±X|Y|Z`, `planar`, `cylindrical`, `vertical`, `horizontal`, `parallel=X|Y|Z`, `line`, `circular`, `radius=<mm>`, `at_max_z`, `at_min_z`, `x=|y=|z=<Zahl, Parameter oder Ausdruck>`, `of_feature=<Label>`, `all`. Singular verlangt genau einen Treffer (sonst `ambiguous` mit Kandidaten).
-- Dress-up-Features (Fillet, Chamfer, Thickness) speichern ihren Selektor in der Property `BuddySelector`. `set_parameters` recomputet und löst die Selektoren aller Features neu auf (`select.refresh_references`), bevor die Transaktion endet – so bleibt die Absicht bei Topologieänderungen erhalten.
+- Grammatik `<face|faces|edge|edges>:<filter>[,<filter>…]` (UND-verknüpft): Richtungen `top/bottom/front/back/left/right`, `normal=±X|Y|Z`, `planar`, `cylindrical`, `vertical`, `horizontal`, `parallel=X|Y|Z`, `line`, `circular`, `radius=<mm>`, `at_max_z`, `at_min_z`, `x=|y=|z=<Zahl, Parameter oder Ausdruck>`, `of_feature=<Label>`, `all`. Singular verlangt genau einen Treffer (sonst `ambiguous` mit Kandidaten). `vertical` gilt auch für Flächen: planare Seitenwände mit waagrechter Normale (`faces:vertical`, z. B. für `draft`).
+- Dress-up-Features (Fillet, Chamfer, Thickness, Draft) speichern ihren Selektor in der Property `BuddySelector`. `set_parameters` recomputet und löst die Selektoren aller Features neu auf (`select.refresh_references`), bevor die Transaktion endet – so bleibt die Absicht bei Topologieänderungen erhalten.
 
 ## Sicherheit
 
@@ -180,16 +180,18 @@ Grund für die Aufteilung (Spike S3): Der Addon-Manager lädt offline seinen lok
 |---|---|
 | Ein Bauteil = ein `PartDesign::Body` | `create_body`; Features nur innerhalb des Bodys |
 | Parameter zentral | `App::VarSet` mit Label `Parameters`; Namen englisch, ASCII, `PascalCase_With_Prefix` (z. B. `Box_Width`) |
-| Skizzen auf stabilen Referenzen | Ursprungsebenen `XY/XZ/YZ` des Bodys oder Datum-Ebenen; Face-Attachment nur explizit, mit TNP-Warnung |
+| Skizzen auf stabilen Referenzen | Ursprungsebenen `XY/XZ/YZ` des Bodys, Datum-Ebenen oder ein LCS (`datum kind='lcs'`, Attachment `ObjectXY`); Face-Attachment nur explizit, mit TNP-Warnung. `sketch.model.plane_support` ist der eine Ebenen-Resolver für Skizzen, Primitive und Datums und liefert den Attachment-Modus mit |
+| Datum-Referenzen | `datum` legt Point, Line und LCS parametrisch an; Offsets in Koordinaten der Basis-Ebene (x, y in der Ebene, z entlang der Normalen) wie bei `datum_plane`. Eine Datum Line läuft entlang der Normalen der Basis-Ebene und ist Achse für `revolve`, `helix` und `pattern(polar)` (`features._axis_reference`) |
 | Skizzen voll bestimmt | DoF = 0 nach jedem Profil-Tool; keine `Block`/`Lock`-Constraints |
 | Menschliche Constraint-Muster | Symmetrie zum Ursprung statt zweier Lagemaße, `Equal` statt doppelter Maße, Konstruktionsgeometrie für Hilfslinien |
 | Maße benannt und gebunden | Maß-Constraints tragen Namen und eine Expression auf einen Parameter |
 | Lochbilder und Anschlussmaße einmal | Layout- bzw. Basis-Skizze als einzige Quelle; abhängige Skizzen im selben Body referenzieren deren **reale** Geometrie (z. B. Lochkreise) mit `add_geometry` Typ `external` → `x<N>`. Konstruktionsgeometrie ist in FreeCAD nicht extern referenzierbar. Quellen: nur frühere Skizzen, Datums, Binder desselben Bodys (Zyklen werden vorab abgelehnt) |
 | Bezüge über Body-Grenzen | nur über `shape_binder` (synchroner `SubShapeBinder`), der dann Quelle für `external` ist; Bezüge auf Körperkanten nur mit `allow_face_reference` und TNP-Warnung |
 | Referenznotation in Skizzen | `g<N>` eigene Geometrie, `x<N>` externe Geometrie (GeoId `-3-N`), je mit `.start`/`.end`/`.center`; `origin`, `x_axis`, `y_axis` |
-| Kanten/Flächen semantisch | Fillet/Chamfer/Thickness über Selektoren (`face:top`, `edges:vertical`); keine `Edge12` im Client |
+| Kanten/Flächen semantisch | Fillet/Chamfer/Thickness/Draft über Selektoren (`face:top`, `edges:vertical`, `faces:vertical`); keine `Edge12` im Client |
 | Sprechende Labels | `<Typ>_<Zweck>`, z. B. `Sketch_BaseProfile`, `Pad_Base`, `Pocket_ScrewHoles`, `Fillet_TopEdges` |
-| PartDesign-first | Keine Part-Primitive oder -Booleans im Standard-Workflow |
+| PartDesign-first | Keine Part-Workbench-Primitive oder -Booleans. PartDesign-Primitive (`primitive`) sind die einzige Ausnahme von „Skizze zuerst“, gedacht für Kugel, Torus, Ellipsoid, Keil und Hilfskörper: Lage über Ebene, `center` und `offset` mit `AttachmentOffset`-Expressions, Maße als Durchmesser/Ausdehnungen. `boolean` (fuse/cut/common) nur zwischen Bodies desselben Bauteils; FreeCAD verschiebt die Werkzeug-Bodies in die Boolean-Gruppe des Ziel-Bodys, wo sie editierbar bleiben; Assembly-Parts und bereits verbrauchte Bodies werden abgelehnt |
+| Eine Helix-Implementierung | `features.make_helix` erzeugt jede Additive/SubtractiveHelix; `helix` (Federn, Nuten) und `thread` (ISO-Außengewinde) sind Aufrufer. `hole(model_thread=true)` schneidet echte Gewindegeometrie (≈ 1,5 s und 60–90 Flächen je Loch), das Regelwerk beschränkt es auf Einzelgewinde |
 
 ## Kompatibilität und API-Drift
 
@@ -197,6 +199,7 @@ Grund für die Aufteilung (Spike S3): Der Addon-Manager lädt offline seinen lok
 - Neue oder geänderte APIs werden per Laufzeitprüfung abgesichert und mit Fehlercode `1007 unsupported` gemeldet statt mit einer Exception aus FreeCAD.
 - Externe Geometrie (FreeCAD 26.3): `Sketch.addExternal(obj, sub[, defining])` nimmt `defining` nur positional; ungültige Elementnamen werden **still ignoriert**, deshalb validiert Buddy Quelle und Element selbst. `g<N>` einer Quellskizze wird über `Shape.ElementReverseMap` (`g<N+1>;SKT`) auf `EdgeN`/`VertexN` abgebildet; die Quelle je externem Element steht in `ExternalGeometryExtension.Ref`. Nach gelöschter Quelle behält `ExternalGeo` veraltete Einträge und Constraints zeigen ins Leere, bei formal gültiger Skizze – `analyze_sketch` meldet das als Lint-`error`.
 - `HoleCutCustomValues` schaltet eigene Senkungswerte (`HoleCutDiameter`, `HoleCutDepth`, `HoleCutCountersinkAngle`) frei; ohne das Flag setzt FreeCAD die ISO-Werte.
+- `REQUIRED_TYPES` umfasst seit 0.3.0 auch Loft, Helix, die 16 Primitive, Boolean, Draft, Point und CoordinateSystem. Eigenheiten in 26.3: `PartDesign::Point` kennt nur `ObjectOrigin` als Objekt-Attachment (kein `ObjectXY`), `PartDesign::Line` läuft mit `ObjectZ` entlang der Ebenennormalen, ein `PartDesign::CoordinateSystem` hat keine Kind-Ebenen. `PartDesign::Draft` liefert ohne `NeutralPlane` je nach `Reversed` unterschiedliche oder keine Ergebnisse, deshalb setzt Buddy immer eine. `Hole.ModelThread` gibt es seit 1.0; die `ThreadSize`-Enumeration füllt sich erst nach `ThreadType`.
 
 ## Teststrategie
 
@@ -228,4 +231,4 @@ Grund für die Aufteilung (Spike S3): Der Addon-Manager lädt offline seinen lok
 
 ## Tool-Katalog
 
-51 öffentliche Tools inkl. `install_addon` und `execute_python` (beide opt-in) in 11 Gruppen nach Arbeitsphase, darunter die Gruppe Design-Tools; Budget ≤ 100, Tools werden nur zusammengelegt, wenn es fachlich Sinn ergibt (z. B. `document(action=new|open|save|close|revert)`). Jede Tool-Beschreibung beginnt mit `[<Kategorie>]`, weil MCP Tools flach listet. Generiert dokumentiert in [`docs/tools.md`](tools.md) (Index) und `docs/tools/<gruppe>.md`; `tests/tools/test_tool_docs.py` prüft Gruppenzuordnung, Präfix und Aktualität. Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.
+57 öffentliche Tools inkl. `install_addon` und `execute_python` (beide opt-in) in 11 Gruppen nach Arbeitsphase, darunter die Gruppe Design-Tools; Budget ≤ 100, Tools werden nur zusammengelegt, wenn es fachlich Sinn ergibt (z. B. `document(action=new|open|save|close|revert)`). Jede Tool-Beschreibung beginnt mit `[<Kategorie>]`, weil MCP Tools flach listet. Generiert dokumentiert in [`docs/tools.md`](tools.md) (Index) und `docs/tools/<gruppe>.md`; `tests/tools/test_tool_docs.py` prüft Gruppenzuordnung, Präfix und Aktualität. Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.

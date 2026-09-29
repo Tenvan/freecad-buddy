@@ -66,7 +66,7 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 | OF-02 | Verhalten von `PartDesign::Boolean` im Baum | #1.1, #4.1, AC-04 | ✅ Geklärt (Spike S1, 2026-09-29): `addObjects` verschiebt die beteiligten Bodies in die Boolean-Gruppe (nicht mehr Root-Objekt), ihr Shape bleibt gültig und `get_model_tree` listet sie weiter als Bodies; Undo und Rollback lassen beide Bodies gültig. Entscheidung: fuse/cut/common voll umsetzen, Bodies aus Assembly-`Parts` ablehnen | Agent (Spike), zur Kenntnis an Ralf |
 | OF-03 | `ModelThread` in 26.3 vorhanden und druckbar | #1.2, #3.4, AC-08 | ✅ Geklärt (Spike S1, 2026-09-29): Eigenschaft vorhanden (dazu `CosmeticThread`, `ThreadDepth`, `ThreadFit`); M6 ≈ 1,8 s und 91 Flächen je Loch, M10 ≈ 1,4 s, Solids gültig, Volumen um 19 % (M6) bzw. 16 % (M10) größer als kosmetisch. Regel: `model_thread` nur für einzelne Gewinde, nicht für Raster; Druckbarkeit ab M5 (vermutet, Probedruck offen) | Agent (Spike) |
 | OF-04 | Ein oder zwei Sprints | Planung | ✅ Entschieden (Annahme, Ralf 2026-09-29): ein Sprint, fünf Phasen | Ralf |
-| OF-05 | Versionsnummer nach dem Sprint | #5.2 | 0.3.0 (vermutet: neue Tools = Minor) | Ralf |
+| OF-05 | Versionsnummer nach dem Sprint | #5.2 | ✅ Umgesetzt als Annahme (S5): 0.3.0 in `pyproject.toml`, `uv.lock`, Server, Bridge, Core und CHANGELOG; Ralf kann vor dem Release-Tag widersprechen | Ralf |
 
 ## Umsetzung und Nachweis
 
@@ -80,9 +80,9 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 | AC-06 | `datum` point/line/lcs; Revolve und Polar um Datum Line | #3.1, #3.2 / P3 | Headless-Core-Test Achsvergleich | **erfüllt** (S3: `test_datum_point_line_and_lcs_follow_their_parameters`, `test_sketch_on_lcs_and_axes_through_a_datum_line`: Torus um Datum Line exakt, Helix und Polar um dieselbe Line, Skizze auf LCS) |
 | AC-07 | Taper und `up_to_first` in `pad`/`pocket` | #3.3 / P3 | Headless-Core-Test Volumen | **erfüllt** (S3: `test_pad_taper_and_up_to_first` mit Pyramidenstumpf-Formel, `test_pocket_up_to_first_and_taper`) |
 | AC-08 | `hole` mit `model_thread`, `unsupported` ohne Eigenschaft | #1.2, #3.4 / P1, P3 | Spike + Headless-Core-Test | **erfüllt** (S3: `test_hole_model_thread_cuts_real_thread_geometry`; `unsupported`-Pfad ist ein Guard ohne eigenen Test, da 26.3 die Eigenschaft hat) |
-| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | teilweise: `REQUIRED_TYPES` um 25 Typen erweitert, `test_all_required_types_are_available` grün, `docs/tools.md` regeneriert (57 Tools nach S4); Regelwerk #5.1 offen |
-| AC-10 | Undo-Schritt, Labels, Sprache, `poe check` grün | #5.3 / P5 | `uv run poe check` | offen |
-| AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | offen |
+| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | **erfüllt** (S5: sechs neue Regeln in `features`/`references` mit `requires`; `test_rules_only_name_registered_tools`, `test_every_topic_of_r03_is_covered`, `test_every_tool_has_an_example_and_docs_are_current` grün; 57 ≤ 100 Tools) |
+| AC-10 | Undo-Schritt, Labels, Sprache, `poe check` grün | #5.3 / P5 | `uv run poe check` | **erfüllt** (S5: `poe check` grün, Undo in den Core-Tests von `boolean`, `hole`, `draft`; Labels per Präfix-Konvention; `test_language.py` grün) |
+| AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | offen – G13 in `docs/acceptance.md` beschrieben, wartet auf Ralf (selbst prüfen, Agent führen lassen oder verschieben) |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -107,11 +107,11 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[████████░░] 75% — 12 von 16 Aufgaben erledigt
+[█████████░] 94% — 15 von 16 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
-*Keine Blocker.*
+- **#5.4 GUI-Abnahme AC-11 (G13)** wartet auf Ralf: selbst prüfen, dem Agenten übertragen („Agent führt, ich schaue“) oder per Scope-Entscheidung ins Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md) verschieben. Besitzer: Ralf. Danach Sprint-Abschluss (S6).
 
 ## Phasen-Übersicht
 
@@ -121,7 +121,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 0 | 3 | [██████████] 100% |
 | 3 — Datum & Bestandserweiterungen | [03-referenzen-bestand.md](03-referenzen-bestand.md) | `mehrere` | 0 | 4 | [██████████] 100% |
 | 4 — Boolean & Draft | [04-boolean-draft.md](04-boolean-draft.md) | `mehrere` | 0 | 2 | [██████████] 100% |
-| 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 4 | 0 | [░░░░░░░░░░] 0% |
+| 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 1 | 3 | [████████░░] 75% |
 
 ## 📅 Session-Übersicht
 
@@ -131,7 +131,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | S2 | Phase 2 | `helix` mit `thread`-Umstellung, `primitive` | ✅ Erledigt (2026-09-29) |
 | S3 | Phase 3 | `datum`, Achsen über Datum Line, Taper/`up_to_first`, `model_thread` | ✅ Erledigt (2026-09-29) |
 | S4 | Phase 4 | `boolean`, `draft` | ✅ Erledigt (2026-09-29) |
-| **→ S5** | Phase 5 | Regelwerk, Doku, Version, `poe check`, GUI-Abnahme AC-11 | **Nächste** |
+| S5 | Phase 5 | Regelwerk, Doku, Version 0.3.0, `poe check` | ✅ Erledigt (2026-09-29), #5.4 offen |
+| **→ S6** | Phase 5 | GUI-Abnahme G13 (nach Freigabe durch Ralf) und Sprint-Abschluss | **Nächste, wartet auf Ralf** |
 
 ## 🔗 Dependency-Übersicht
 
