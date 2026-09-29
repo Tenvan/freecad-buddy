@@ -4,4 +4,4 @@ Runs inside FreeCAD's Python (GUI or headless). Must not depend on the MCP SDK o
 anything outside the Python standard library and FreeCAD itself.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

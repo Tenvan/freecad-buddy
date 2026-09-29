@@ -2,11 +2,11 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-57 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+60 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
-| [Session & Dokument](tools/session.md) | `[Session]` | 3 |
+| [Session & Dokument](tools/session.md) | `[Session]` | 6 |
 | [Modell & Parameter](tools/model.md) | `[Model]` | 6 |
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
 | [Referenzen](tools/reference.md) | `[Reference]` | 4 |
@@ -23,6 +23,9 @@
 | Tool | Zweck |
 |---|---|
 | [`get_status`](tools/session.md#get_status) | Status of FreeCAD and the bridge: version, open documents, missing object types. Call first. |
+| [`storepoint`](tools/session.md#storepoint) | Mark a milestone in the design stream: a marker in the group 'Storepoints' linked to the current |
+| [`list_storepoints`](tools/session.md#list_storepoints) | Storepoints of the document with position, timestamp, steps since the previous one and the |
+| [`replay`](tools/session.md#replay) | Rebuild the design from its recorded stream up to a storepoint in a new document, over the same |
 | [`document`](tools/session.md#document) | Document lifecycle. new: create and activate (then set_parameters → create_body → create_sketch → |
 | [`undo`](tools/session.md#undo) | Undo the last change(s). Every tool call is exactly one step. |
 

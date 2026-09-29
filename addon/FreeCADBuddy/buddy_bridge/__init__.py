@@ -5,4 +5,4 @@ shim in ``qt_dispatcher``). ``protocol``, ``tokens``, ``client`` and ``server`` 
 import FreeCAD, so they are usable and testable outside of it.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

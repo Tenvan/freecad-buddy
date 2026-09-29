@@ -1,6 +1,6 @@
 [project]
 name = "freecad-buddy"
-version = "0.3.0"
+version = "0.4.0"
 description = "MCP-Server mit TUI für PartDesign/Sketcher-basierte 3D-Druck-Projekte in FreeCAD"
 readme = "README.md"
 license = "MIT"

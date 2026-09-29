@@ -7,7 +7,7 @@ from typing import Any
 
 import FreeCAD
 
-from buddy_core import naming
+from buddy_core import naming, stream
 from buddy_core.errors import AMBIGUOUS, CoreError, not_found, validation
 from buddy_core.result import ToolResult, describe
 from buddy_core.transaction import ensure_user_not_editing, transaction
@@ -197,6 +197,16 @@ def _node(obj: Any) -> dict[str, Any]:
         obj.solve()
         node["dof"] = obj.DoF
         node["fully_constrained"] = bool(obj.FullyConstrained)
+    elif obj.Name == stream.GROUP_NAME:
+        node["steps"] = len(obj.Stream)
+        node["storepoints"] = [
+            {
+                **describe(marker),
+                "position": marker.Position,
+                "feature": marker.Feature.Label if marker.Feature is not None else None,
+            }
+            for marker in obj.Group
+        ]
     return node
 
 
@@ -213,11 +223,13 @@ def model_tree(document: str | None = None) -> dict[str, Any]:
         if obj.TypeId.startswith("App::Origin")
         for feature in getattr(obj, "OriginFeatures", [])
     }
+    markers = stream.claimed(doc)  # storepoint markers are listed under their group
     top_level = [
         obj
         for obj in doc.Objects
         if obj.Name not in in_body
         and obj.Name not in origin_parts
+        and obj.Name not in markers
         and not obj.TypeId.startswith("App::Origin")
     ]
     return {

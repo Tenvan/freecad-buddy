@@ -53,6 +53,13 @@ TOPICS: tuple[Topic, ...] = (
         "Order of steps, checks after every step",
         (
             Rule(
+                "Set a storepoint at every milestone (base body done, before details, before export): the "
+                "design stream is recorded automatically, replay rebuilds the design up to a storepoint in a "
+                "new document - for recovery, FreeCAD updates and variants. Manual GUI edits are not in the "
+                "stream.",
+                requires=("storepoint", "replay"),
+            ),
+            Rule(
                 "Read get_model_tree before changes - the user works in FreeCAD at the same time.", core=True
             ),
             Rule(

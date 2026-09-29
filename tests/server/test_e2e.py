@@ -91,3 +91,33 @@ def test_unreachable_bridge_answers_fast(tmp_path: Path) -> None:
 
     assert is_error and "[bridge_unavailable]" in text
     assert duration <= 10
+
+
+def test_storepoints_and_replay_over_mcp(bridge_home: tuple[Path, int]) -> None:
+    home, bridge_port = bridge_home
+    settings = make_settings(home, bridge_port)
+
+    async def scenario() -> dict:
+        async with running_server(settings), mcp_session(settings) as session:
+            call = tool_caller(session)
+            await call("document", action="new", name="E2E Stream")
+            await call("create_body", label="Box")
+            sketch = await call("create_sketch", plane="XY", purpose="Base")
+            await call(
+                "add_profile",
+                sketch=sketch["sketch"]["label"],
+                kind="rectangle",
+                params={"width": 40, "height": 20},
+            )
+            await call("pad", sketch="Sketch_Base", length=10, purpose="Base")
+            point = await call("storepoint", name="Base body")
+            assert point["storepoint"]["feature"] == "Pad_Base"
+            listing = await call("list_storepoints")
+            assert [item["name"] for item in listing["storepoints"]] == ["Base body"]
+            copy = await call("replay", storepoint="Base body", into="E2E Copy")
+            assert copy["steps"] == 5
+            return await call("get_model_tree", document=copy["document"]["name"])
+
+    tree = asyncio.run(scenario())
+    labels = [node["label"] for node in tree["objects"]]
+    assert "Box" in labels and "Storepoints" in labels

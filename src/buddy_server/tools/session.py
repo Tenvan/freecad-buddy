@@ -22,6 +22,42 @@ def register(reg: Registration) -> None:
         return await ctx.call("get_status", "system.status")
 
     @tool
+    async def storepoint(
+        name: Annotated[str, Field(description="Unique name of the milestone, e.g. 'Base body'")],
+        snapshot: Annotated[
+            bool,
+            Field(description="Also save a copy of the document next to its file (needs a saved document)"),
+        ] = False,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Mark a milestone in the design stream: a marker in the group 'Storepoints' linked to the current
+        feature plus the description 'Storepoint n: name' on that feature. replay rebuilds the design up to
+        a storepoint in a new document."""
+        return await ctx.call(
+            "storepoint", "stream.storepoint", name=name, snapshot=snapshot, document=document
+        )  # fmt: skip
+
+    @tool
+    async def list_storepoints(document: Doc = None) -> dict[str, Any]:
+        """Storepoints of the document with position, timestamp, steps since the previous one and the
+        linked feature; also the number of recorded steps and detected manual edits."""
+        return await ctx.call("list_storepoints", "stream.list", document=document)
+
+    @tool
+    async def replay(
+        storepoint: Annotated[str, Field(description="Storepoint to rebuild up to (inclusive)")],
+        into: Annotated[str, Field(description="Name of the new document (must not exist yet)")],
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Rebuild the design from its recorded stream up to a storepoint in a new document, over the same
+        tools and without changes: recover a broken model, rebuild after a FreeCAD update or branch a
+        variant. Python execution and addon installation are skipped and reported; manual GUI edits in the
+        original are not part of the stream (warning)."""
+        return await ctx.call(
+            "replay", "stream.replay", timeout=600, storepoint=storepoint, into=into, document=document
+        )  # fmt: skip
+
+    @tool
     async def document(
         action: Annotated[
             Literal["new", "open", "save", "close", "revert"],

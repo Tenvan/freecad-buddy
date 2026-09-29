@@ -6,7 +6,7 @@ MCP-Server mit Terminal-Oberfläche für FreeCAD: Ein Agent (z. B. Claude Code) 
 
 | Thema | FreeCAD Buddy |
 |---|---|
-| Werkzeuge | 57 Intent-Level-Tools in 11 Gruppen statt einer API-Kopie; jedes Standard-Werkzeug der PartDesign-Leiste ist abgedeckt (inkl. Loft, Helix, Primitive, Boolean, Draft, Datum); `execute_python` nur per Opt-in |
+| Werkzeuge | 60 Intent-Level-Tools in 11 Gruppen statt einer API-Kopie; jedes Standard-Werkzeug der PartDesign-Leiste ist abgedeckt (inkl. Loft, Helix, Primitive, Boolean, Draft, Datum); `execute_python` nur per Opt-in |
 | Design-Tools | Wiederkehrende Aufgaben in einem Aufruf: `fill_pattern` für Sieb-, Loch-, Lüftungs- und Wabenraster (runde oder Sechseck-Zellen), parametrisch und ohne Addon; fehlende Tools schlägt der Agent mit `propose_design_tool` vor |
 | Addons | `search_addons`/`get_addon` durchsuchen den offiziellen FreeCAD-Katalog (offline aus dem Cache); `install_addon` installiert nach Bestätigung im FreeCAD-Dialog |
 | Agentenführung | Design-Regelwerk nach Themen mit Werten aus dem Druckerprofil; alle MCP-Ausgaben englisch, FreeCAD-Oberfläche und TUI deutsch |
@@ -14,6 +14,7 @@ MCP-Server mit Terminal-Oberfläche für FreeCAD: Ein Agent (z. B. Claude Code) 
 | Parameter | Maße als Zahl, Parametername oder Ausdruck (`"Box_Width - 2*Wall"`) – gebunden per FreeCAD-Expression |
 | Robustheit | Kanten/Flächen über semantische Selektoren (`edges:vertical`, `face:top`, `edges:parallel=X,y=Thickness`); nach Parameteränderungen neu aufgelöst |
 | Sicherheit im Modell | Jeder Tool-Aufruf ist genau ein benannter Undo-Schritt; Fehler rollen zurück; offene Nutzer-Bearbeitung wird respektiert |
+| Design-Stream | Jeder Aufbau wird im Dokument aufgezeichnet; `storepoint` setzt Meilensteine (sichtbar im Baum als Marker und Beschreibung), `replay` baut das Design bis zu einem Storepoint in einem neuen Dokument neu auf |
 | 3D-Druck | Druckerprofil, Druckbarkeitsprüfung (Solid, Bauraum, Überhang, Wandstärke, Details), Export STL/3MF/STEP aufs Druckbett mit Reimport-Kontrolle |
 | Übersicht | TUI zeigt Bridge-Status, MCP-Sessions und jeden Tool-Aufruf als farbigen Chat aus Anfrage und Antwort |
 

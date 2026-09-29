@@ -16,9 +16,12 @@ from buddy_bridge.protocol import (
     Request,
     RpcError,
 )
+from buddy_core import stream
 from buddy_core.errors import CoreError
 
 DEFAULT_TIMEOUT = 30.0
+# read-only, session and lifecycle methods never enter a design stream; replay records its own steps
+NOT_RECORDED = ("system.", "python.", "addons.", "document.", "stream.list", "stream.replay")
 CODES_BY_NAME = {name: code for code, name in ERROR_NAMES.items()}
 
 
@@ -43,6 +46,22 @@ class MethodRegistry:
     def names(self) -> list[str]:
         return sorted(self._methods)
 
+    def function(self, name: str) -> Callable[..., Any]:
+        method = self._methods.get(name)
+        if method is None:
+            raise RpcError(METHOD_NOT_FOUND, f"Unknown method '{name}'")
+        return method.fn
+
+    def execute(self, name: str, params: dict[str, Any]) -> Any:
+        """Run a method on the current thread and record it in the design stream of every document
+        it changed (the one execution path, shared by RPC calls and the replay)."""
+        fn = self.function(name)
+        before = stream.snapshot()
+        result = fn(**params)
+        payload = result.to_dict() if hasattr(result, "to_dict") else result
+        stream.record(name, params, payload, before, store=not name.startswith(NOT_RECORDED))
+        return payload
+
     def invoke(self, request: Request, dispatcher: Dispatcher) -> Any:
         method = self._methods.get(request.method)
         if method is None:
@@ -53,8 +72,7 @@ class MethodRegistry:
             raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{request.method}': {error}") from None
 
         def run() -> Any:
-            result = method.fn(**request.params)
-            return result.to_dict() if hasattr(result, "to_dict") else result
+            return self.execute(request.method, request.params)
 
         try:
             return dispatcher.call(run, method.timeout) if method.main_thread else run()

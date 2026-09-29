@@ -1,10 +1,10 @@
 # Design-Stream mit Storepoints: Aufbau aufzeichnen, neu aufbauen, zurückspringen
 
-> Erstellt: 2026-09-29 │ Status: 🔵 Backlog │ Priorität: mittel │ Architektur-Impact: mehrere
+> Erstellt: 2026-09-29 │ Status: 🔵 In Sprint [`freecad-buddy-storepoints`](../../2-sprints-aktiv/freecad-buddy-storepoints/00-index.md) │ Priorität: mittel │ Architektur-Impact: mehrere
 
 ## Spezifikation
 
-> Spec-Stand: 1 │ Spec-Status: Entwurf │ Freigabe: ausstehend
+> Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: Ralf im Chat, 2026-09-29 („ok, dann umsetzen“), inklusive der Annahmen OF-01 bis OF-05 als Entscheidungen; Umsetzung und Nachweise im Sprint
 
 ## Ausgangslage
 
@@ -38,12 +38,18 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 - **A-05 Manuelle Änderungen:** Änderungen, die Ralf in der GUI zwischen zwei Aufrufen macht, sind nicht im Stream. Der Server erkennt sie (Objektzahl oder Undo-Namen ohne Buddy-Präfix) und markiert im Stream einen Eintrag `manual_edit`; `replay` warnt an dieser Stelle und bietet als Fallback den letzten Dokument-Snapshot (OF-03).
 - **A-06 Sicherheit und Sprache:** Kein Replay von `execute_python` ohne dessen Opt-in; `install_addon` wird nie erneut ausgeführt, sondern als Voraussetzung gemeldet. Alle MCP-Ausgaben englisch.
 - **A-07 Budget:** Höchstens drei neue Tools (`storepoint`, `list_storepoints`, `replay`); Tool-Budget bleibt ≤ 100.
+- **A-08 Sichtbarkeit im Modellbaum (Ralf, Chat 2026-09-29):** Ein Storepoint ist in FreeCAD sichtbar, ohne Labels zu verändern (Labels sind Referenzen):
+  - (a) als Beschreibung (`Label2`) auf dem Feature, das zum Zeitpunkt des Storepoints Tip des Bodys war, z. B. „◆ Storepoint 2: Deckel fertig“. FreeCAD zeigt `Label2` als Tooltip im Baum und in der einblendbaren Spalte „Beschreibung“ (vermutet: Spalte ab 1.0 per Kontextmenü des Baumkopfs, ungeprüft). Damit steht der Storepoint an der richtigen Stelle in der Feature-Kette.
+  - (b) als Marker-Objekt in einer Gruppe `Storepoints` an der Dokumentwurzel, ein Objekt je Storepoint (`App::FeaturePython` ohne Shape) mit Link auf das Feature, Zeitstempel und Schrittzahl; eigenes Icon über einen ViewProvider des Addons, Auswahl des Markers markiert das verlinkte Feature. Ohne installiertes Addon lädt das Dokument trotzdem (generisches Icon, Proxy-Warnung).
+  - In den Body selbst lässt sich kein Marker einfügen; PartDesign nimmt dort nur Features, Skizzen, Datums und Binder (vermutet, im Spike prüfen).
+  - `undo` eines Storepoints entfernt Beschreibung und Marker wieder (beides in derselben Transaktion).
 
 ## Nicht-Ziele
 
 - Versionsverwaltung mit Diff und Merge zwischen Streams.
 - Aufzeichnung der GUI-Bedienung selbst (Sketcher-Interaktionen); manuelle Änderungen werden nur erkannt, nicht rekonstruiert.
 - Replay über Dokumentgrenzen (Assembly aus mehreren Dateien) im ersten Schritt.
+- Replay per Doppelklick auf einen Marker in der GUI; im ersten Schritt läuft Replay nur über das Tool.
 
 ## Regeln und Einschränkungen
 
@@ -77,6 +83,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 - [ ] AC-07: Eine manuelle GUI-Änderung wird als `manual_edit` markiert und `replay` warnt (GUI-Anteil Nutzerabnahme, headless über simulierte Fremdtransaktion).
 - [ ] AC-08: `execute_python`-Einträge werden ohne Opt-in übersprungen und gemeldet; `install_addon` wird nie erneut ausgeführt.
 - [ ] AC-09: Tool-Budget ≤ 100, `uv run poe check` grün, keine deutschen MCP-Texte.
+- [ ] AC-10: Nach `storepoint("Grundkörper")` trägt das Tip-Feature die Beschreibung „◆ Storepoint 1: Grundkörper“ und die Gruppe `Storepoints` enthält einen Marker mit Link auf dieses Feature; nach `undo` ist beides weg (headless). Sichtbarkeit von Tooltip und Marker-Icon in der GUI als Nutzerabnahme.
 
 ## Offene Fragen
 
@@ -86,6 +93,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 | OF-02 | `undo` als Eintrag aufzeichnen oder den Stream kompaktieren (zurückgenommene Schritte entfernen)? | A-01 | Kompaktieren, damit Replay linear bleibt; `undo` selbst erscheint nicht im Stream | Ralf |
 | OF-03 | Snapshot-Fallback bei manuellen Änderungen: FCStd-Kopie je Storepoint speichern? | A-05 | Ja, optional per Parameter `snapshot=true` in `storepoint`, Ablage neben der FCStd | Ralf |
 | OF-04 | Soll `replay` optional Argumente überschreiben können (z. B. Parameterwerte) für Varianten? | A-04 | Nein im ersten Schritt; Varianten entstehen nach dem Replay über `set_parameters` | Ralf |
+| OF-05 | Baum-Anzeige nur als Beschreibung (a), nur als Marker-Gruppe (b) oder beides? | A-08, AC-10 | Beides: (a) zeigt die Stelle in der Feature-Kette, (b) liefert die Liste mit Icon und Zeitstempel | Ralf |
 
 ## Umsetzung und Nachweis
 
@@ -97,6 +105,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 | AC-07 | Erkennung fremder Transaktionen in der Bridge | Headless-Core-Test + GUI-Nutzerabnahme | offen |
 | AC-08 | Filter für `execute_python`/`install_addon` | Unit-Test Server | offen |
 | AC-09 | Doku, `poe check` | `uv run poe check` | offen |
+| AC-10 | `Label2` auf dem Tip-Feature, Gruppe `Storepoints` mit Marker-Objekten und ViewProvider-Icon im Addon | Headless-Core-Test + GUI-Nutzerabnahme (Tooltip, Icon) | offen |
 
 Umsetzung folgt dem freigegebenen Spec-Stand. Browser-/manuelle Prüfungen zusätzlich nach der [Abnahmefreigabe](../../README.md#browser--und-manuelle-abnahmeprüfungen) behandeln; Spec-Freigabe ist keine Testfreigabe.
 
@@ -148,4 +157,4 @@ AUTO-RESUME ENDE
 
 - Architektur-Update-Artefakt nötig: ja (`98-architecture-update.md`, Datenfluss Design-Stream)
 - Vermutete Ziel-Dokumente: `docs/architecture.md`, `docs/tools.md`
-- Offene Klärungen vor Umsetzung: OF-01 bis OF-04
+- Offene Klärungen vor Umsetzung: OF-01 bis OF-05
