@@ -38,8 +38,6 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| G1–G8 laut `docs/acceptance.md` (Teilnachweise G1/G7 im Ticket) | offen | ausstehend | ausstehend |
-| G9 Addon-Installationsdialog, G10 `fill_pattern`, G11 Chat-Log | offen | ausstehend | ausstehend |
 | Agententeil (Ralf: „Agent führt, ich schaue“, 2026-09-29), Dokument `Abnahme` in der GUI: G1 Teil 1 (`get_status`: FreeCAD 26.3.0, Bridge/Core 0.2.0, keine fehlenden Typen), G3 agentenseitig (20 Aufrufe = 20 benannte Undo-Schritte, z. B. `Fill pattern: Sieve`), G4 (Screenshots iso/top), G10 (Platte mit Rand; `fill_pattern` round 17 × 13 und hex 11 × 10 mit Feld `Plate_Width - 2*Rim_Width`; nach `Plate_Width` 120 und `Sieve_Pitch` 6 → 18 × 11 bzw. 14 × 10, alle Skizzen DoF 0, alles gültig), G12 (Ansicht nach erstem `pad` automatisch iso, nach `set_view` komplett sichtbar); AC-01 Sichtung: englische Instructions kommen in Claude Code an | ✅ bestanden | Agentenfreigabe durch Ralf im Chat | Session-Log 6c |
 | Ralfs Teil: G1 (inkl. FreeCAD schließen → `[bridge_unavailable]`), G3 (Menü „Bearbeiten → Rückgängig“), G5, G7/G11, G9 (Dialog ablehnen und zustimmen), G10 (Skizze in der GUI vollständig bestimmt) | ✅ bestanden | Ralf im Chat, 2026-09-29 | Session-Log 6c |
 | G2 (GUI bedienbar während eines Baus), G6 (3MF im Slicer), G8 (Probedruck, optional) | ⏭️ nicht getestet, verschoben | Scope-Entscheidung: Folgeticket `gui-abnahme.md` | Session-Log 6c |

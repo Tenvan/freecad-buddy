@@ -34,7 +34,6 @@ Aus den Nicht-Zielen des Sprints; erst bei Bedarf als Ticket ausformulieren.
 - Slicer-Integration (Orca/Prusa/Bambu-CLI): Slicen, Druckzeit/Materialschätzung zurückmelden.
 - Bauteil-Bibliothek: Snap-Fits, Scharniere, Gewindeeinsätze, Schraubendome als Intent-Tools.
 - Multi-Body-Projekte mit Passungen zwischen Bauteilen (ohne volle Assembly).
-- Veröffentlichung als FreeCAD-Addon (Addon-Manager).
 
 ## Hinweise
 

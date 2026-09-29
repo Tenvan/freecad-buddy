@@ -58,19 +58,19 @@ Abgenommen im Sprint `freecad-buddy-design-regelwerk` (Agent und Ralf, Version 0
 
 ## Offene Fragen
 
-- Welche optionalen Prüfungen (G3, G7, G8) sollen überhaupt durchgeführt werden? Verantwortlich: Ralf.
+- Soll die optionale Prüfung G8 (Probedruck) durchgeführt werden? Verantwortlich: Ralf. (G3 und G7 sind abgenommen.)
 
 ## Umsetzung und Nachweis
 
 | Kriterium | Geplante Aufgabe / Schritte | Prüfebene und erwartetes Ergebnis | Nachweis / Status |
 |---|---|---|---|
-| AC-01 | G1 gemäß `docs/acceptance.md` | Nutzerprüfung GUI | Teilnachweis 2026-09-28: Testplatte live über TUI-Server und GUI-Bridge gebaut, `get_status` verbunden. Fehlerfall nach FreeCAD-Ende nicht geprüft → offen |
+| AC-01 | G1 gemäß `docs/acceptance.md` | Nutzerprüfung GUI | ✅ Ralf, 2026-09-29 (inkl. FreeCAD schließen → `[bridge_unavailable]`) |
 | AC-02 | G2 | Nutzerprüfung GUI | offen |
-| AC-03 | G3 | Nutzerprüfung GUI | offen |
-| AC-04 | G4 | Nutzerprüfung GUI | offen |
-| AC-05 | G5 | Nutzerprüfung GUI | offen |
+| AC-03 | G3 | Nutzerprüfung GUI | ✅ Agent (20 benannte Undo-Schritte) und Ralf (Menü „Bearbeiten → Rückgängig“), 2026-09-29 |
+| AC-04 | G4 | Nutzerprüfung GUI | ✅ Agent, 2026-09-29 (Screenshots iso/top) |
+| AC-05 | G5 | Nutzerprüfung GUI | ✅ Ralf, 2026-09-29 |
 | AC-06 | G6 | Nutzerprüfung Slicer | offen |
-| AC-07 | G7 | Sichtung TUI | Teilnachweis 2026-09-28: Ralf hat die TUI im Betrieb genutzt; auf seinen Wunsch stehen die Log-Bereiche übereinander. Ausdrückliche Bestätigung fehlt → offen |
+| AC-07 | G7 | Sichtung TUI | ✅ Ralf, 2026-09-29 (zusammen mit G11) |
 | AC-08 | G8 | Probedruck | offen |
 
 Umsetzung folgt dem freigegebenen Spec-Stand. Browser-/manuelle Prüfungen zusätzlich nach der [Abnahmefreigabe](../../README.md#browser--und-manuelle-abnahmeprüfungen) behandeln; Spec-Freigabe ist keine Testfreigabe.

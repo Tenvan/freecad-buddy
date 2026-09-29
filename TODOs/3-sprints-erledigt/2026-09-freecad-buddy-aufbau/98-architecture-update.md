@@ -53,12 +53,12 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 
 ## Abschlussprüfung
 
-- [ ] Alle Phasen auf Architektur-Deltas geprüft.
-- [ ] `99-session-log.md` auf Architektur-Erkenntnisse geprüft.
-- [ ] `docs/architecture.md` aktualisiert oder bewusst unverändert gelassen.
-- [ ] Keine unnötigen Code-Samples in Architektur-Doku übernommen.
-- [ ] Neue Architektur-Dokumente im Projekt-README verlinkt.
+- [x] Alle Phasen auf Architektur-Deltas geprüft.
+- [x] `99-session-log.md` auf Architektur-Erkenntnisse geprüft.
+- [x] `docs/architecture.md` aktualisiert oder bewusst unverändert gelassen.
+- [x] Keine unnötigen Code-Samples in Architektur-Doku übernommen.
+- [x] Neue Architektur-Dokumente im Projekt-README verlinkt.
 
 ## Abschlussnotiz
 
-<Kurz festhalten, welche Architektur-Dokumente geändert wurden oder warum kein Update nötig war.>
+Alle Deltas der Tabelle sind in `docs/architecture.md` übernommen, `docs/tools.md` ist in S9/S10 generiert; beide sind im README verlinkt. Abschlussprüfung nachgetragen am 2026-09-29 (Sprint war am 2026-09-28 ohne Häkchen geschlossen worden).

@@ -96,7 +96,7 @@ Ein eigener, lokaler MCP-Server, über den ein Agent 3D-Druck-Projekte in FreeCA
 
 ## Akzeptanzkriterien
 
-- [ ] AC-01 (Stand 2): Die manuell gestartete TUI `freecad-buddy` ist in Claude Code als HTTP-MCP-Server registriert; `get_status` liefert FreeCAD-Version und Bridge-Status; ohne laufendes FreeCAD kommt nach ≤ 10 s eine verständliche Fehlermeldung (`bridge_unavailable`). *(automatisierter Teil erfüllt; GUI-Anteil → Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md))*
+- [x] AC-01 (Stand 2): Die manuell gestartete TUI `freecad-buddy` ist in Claude Code als HTTP-MCP-Server registriert; `get_status` liefert FreeCAD-Version und Bridge-Status; ohne laufendes FreeCAD kommt nach ≤ 10 s eine verständliche Fehlermeldung (`bridge_unavailable`). *(GUI-Anteil G1 von Ralf abgenommen, 2026-09-29, Sprint `freecad-buddy-design-regelwerk`)*
 - [ ] AC-02: Bridge-Aufrufe laufen im GUI-Hauptthread; bei 100 aufeinanderfolgenden Aufrufen bleibt die GUI bedienbar und stabil. *(automatisierter Teil erfüllt; GUI-Anteil → Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md))*
 - [x] AC-03: Jeder mutierende Tool-Call erzeugt genau einen benannten Undo-Eintrag; bei Fehler ist das Dokument unverändert (Rollback).
 - [x] AC-04: Profil-Tools erzeugen voll bestimmte Skizzen (DoF = 0, keine Konflikte/Redundanzen, keine Block/Lock-Constraints) mit benannten Maß-Constraints.
@@ -104,12 +104,12 @@ Ein eigener, lokaler MCP-Server, über den ein Agent 3D-Druck-Projekte in FreeCA
 - [x] AC-06: Pad, Pocket, Revolution, Groove, Hole, Fillet, Chamfer, Thickness, Mirrored, LinearPattern, PolarPattern und Datum-Ebene sind per Tool nutzbar; Ergebnis ist ein gültiger Solid im Body.
 - [x] AC-07: Kanten-/Flächenauswahl erfolgt über semantische Selektoren; in den Referenzprojekten führt eine topologieverschiebende Parameteränderung nicht zu falschen Referenzen.
 - [x] AC-08: Der Modellbaum erzeugter Modelle folgt der Namenskonvention (keine unbenannten `Sketch001`/`Pad002`).
-- [ ] AC-09: `screenshot` liefert ein PNG als MCP-Image-Content für aktuelle und Standardansichten. *(automatisierter Teil erfüllt; GUI-Anteil → Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md))*
+- [x] AC-09: `screenshot` liefert ein PNG als MCP-Image-Content für aktuelle und Standardansichten. *(GUI-Anteil G4 abgenommen, 2026-09-29, Sprint `freecad-buddy-design-regelwerk`)*
 - [x] AC-10: `check_printability` erkennt an Testkörpern mit bekannten Fehlern: ungültiger Solid, Bauraum-Überschreitung, Überhang über Grenzwinkel, Wand unter Mindestwandstärke.
 - [ ] AC-11: Export STL/3MF/STEP pro Body erzeugt reimportierbare Dateien (Volumenabweichung < 1 %). *(automatisierter Teil erfüllt; GUI-Anteil → Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md))*
 - [x] AC-12 (Stand 2): Bridge und MCP-HTTP-Endpunkt binden nur `127.0.0.1` und verlangen jeweils ein Token; der HTTP-Endpunkt lehnt fremde `Host`/`Origin`-Header ab; `execute_python` ist ohne Opt-in nicht verfügbar.
 - [x] AC-13: Headless-Core-Tests (FreeCAD-Python) und Server-Unit-Tests laufen mit einem Befehl grün.
-- [ ] AC-14: Drei Referenzprojekte (Box mit Deckel, Wandhalter, Drehknopf) laufen E2E über MCP und sind in der GUI manuell weiterbearbeitbar (Nutzerabnahme). *(automatisierter Teil erfüllt; GUI-Anteil → Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md))*
+- [x] AC-14: Drei Referenzprojekte (Box mit Deckel, Wandhalter, Drehknopf) laufen E2E über MCP und sind in der GUI manuell weiterbearbeitbar (Nutzerabnahme). *(GUI-Anteil G5 von Ralf abgenommen, 2026-09-29, Sprint `freecad-buddy-design-regelwerk`)*
 - [x] AC-15: Höchstens 40 öffentliche Tools, jedes mit Beschreibung, Schema und Beispiel im Tool-Katalog.
 - [x] AC-16 (Stand 2): Die TUI zeigt Bridge-Status (inkl. FreeCAD-Version), Anzahl verbundener MCP-Sessions, die letzten Tool-Aufrufe mit Name, Dauer und Ergebnis sowie FreeCAD-Konsolenmeldungen live; das Log ist auf 1000 Einträge begrenzt und die Oberfläche bleibt nach 10.000 simulierten Aufrufen bedienbar.
 
