@@ -7,13 +7,13 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 6 freigegeben | 20/21 Aufgaben; nächste: #5.3 GUI-Abnahme, dann Sprint-Abschluss; 48/100 Tools |
+| — | — | — | Kein aktiver Sprint |
 
 ## Backlog (nach Domain)
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 6 Tickets: 5 im Sprint `freecad-buddy-design-regelwerk`, 1 offen (🟡 Druckprüfung Überhang/Brücken); dazu Ideen-Parkplatz |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 2 offene Tickets: 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 4 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
 
 ## Konzepte
 
@@ -26,5 +26,6 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
+| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) | ✅ Erledigt (2026-09-29) | 21/21 Aufgaben, Spec-Stand 6, Version 0.2.0; Regelwerk, `fill_pattern`, Addon-Suche/-Installation, Chat-Log, englische MCP-Ausgaben; GUI-Rest G2/G6/G8 → Backlog |
 | FreeCAD Buddy: Externe Geometrie, Shape-Binder & Layout-Skizze | [`3-sprints-erledigt/2026-09-freecad-buddy-referenzen/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-referenzen/00-index.md) | ✅ Erledigt (2026-09-28) | 16/16 Aufgaben, Spec-Stand 2; externe Geometrie, `shape_binder`, Hole-Senkungen, gruppierter Katalog, `document`-Tool |
 | FreeCAD Buddy: PartDesign-first für 3D-Druck | [`3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-aufbau/00-index.md) | ✅ Erledigt (2026-09-28) | 36/36 Aufgaben, Spec-Stand 2; GUI-Abnahme G1–G8 → Backlog-Ticket |

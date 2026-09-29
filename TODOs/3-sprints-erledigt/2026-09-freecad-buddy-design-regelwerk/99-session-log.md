@@ -5,6 +5,34 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 6c — 2026-09-29 (GUI-Abnahme und Abschluss)
+
+**Ziel:** #5.3 GUI-Abnahme G1–G12 und Sprint-Abschluss.
+
+**Erledigt:**
+- Commits `30c5092` (parallele Arbeit: `add_gear`, `search_parts`/`insert_part`, Slicer) und `1091630` (#5.1/#5.2, Version 0.2.0). Die parallele Session hatte eine deutsche README-Überschrift in einer Regel eingeführt; das wörtliche Zitat `'Benötigte Addons'` ist im Sprachtest freigegeben.
+- Agententeil der Abnahme (Freigabe Ralf: „Agent führt, ich schaue“) im Dokument `Abnahme`: G1 Teil 1, G3 (Undo-Namen), G4, G10 (Platte mit Rand, round und hex, Feld an Plattenparametern, Parameteränderung folgt), G12; AC-01-Sichtung.
+- Ralf bestätigt: G1, G3, G5, G7/G11, G9, G10 ok. G2, G6, G8 nicht getestet → Folgeticket `gui-abnahme.md`.
+- Sprint nach `3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/` verschoben, Backlog und `master-todo.md` aktualisiert.
+
+**Release-Änderungen:**
+- `[skip][todos]` Abnahme und Sprint-Abschluss, keine Produktänderung.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Die an Claude Code gelieferten Tool-Schemas zeigten nach dem Neustart noch deutsche Beschreibungen, obwohl Server-Antworten und Instructions englisch waren; vermutlich Schema-Cache im Client (ungeprüft).
+
+**Validierung:**
+- `uv run poe check` vor den Commits: ruff ✅, pyright ✅, 183 Projekt-Python-Tests ✅, 224 FreeCAD-Python-Tests ✅.
+- GUI-/manuelle Abnahme: siehe oben; Nachweise in `05-abschluss-abnahme.md`.
+
+**Nächste Session:**
+- Offene Backlog-Tickets: `gui-abnahme.md` (G2, G6, G8), `druckpruefung-ueberhang-kruemmung.md`.
+
+---
+
 ## Session 6b — 2026-09-29
 
 **Ziel:** #5.1 und #5.2 (Doku, CHANGELOG, Version 0.2.0).

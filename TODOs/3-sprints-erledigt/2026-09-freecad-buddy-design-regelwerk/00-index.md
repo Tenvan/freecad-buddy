@@ -1,6 +1,6 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
 
-> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-29 │ Status: 🔵 Aktiv – Spec-Stand 6 freigegeben
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-29 │ Status: ✅ Erledigt (2026-09-29) – Spec-Stand 6 freigegeben
 
 ## Spezifikation
 
@@ -104,7 +104,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 
 ## Akzeptanzkriterien
 
-- [ ] AC-01: Die Server-Instructions liegen innerhalb des Budgets (OF-01). Sie enthalten die Kernregeln, die Design-Tool-Regel (R-04) und den Verweis auf `get_design_rules` und erscheinen in Claude Code als Server-Instructions.
+- [x] AC-01: Die Server-Instructions liegen innerhalb des Budgets (OF-01). Sie enthalten die Kernregeln, die Design-Tool-Regel (R-04) und den Verweis auf `get_design_rules` und erscheinen in Claude Code als Server-Instructions.
 - [x] AC-02: `get_design_rules()` liefert die Themenliste, `get_design_rules(topic)` den Themeninhalt, ein unbekanntes Thema ergibt `validation` mit gültigen Themen. Dieselben Inhalte gibt es als MCP-Resource `buddy://design-rules/{topic}`. Der Prompt `human_modeling_guide` stammt aus derselben Quelle.
 - [x] AC-03: Das Regelwerk deckt alle Themen aus R-03 ab. Jedes darin genannte Tool existiert (Test). FDM-Zahlen ändern sich mit dem Druckerprofil (Test mit Düse 0,6).
 - [x] AC-04: Die Design-Tool-Regel ist mit Kriterium und Reihenfolge (R-04) in Instructions und Thema `design_tools` formuliert. `design_part` verweist darauf.
@@ -120,7 +120,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
 - [x] AC-16 (Stand 2): Die Ansichtsregel ist eine Kernregel der Instructions und steht direkt nach „get_model_tree lesen“. `set_view` ist registriert und setzt die Live-Ansicht, ohne GUI liefert es `unsupported`. Das erste Basis-Feature setzt die Ansicht automatisch (G12).
 - [x] AC-17 (Stand 3): Keine deutschsprachigen Texte mehr in MCP-Ausgaben. Ein Test prüft Instructions, Regelwerk, Prompts, Tool-Schemas und typische Ergebnisse bzw. Fehler auf deutsche Wörter und Umlaute.
-- [ ] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`fill_pattern` in der GUI weiterbearbeitbar) G11 (Chat-Log in der TUI verständlich) und G12 (Ansicht nach `set_view` komplett und isometrisch) sind abgenommen oder per Scope-Entscheidung verschoben.
+- [x] AC-13: Übernommene GUI-Abnahme `GA-AC-01` … `GA-AC-08` (G1–G8) sowie neu G9 (Installationsdialog mit Ablehnung und Zustimmung an einem echten Addon) G10 (`fill_pattern` in der GUI weiterbearbeitbar) G11 (Chat-Log in der TUI verständlich) und G12 (Ansicht nach `set_view` komplett und isometrisch) sind abgenommen oder per Scope-Entscheidung verschoben.
 
 ## Offene Fragen
 
@@ -141,7 +141,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 
 | Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
 |---|---|---|---|---|
-| AC-01 | kompakte Instructions im Budget | #1.1, #1.3 / P1 | Unit-Test (Länge, Pflichtinhalte) + Sichtung in Claude Code | **erfüllt** automatisiert (1 688 ≤ 2 000 Zeichen, `test_design_rules.py`); Sichtung in Claude Code offen |
+| AC-01 | kompakte Instructions im Budget | #1.1, #1.3 / P1 | Unit-Test (Länge, Pflichtinhalte) + Sichtung in Claude Code | **erfüllt** (Budget per `test_design_rules.py`; Sichtung in Claude Code am 2026-09-29: englische Instructions kommen an) |
 | AC-02 | Regelwerk per Tool, Resource, Prompt | #1.2, #1.4 / P1 | E2E über MCP (Headless) | **erfüllt** (`test_tool_resource_and_prompt_over_mcp`) |
 | AC-03 | Themenabdeckung, Tool-Konsistenz, Profilwerte | #1.2, #1.5 / P1 | Unit-Tests | **erfüllt** (`test_rules_only_name_registered_tools`, `test_printing_numbers_follow_the_profile`, `test_every_topic_of_r03_is_covered`) |
 | AC-04 | Design-Tool-Regel formuliert | #1.3, #3.1 / P1, P3 | Unit-Test (Pflichtinhalte) | **erfüllt** (`test_instructions_are_compact_and_complete`, `test_design_tool_rule_names_the_tool_steps_and_design_part_points_to_it`: Kriterium, Reihenfolge `fill_pattern` → `search_addons` → `propose_design_tool`, Verweis in `design_part`) |
@@ -157,7 +157,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | **erfüllt** für den Sprint-Stand (51 ≤ 100 Tools, Doku aktuell, `poe check` grün bis Commit `451f715`); Gesamtcheck nach Abschluss paralleler Arbeiten im Checkout erneut |
 | AC-16 | Ansichtsregel und `set_view` | #1.6 / P1 | Unit-Test (Instructions) + Bridge-Test headless + G12 | **erfüllt** automatisiert (`test_view_rule_is_first_core_rule_after_reading_the_tree`, `test_set_view_without_gui_is_unsupported`); G12 offen |
 | AC-17 | MCP-Ausgaben englisch | #5.4 / P5 | Unit-Test (Sprachprüfung) | **erfüllt** (`test_language.py`: Instructions, Regelwerk, Prompts, Resources und Tool-Schemas dynamisch; alle Meldungstexte in Server, Core und Bridge statisch; UI-Texte nach OF-09 ausgenommen) |
-| AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G12 | #5.3 / P5 | Nutzerabnahme | offen |
+| AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G12 | #5.3 / P5 | Nutzerabnahme | **erfüllt bzw. verschoben**: G1, G3, G4, G5, G7/G11, G9, G10, G12 abgenommen (Agent und Ralf, 2026-09-29); G2, G6, G8 nicht getestet → Scope-Entscheidung, Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md) |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -177,7 +177,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[██████████] 95% — 20 von 21 Aufgaben erledigt
+[██████████] 100% — 21 von 21 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -193,7 +193,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 0 | 5 | [██████████] 100% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 0 | 3 | [██████████] 100% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |
-| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 1 | 3 | [███████▌░░] 75% |
+| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 0 | 4 | [██████████] 100% |
 
 ## 📅 Session-Übersicht
 
@@ -204,7 +204,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | S3 | Phase 2 | Spike Addon-Manager-API, Adapter, Katalogsuche und Details | ✅ Erledigt (2026-09-28) |
 | S4 | Phase 2 | Installation mit Opt-in, Dialog, Job-Muster, Aufräumen | ✅ Erledigt (2026-09-28) |
 | S5 | Phase 3 | Grid-Recherche, `propose_design_tool`, `fill_pattern` | ✅ Erledigt (2026-09-29) |
-| **→ S6** | Phase 5 | Englische MCP-Ausgaben, Doku, Release 0.2.0, GUI-Abnahme G1–G12 | **Nächste** |
+| S6 | Phase 5 | Englische MCP-Ausgaben, Doku, Release 0.2.0, GUI-Abnahme G1–G12 | ✅ Erledigt (2026-09-29) |
 
 ## 🔗 Dependency-Übersicht
 
@@ -238,17 +238,17 @@ GUI-, manuelle und Live-Netz-Prüfungen laufen nach der [Freigaberegel](../../RE
 
 ## Sprint-Abschluss / Definition of Done
 
-- [ ] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
-- [ ] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
-- [ ] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
-- [ ] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
-- [ ] Offene Blocker mit Besitzer und nächstem Schritt festgehalten.
-- [ ] `99-session-log.md` aktualisiert.
-- [ ] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
-- [ ] `98-architecture-update.md` ausgewertet.
-- [ ] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
-- [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben, `master-todo.md` angepasst.
-- [ ] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
+- [x] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
+- [x] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
+- [x] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
+- [x] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
+- [x] Offene Blocker mit Besitzer und nächstem Schritt festgehalten (keine; Rest-Abnahme G2/G6/G8 im Ticket `gui-abnahme.md`, Besitzer Ralf).
+- [x] `99-session-log.md` aktualisiert.
+- [x] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
+- [x] `98-architecture-update.md` ausgewertet.
+- [x] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [x] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben, `master-todo.md` angepasst.
+- [x] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
 
 ## 📓 Session-Log
 

@@ -1,6 +1,6 @@
 # Recherche: fertige Grid-Lösung im Addon-Katalog
 
-> Erstellt: 2026-09-28 │ Status: 🔵 Eingeplant → Sprint [`freecad-buddy-design-regelwerk`](../../2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) │ Priorität: mittel │ Architektur-Impact: keiner
+> Erstellt: 2026-09-28 │ Status: ✅ Umgesetzt im Sprint [`freecad-buddy-design-regelwerk`](../../3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) (2026-09-29) │ Priorität: mittel │ Architektur-Impact: keiner
 
 ## Spezifikation
 

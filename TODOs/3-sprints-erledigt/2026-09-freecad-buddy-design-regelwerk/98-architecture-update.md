@@ -12,7 +12,7 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 
 | Dokument | Status | Ziel-Dokumente |
 |---|---|---|
-| `docs/architecture.md` | aktualisieren | `docs/architecture.md` |
+| `docs/architecture.md` | aktualisiert (0.2.0) | `docs/architecture.md` |
 
 ## Architektur-Deltas
 
@@ -40,7 +40,7 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 
 ## Abschlussprüfung
 
-- [ ] Alle Phasen auf Architektur-Deltas geprüft.
-- [ ] `99-session-log.md` auf Architektur-Erkenntnisse geprüft.
-- [ ] `docs/architecture.md` aktualisiert oder bewusst unverändert gelassen.
-- [ ] Keine unnötigen Code-Samples in Architektur-Doku übernommen.
+- [x] Alle Phasen auf Architektur-Deltas geprüft.
+- [x] `99-session-log.md` auf Architektur-Erkenntnisse geprüft.
+- [x] `docs/architecture.md` aktualisiert oder bewusst unverändert gelassen.
+- [x] Keine unnötigen Code-Samples in Architektur-Doku übernommen.

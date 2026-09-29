@@ -1,6 +1,6 @@
 # TUI: Tool-Log als farbige Chat-Ansicht mit Anfrage und Antwort
 
-> Erstellt: 2026-09-28 │ Status: 🔵 Eingeplant → Sprint [`freecad-buddy-design-regelwerk`](../../2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) (Phase 4) │ Priorität: hoch │ Architektur-Impact: server
+> Erstellt: 2026-09-28 │ Status: ✅ Umgesetzt im Sprint [`freecad-buddy-design-regelwerk`](../../3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) (2026-09-29) │ Priorität: hoch │ Architektur-Impact: server
 
 ## Spezifikation
 

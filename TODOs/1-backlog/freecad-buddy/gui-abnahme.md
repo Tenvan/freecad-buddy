@@ -1,6 +1,6 @@
 # GUI-Abnahme FreeCAD Buddy 0.1.0 (G1–G8)
 
-> Erstellt: 2026-09-28 │ Status: 🔵 Eingeplant → Sprint [`freecad-buddy-design-regelwerk`](../../2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) (Phase 5) │ Priorität: hoch │ Architektur-Impact: keiner
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-29 │ Status: 🟡 Rest offen (G2, G6, G8) – Rest aus Sprint [`freecad-buddy-design-regelwerk`](../../3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) │ Priorität: mittel │ Architektur-Impact: keiner
 
 ## Spezifikation
 
@@ -43,14 +43,18 @@ Ablauf und erwartete Ergebnisse je Prüfung stehen in [`docs/acceptance.md`](../
 
 ## Akzeptanzkriterien
 
-- [ ] AC-01 (G1 → Sprint-AC-01): `get_status` aus Claude Code gegen die GUI-Bridge liefert Version und Status „verbunden“; nach dem Schließen von FreeCAD kommt `[bridge_unavailable]` in ≤ 10 s und die TUI zeigt „wartet“.
+- [x] AC-01 (G1 → Sprint-AC-01): `get_status` aus Claude Code gegen die GUI-Bridge liefert Version und Status „verbunden“; nach dem Schließen von FreeCAD kommt `[bridge_unavailable]` in ≤ 10 s und die TUI zeigt „wartet“.
 - [ ] AC-02 (G2 → Sprint-AC-02): Während ein Referenzprojekt gebaut wird, bleibt die FreeCAD-GUI bedienbar, ohne Hänger oder Absturz.
-- [ ] AC-03 (G3, optional → Sprint-AC-03): Die Undo-Liste zeigt genau einen sprechend benannten Schritt pro Tool-Aufruf.
-- [ ] AC-04 (G4 → Sprint-AC-09): `screenshot` (view iso) liefert ein Bild der 3D-Ansicht in Claude Code.
-- [ ] AC-05 (G5 → Sprint-AC-14): Die drei Referenzprojekte sind in der GUI manuell weiterbearbeitbar (Skizze vollständig bestimmt, Parameteränderung im VarSet wirkt, eigenes Feature ergänzbar).
+- [x] AC-03 (G3, optional → Sprint-AC-03): Die Undo-Liste zeigt genau einen sprechend benannten Schritt pro Tool-Aufruf.
+- [x] AC-04 (G4 → Sprint-AC-09): `screenshot` (view iso) liefert ein Bild der 3D-Ansicht in Claude Code.
+- [x] AC-05 (G5 → Sprint-AC-14): Die drei Referenzprojekte sind in der GUI manuell weiterbearbeitbar (Skizze vollständig bestimmt, Parameteränderung im VarSet wirkt, eigenes Feature ergänzbar).
 - [ ] AC-06 (G6 → Sprint-AC-11): Die exportierte 3MF liegt im Slicer korrekt auf dem Bett, die Maße stimmen.
-- [ ] AC-07 (G7, optional → Sprint-AC-16): Status, Sessions, Tool-Log und Meldungen der TUI sind verständlich.
+- [x] AC-07 (G7, optional → Sprint-AC-16): Status, Sessions, Tool-Log und Meldungen der TUI sind verständlich.
 - [ ] AC-08 (G8, optional): Beim Probedruck der Box mit Deckel passt der Deckel mit dem Spiel `clearance_fit`.
+
+## Stand 2026-09-29
+
+Abgenommen im Sprint `freecad-buddy-design-regelwerk` (Agent und Ralf, Version 0.2.0): G1, G3, G4, G5, G7. Nicht getestet und weiter offen: G2 (GUI bedienbar während eines Baus), G6 (3MF im Slicer), G8 (Probedruck, optional). Die neuen Prüfungen G9–G12 sind im Sprint abgenommen.
 
 ## Offene Fragen
 

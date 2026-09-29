@@ -8,7 +8,7 @@
 >
 > **Delta Stand 2 (2026-09-28):** Tool-Katalog nach Arbeitsphasen gruppiert (eine Quelle für Server und Doku), Kategorie als Präfix in jeder Tool-Beschreibung; `new_document`, `open_document`, `save_document`, `close_document`, `revert_document` werden zu `document(action=new|open|save|close|revert)` – **bewusster Breaking Change** gegenüber der Regel „Tool-Namen aus 0.1.0 bleiben“ (nur interne Nutzung), 49 → 45 Tools. Neu: R-11, R-12, AC-13, AC-14, #3.6, #3.7.
 
-Quelle: Chat-Auftrag von Ralf vom 2026-09-28 („Dann lass uns für den Buddy die entsprechenden Tools entwickeln, da die sehr wichtig sind und oft gebraucht werden“). Anlass war der Lüfter-Adapter 50 → 60 mm (`out/Fan_Frame_50_to_60_v2.FCStd`). Kein Backlog-Ticket. Querbezug: R-13 (englische Ausgaben) und R-10/AC-12 (Tool-Budget) aus dem aktiven Sprint [`freecad-buddy-design-regelwerk`](../../2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md#anforderungen).
+Quelle: Chat-Auftrag von Ralf vom 2026-09-28 („Dann lass uns für den Buddy die entsprechenden Tools entwickeln, da die sehr wichtig sind und oft gebraucht werden“). Anlass war der Lüfter-Adapter 50 → 60 mm (`out/Fan_Frame_50_to_60_v2.FCStd`). Kein Backlog-Ticket. Querbezug: R-13 (englische Ausgaben) und R-10/AC-12 (Tool-Budget) aus dem aktiven Sprint [`freecad-buddy-design-regelwerk`](../2026-09-freecad-buddy-design-regelwerk/00-index.md#anforderungen).
 
 ## Ausgangslage
 

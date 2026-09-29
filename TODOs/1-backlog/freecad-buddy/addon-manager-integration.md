@@ -1,6 +1,6 @@
 # Addon-Manager-Integration: fertige Lösungen suchen und installieren
 
-> Erstellt: 2026-09-28 │ Status: 🔵 Eingeplant → Sprint [`freecad-buddy-design-regelwerk`](../../2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) │ Priorität: hoch │ Architektur-Impact: mehrere
+> Erstellt: 2026-09-28 │ Status: ✅ Umgesetzt im Sprint [`freecad-buddy-design-regelwerk`](../../3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) (2026-09-29) │ Priorität: hoch │ Architektur-Impact: mehrere
 
 ## Spezifikation
 
