@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-51 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+52 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
@@ -10,7 +10,7 @@
 | [Modell & Parameter](tools/model.md) | `[Model]` | 6 |
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
 | [Referenzen](tools/reference.md) | `[Reference]` | 3 |
-| [Features](tools/feature.md) | `[Feature]` | 11 |
+| [Features](tools/feature.md) | `[Feature]` | 12 |
 | [Design-Tools](tools/design.md) | `[Design tools]` | 3 |
 | [Baugruppe](tools/assembly.md) | `[Assembly]` | 7 |
 | [Material & Ansicht](tools/appearance.md) | `[Appearance]` | 3 |
@@ -64,6 +64,7 @@
 | [`pocket`](tools/feature.md#pocket) | Cut a pocket (subtractive). |
 | [`revolve`](tools/feature.md#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
 | [`sweep`](tools/feature.md#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
+| [`loft`](tools/feature.md#loft) | Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels, |
 | [`hole`](tools/feature.md#hole) | Holes (Hole feature) at every circle centre of the sketch. Cuts without cut_* use ISO defaults; |
 | [`fillet`](tools/feature.md#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
 | [`chamfer`](tools/feature.md#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |

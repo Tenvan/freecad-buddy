@@ -274,3 +274,57 @@ def test_sweep_rejects_empty_path_and_bad_radius(doc: Any, part: Any) -> None:
         features.sweep(section.Name, path.Name, document=doc.Name)
     with pytest.raises(Error):
         profile(doc, path, "u_path", length=20, height=5, radius=10)
+
+
+def _frustum(height: float, radius_bottom: float, radius_top: float) -> float:
+    import math
+
+    return math.pi * height / 3 * (radius_bottom**2 + radius_bottom * radius_top + radius_top**2)
+
+
+def test_loft_makes_a_funnel_that_follows_its_parameters(doc: Any, part: Any) -> None:
+    set_params(doc, Funnel_Bottom=40, Funnel_Top=12, Funnel_Height=30)
+    bottom = sketch_on(doc, purpose="FunnelBottom")
+    profile(doc, bottom, "circle", diameter="Funnel_Bottom")
+    plane = features.datum_plane(offset="Funnel_Height", purpose="FunnelTop", document=doc.Name).to_dict()
+    top = sketch_on(doc, plane=plane["plane"]["label"], purpose="FunnelTop")
+    profile(doc, top, "circle", diameter="Funnel_Top")
+
+    result = features.loft([bottom.Name, top.Name], purpose="Funnel", document=doc.Name).to_dict()
+
+    assert result["created"][0]["label"] == "Loft_Funnel"
+    assert abs(result["volume"] - _frustum(30, 20, 6)) < _frustum(30, 20, 6) * 0.01
+
+    set_params(doc, Funnel_Height=50)  # the loft follows the datum plane's parameter
+    doc.recompute()
+    assert abs(part.Tip.Shape.Volume - _frustum(50, 20, 6)) < _frustum(50, 20, 6) * 0.01
+
+
+def test_subtractive_loft_cuts_a_tapered_pocket(doc: Any, part: Any) -> None:
+    _box(doc)  # 60 x 40 x 20
+    bottom = sketch_on(doc, purpose="TaperBottom")
+    profile(doc, bottom, "circle", diameter=20)
+    plane = features.datum_plane(offset=20, purpose="TaperTop", document=doc.Name).to_dict()
+    top = sketch_on(doc, plane=plane["plane"]["label"], purpose="TaperTop")
+    profile(doc, top, "circle", diameter=10)
+
+    result = features.loft(
+        [bottom.Name, top.Name], subtractive=True, purpose="Taper", document=doc.Name
+    ).to_dict()
+
+    removed = _frustum(20, 10, 5)
+    assert result["created"][0]["label"] == "LoftCut_Taper"
+    assert abs(result["volume"] - (60 * 40 * 20 - removed)) < removed * 0.01
+
+
+def test_loft_rejects_one_sketch_and_sketches_on_the_same_plane(doc: Any, part: Any) -> None:
+    first = sketch_on(doc, purpose="A")
+    profile(doc, first, "circle", diameter=10)
+    second = sketch_on(doc, purpose="B")
+    profile(doc, second, "circle", diameter=5)
+
+    with pytest.raises(CoreError, match="at least two"):
+        features.loft([first.Name], document=doc.Name)
+    with pytest.raises(CoreError, match="same plane"):
+        features.loft([first.Name, second.Name], document=doc.Name)
+    assert part.Tip is None

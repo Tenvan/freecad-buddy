@@ -22,15 +22,15 @@ Enthaltene Aufgaben: #1.1, #1.2, #1.3 (dazu #2.1 aus Phase 2)
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #1.1 | Spike OF-02: `PartDesign::Boolean` headless mit zwei Bodies (fuse/cut/common). Festhalten: Wohin wandern die Bodies (`Group`, `InList`), was zeigt `get_model_tree`, was passiert mit einem Body in der Assembly4-`Parts`-Gruppe, bleibt Undo ein Schritt. Ergebnis als Entscheidung im Index | Geplant | `core` | — | — | AC-04 (Voraussetzung) |
-| #1.2 | Spike OF-03: `PartDesign::Hole` mit `Threaded=True` und `ModelThread=True` (M6, M10) headless: Eigenschaft vorhanden, Solid gültig, Volumen kleiner als ohne, Rechenzeit. Ergebnis als Entscheidung im Index | Geplant | `core` | — | — | AC-08 (Voraussetzung) |
-| #1.3 | `compat.REQUIRED_TYPES` um AdditiveLoft, SubtractiveLoft, AdditiveHelix, SubtractiveHelix, die 16 Primitive, Boolean, Draft, Point, CoordinateSystem erweitern; `test_compat.py` anpassen; Testhelfer für Volumenformeln (Kugel, Kegel, Torus, Ellipsoid, Keil) in `tests/core/conftest.py` | Geplant | `core` | — | — | AC-09; technische Voraussetzung für #2.1 bis #4.2 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #1.1 | Spike OF-02 headless (Skript im Scratchpad, nicht im Repo): `PartDesign::Boolean` mit `addObjects([body])` für Fuse (9000 mm³), Cut (6000), Common (2000), alle gültig; der Werkzeug-Body verlässt `RootObjects` und hängt in `Boolean.Group`, sein Shape bleibt gültig, `InList` zeigt den Boolean; Undo ist ein Schritt, danach und nach `abortTransaction` sind beide Bodies gültig und wieder Root. Assembly-`Parts`-Fall nicht gemessen → Ablehnung per Regel. Ergebnis im Index (OF-02) | Boolean-Regel in 98 bestätigt | 2026-09-29 |
+| #1.2 | Spike OF-03 headless: `ModelThread` in 26.3 vorhanden (dazu `CosmeticThread`, `ThreadDepth`, `ThreadDepthType`, `ThreadFit`, `ThreadClass`); `ThreadSize`-Enumeration wird erst durch `ThreadType` gefüllt (bestehender Helfer `_thread_size` deckt das ab). M6: 1767 ms, 91 Flächen, 467 mm³ statt 393; M10: 1396 ms, 64 Flächen, 1321 mm³ statt 1135; Solids gültig. Ergebnis im Index (OF-03) | Regel „nur einzelne Gewinde“ in 98 | 2026-09-29 |
+| #1.3 | `compat.REQUIRED_TYPES` um 25 Typen erweitert (Loft, Helix, 16 Primitive, Boolean, Draft, Point, CoordinateSystem); `test_all_required_types_are_available` grün in 26.3. Volumenhelfer verschoben nach #2.3 (erst dort gebraucht, Scope-Entscheidung Agent) | `REQUIRED_TYPES`-Delta in 98 | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -44,8 +44,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
-> - Nächste Session: S1
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py`, `addon/FreeCADBuddy/buddy_core/compat.py`, `tests/core/conftest.py`
-> - Architektur-Deltas: Ergebnis der Spikes in `98-architecture-update.md` ergänzen
-> - Startpunkt: #1.1
+> - Offene Aufgaben: 0
+> - Nächste Session: S2 (Phase 2, #2.2)
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/thread.py`, `addon/FreeCADBuddy/buddy_core/features.py`
+> - Architektur-Deltas: Spike-Ergebnisse in `98-architecture-update.md` eingetragen
+> - Startpunkt: #2.2

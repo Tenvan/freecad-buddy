@@ -63,8 +63,8 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 | ID | Frage | Betroffen | Annahme bis Klärung | Verantwortlich |
 |---|---|---|---|---|
 | OF-01 | `draft` aufnehmen? | #4.2, AC-05 | ✅ Entschieden (Annahme, Ralf 2026-09-29): Ja, als letzte Aufgabe | Ralf |
-| OF-02 | Verhalten von `PartDesign::Boolean` im Baum | #1.1, #4.1, AC-04 | Spike in S1; fällt er negativ aus, wird `boolean` auf `fuse` beschränkt | Agent (Spike), Entscheidung Ralf |
-| OF-03 | `ModelThread` in 26.3 vorhanden und druckbar | #1.2, #3.4, AC-08 | Spike in S1 | Agent (Spike) |
+| OF-02 | Verhalten von `PartDesign::Boolean` im Baum | #1.1, #4.1, AC-04 | ✅ Geklärt (Spike S1, 2026-09-29): `addObjects` verschiebt die beteiligten Bodies in die Boolean-Gruppe (nicht mehr Root-Objekt), ihr Shape bleibt gültig und `get_model_tree` listet sie weiter als Bodies; Undo und Rollback lassen beide Bodies gültig. Entscheidung: fuse/cut/common voll umsetzen, Bodies aus Assembly-`Parts` ablehnen | Agent (Spike), zur Kenntnis an Ralf |
+| OF-03 | `ModelThread` in 26.3 vorhanden und druckbar | #1.2, #3.4, AC-08 | ✅ Geklärt (Spike S1, 2026-09-29): Eigenschaft vorhanden (dazu `CosmeticThread`, `ThreadDepth`, `ThreadFit`); M6 ≈ 1,8 s und 91 Flächen je Loch, M10 ≈ 1,4 s, Solids gültig, Volumen um 19 % (M6) bzw. 16 % (M10) größer als kosmetisch. Regel: `model_thread` nur für einzelne Gewinde, nicht für Raster; Druckbarkeit ab M5 (vermutet, Probedruck offen) | Agent (Spike) |
 | OF-04 | Ein oder zwei Sprints | Planung | ✅ Entschieden (Annahme, Ralf 2026-09-29): ein Sprint, fünf Phasen | Ralf |
 | OF-05 | Versionsnummer nach dem Sprint | #5.2 | 0.3.0 (vermutet: neue Tools = Minor) | Ralf |
 
@@ -72,15 +72,15 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 
 | Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
 |---|---|---|---|---|
-| AC-01 | Trichter per `loft`, Höhe folgt Parameter, subtraktiv schneidet | #2.1 / P2 | Headless-Core-Test | offen |
+| AC-01 | Trichter per `loft`, Höhe folgt Parameter, subtraktiv schneidet | #2.1 / P2 | Headless-Core-Test | **erfüllt** (S1: `test_loft_makes_a_funnel_that_follows_its_parameters`, `test_subtractive_loft_cuts_a_tapered_pocket`, `test_loft_rejects_one_sketch_and_sketches_on_the_same_plane`) |
 | AC-02 | Feder und Nut per `helix`, `thread` unverändert | #2.2 / P2 | Headless-Core-Test + bestehende `thread`-Tests | offen |
 | AC-03 | 8 Primitive additiv und subtraktiv, Volumen nach Formel ±1 % | #2.3 / P2 | Headless-Core-Test | offen |
-| AC-04 | `boolean` fuse/cut/common, Ablehnungen | #1.1, #4.1 / P1, P4 | Spike + Headless-Core-Test | offen |
+| AC-04 | `boolean` fuse/cut/common, Ablehnungen | #1.1, #4.1 / P1, P4 | Spike + Headless-Core-Test | Spike erfüllt (S1, OF-02); Umsetzung #4.1 offen |
 | AC-05 | `draft` mit Selektor und Re-Resolve | #4.2 / P4 | Headless-Core-Test | offen |
 | AC-06 | `datum` point/line/lcs; Revolve und Polar um Datum Line | #3.1, #3.2 / P3 | Headless-Core-Test Achsvergleich | offen |
 | AC-07 | Taper und `up_to_first` in `pad`/`pocket` | #3.3 / P3 | Headless-Core-Test Volumen | offen |
-| AC-08 | `hole` mit `model_thread`, `unsupported` ohne Eigenschaft | #1.2, #3.4 / P1, P3 | Spike + Headless-Core-Test | offen |
-| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | offen |
+| AC-08 | `hole` mit `model_thread`, `unsupported` ohne Eigenschaft | #1.2, #3.4 / P1, P3 | Spike + Headless-Core-Test | Spike erfüllt (S1, OF-03); Umsetzung #3.4 offen |
+| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | teilweise: `REQUIRED_TYPES` um 25 Typen erweitert, `test_all_required_types_are_available` grün, `docs/tools.md` mit 52 Tools regeneriert (S1); Regelwerk #5.1 offen |
 | AC-10 | Undo-Schritt, Labels, Sprache, `poe check` grün | #5.3 / P5 | `uv run poe check` | offen |
 | AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | offen |
 
@@ -93,10 +93,13 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2026-09-29 | Sprint aus dem Ticket mit den Annahmen OF-01 bis OF-04 gestartet (Ralf, „starte sprint“) | Offene Fragen sind als Annahmen tragfähig; OF-02/OF-03 werden per Spike geklärt | mehrere |
 | 2026-09-29 | Sechs neue Tools statt Erweiterung bestehender (z. B. kein `pad kind=loft`) | Ein Tool je PartDesign-Werkzeug bleibt für Agent und Regelwerk lesbar; Budget reicht | server |
 | 2026-09-29 | `thread` bleibt Intent-Tool und nutzt intern `helix` | Keine zwei Helix-Implementierungen | core |
+| 2026-09-29 | `boolean` mit fuse/cut/common; die Werkzeug-Bodies wandern in die Boolean-Gruppe des Ziel-Bodys, Bodies aus Assembly-`Parts` werden abgelehnt (Spike S1, OF-02) | FreeCAD-Verhalten ist stabil, Undo/Rollback sauber; `get_model_tree` zeigt die Bodies weiter | core, server |
+| 2026-09-29 | `model_thread` wird umgesetzt, das Regelwerk beschränkt es auf einzelne Gewinde (Spike S1, OF-03) | ≈ 1,5 s und 60–90 Flächen je Loch; in Rastern zu teuer | core, server |
+| 2026-09-29 | `loft` verlangt eigene Ebenen je Skizze und prüft das vor der Transaktion (`validation`, kein Recompute-Fehler) | Verständlicher Fehler statt OCC-Meldung | core |
 
 ## Gesamtfortschritt
 
-[░░░░░░░░░░] 0% — 0 von 16 Aufgaben erledigt
+[███░░░░░░░] 25% — 4 von 16 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -106,8 +109,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
-| 1 — Spikes & Fundament | [01-spikes-fundament.md](01-spikes-fundament.md) | `core` | 3 | 0 | [░░░░░░░░░░] 0% |
-| 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 3 | 0 | [░░░░░░░░░░] 0% |
+| 1 — Spikes & Fundament | [01-spikes-fundament.md](01-spikes-fundament.md) | `core` | 0 | 3 | [██████████] 100% |
+| 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 2 | 1 | [███░░░░░░░] 33% |
 | 3 — Datum & Bestandserweiterungen | [03-referenzen-bestand.md](03-referenzen-bestand.md) | `mehrere` | 4 | 0 | [░░░░░░░░░░] 0% |
 | 4 — Boolean & Draft | [04-boolean-draft.md](04-boolean-draft.md) | `mehrere` | 2 | 0 | [░░░░░░░░░░] 0% |
 | 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 4 | 0 | [░░░░░░░░░░] 0% |
@@ -116,8 +119,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
-| **→ S1** | Phase 1 + #2.1 | Spikes OF-02/OF-03, `REQUIRED_TYPES`, Testhelfer, `loft` | **Nächste** |
-| S2 | Phase 2 | `helix` mit `thread`-Umstellung, `primitive` | Geplant |
+| S1 | Phase 1 + #2.1 | Spikes OF-02/OF-03, `REQUIRED_TYPES`, `loft` | ✅ Erledigt (2026-09-29) |
+| **→ S2** | Phase 2 | `helix` mit `thread`-Umstellung, `primitive` (inkl. Volumenhelfer aus #1.3) | **Nächste** |
 | S3 | Phase 3 | `datum`, Achsen über Datum Line, Taper/`up_to_first`, `model_thread` | Geplant |
 | S4 | Phase 4 | `boolean`, `draft` | Geplant |
 | S5 | Phase 5 | Regelwerk, Doku, Version, `poe check`, GUI-Abnahme AC-11 | Geplant |

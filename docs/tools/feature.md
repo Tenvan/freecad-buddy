@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Feature]` · 11 Tools
+Kategorie-Präfix: `[Feature]` · 12 Tools
 
 | Tool | Zweck |
 |---|---|
@@ -10,6 +10,7 @@ Kategorie-Präfix: `[Feature]` · 11 Tools
 | [`pocket`](#pocket) | Cut a pocket (subtractive). |
 | [`revolve`](#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
 | [`sweep`](#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
+| [`loft`](#loft) | Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels, |
 | [`hole`](#hole) | Holes (Hole feature) at every circle centre of the sketch. Cuts without cut_* use ISO defaults; |
 | [`fillet`](#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
 | [`chamfer`](#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |
@@ -109,6 +110,33 @@ Beispiel:
   "profile": "Sketch_HandleSection",
   "path": "Sketch_HandlePath",
   "purpose": "Handle"
+}
+```
+
+## loft
+
+[Feature] Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels,
+adapters, transitions between cross-sections. Put every section on its own plane
+(origin plane or datum_plane with an offset parameter).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `sketches` | array<string> | ja | `—` | Two or more sketches in transition order, each on its own plane (e.g. circle on XY, smaller circle on a datum_plane at Funnel_Height) |
+| `subtractive` | boolean | nein | `false` | true = remove material through the sections |
+| `ruled` | boolean | nein | `false` | Straight surfaces between sections instead of smooth |
+| `closed` | boolean | nein | `false` | Close the loft back to the first sketch |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "sketches": [
+    "Sketch_FunnelBottom",
+    "Sketch_FunnelTop"
+  ],
+  "purpose": "Funnel"
 }
 ```
 

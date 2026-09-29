@@ -21,7 +21,8 @@ Nicht hier sammeln: temporäre Implementierungsdetails, Debug-Notizen, reine Cod
 |---|---|---|---|---|---|
 | Planung 2026-09-29 | Tool-Katalog | Sechs neue Tools (`loft`, `helix`, `primitive`, `boolean`, `draft`, `datum`); ein Tool je PartDesign-Werkzeug, keine Sammel-Tools | `docs/architecture.md` | `docs/architecture.md#tool-katalog` | offen |
 | Planung 2026-09-29 | Modellierungsregeln | Primitive sind die einzige Ausnahme von „Skizze zuerst“, beschränkt auf Kugel, Torus, Ellipsoid, Keil und Hilfskörper | `docs/architecture.md` | `docs/architecture.md` Modellierungsregeln | offen |
-| Planung 2026-09-29 | Modellierungsregeln | Boolean verbindet nur Bodies desselben Bauteils; Verhalten im Baum nach Spike #1.1 | `docs/architecture.md` | `docs/architecture.md` Modellierungsregeln | offen (Spike) |
+| Planung 2026-09-29, Spike S1 #1.1 | Modellierungsregeln | Boolean verbindet nur Bodies desselben Bauteils. FreeCAD verschiebt die Werkzeug-Bodies in die Boolean-Gruppe des Ziel-Bodys (kein Root-Objekt mehr, Shape bleibt gültig); Undo und Rollback stellen beide Bodies her | `docs/architecture.md` | `docs/architecture.md` Modellierungsregeln | offen |
+| Spike S1 #1.2 | Modellierungsregeln | `hole(model_thread=true)` erzeugt echte Gewindegeometrie (≈ 1,5 s, 60–90 Flächen je Loch); das Regelwerk beschränkt es auf einzelne Gewinde, Raster bleiben kosmetisch | `docs/architecture.md` | Regelwerk-Thema `features` (#5.1) | offen |
 | Planung 2026-09-29 | Referenzen | Datum Point, Line und LCS sind neben Datum Plane die einzigen erlaubten Nicht-Ursprungs-Referenzen | `docs/architecture.md` | `docs/architecture.md` Referenzen | offen |
 | Planung 2026-09-29 | Kompatibilität | `REQUIRED_TYPES` wächst um die neuen PartDesign-Typen; `get_status` meldet fehlende Typen vorab | `docs/architecture.md` | `docs/architecture.md#kompatibilität-und-api-drift` | offen |
 

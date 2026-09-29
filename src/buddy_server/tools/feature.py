@@ -84,6 +84,33 @@ def register(reg: Registration) -> None:
         )  # fmt: skip
 
     @tool
+    async def loft(
+        sketches: Annotated[
+            list[str],
+            Field(
+                description="Two or more sketches in transition order, each on its own plane "
+                "(e.g. circle on XY, smaller circle on a datum_plane at Funnel_Height)"
+            ),
+        ],
+        subtractive: Annotated[
+            bool, Field(description="true = remove material through the sections")
+        ] = False,
+        ruled: Annotated[
+            bool, Field(description="Straight surfaces between sections instead of smooth")
+        ] = False,
+        closed: Annotated[bool, Field(description="Close the loft back to the first sketch")] = False,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels,
+        adapters, transitions between cross-sections. Put every section on its own plane
+        (origin plane or datum_plane with an offset parameter)."""
+        return await ctx.call(
+            "loft", "feature.loft", sketches=sketches, subtractive=subtractive, ruled=ruled, closed=closed,
+            purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
     async def hole(
         sketch: Annotated[
             str, Field(description="Sketch with circles at the hole positions (e.g. hole_rect)")

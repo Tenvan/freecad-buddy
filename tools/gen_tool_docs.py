@@ -117,6 +117,7 @@ EXAMPLES: dict[str, dict[str, Any]] = {
     "get_addon": {"addon_id": "lattice2"},
     "install_addon": {"addon_id": "lattice2"},
     "sweep": {"profile": "Sketch_HandleSection", "path": "Sketch_HandlePath", "purpose": "Handle"},
+    "loft": {"sketches": ["Sketch_FunnelBottom", "Sketch_FunnelTop"], "purpose": "Funnel"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
 

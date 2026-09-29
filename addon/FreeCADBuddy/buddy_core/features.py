@@ -240,6 +240,64 @@ def sweep(
     return result
 
 
+def _same_plane(first: Any, second: Any) -> bool:
+    a, b = first.Placement, second.Placement
+    return (a.Base - b.Base).Length < 1e-6 and a.Rotation.isSame(b.Rotation, 1e-6)
+
+
+def loft(
+    sketches: list[str],
+    subtractive: bool = False,
+    ruled: bool = False,
+    closed: bool = False,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Loft through two or more sketches in the given order (AdditiveLoft, or SubtractiveLoft
+    for a cut): funnels, adapters, transitions between cross-sections.
+
+    The sketches sit on origin planes or datum planes with an offset parameter; the first one is
+    the profile, the others the sections - that is how a person sets up a loft in FreeCAD.
+    """
+    doc = resolve_document(document)
+    if len(sketches) < 2:
+        raise validation("A loft needs at least two sketches on different planes")
+    first, body = _profile(doc, sketches[0])
+    sections = [resolve_sketch(doc, ref) for ref in sketches[1:]]
+    for sketch in sections:
+        if body_of(sketch) is not body:
+            raise validation("All loft sketches must be in the same body")
+    for sketch in (first, *sections):
+        if sketch.Shape.isNull() or not sketch.Shape.Wires:
+            raise validation(f"Sketch '{sketch.Label}' contains no closed profile")
+    for previous, sketch in zip((first, *sections), sections, strict=False):
+        if _same_plane(previous, sketch):
+            raise validation(
+                f"Sketches '{previous.Label}' and '{sketch.Label}' lie on the same plane",
+                hints=["Put each section on its own plane, e.g. a datum_plane with an offset parameter."],
+            )
+    type_id, prefix = (
+        ("PartDesign::SubtractiveLoft", "LoftCut") if subtractive else ("PartDesign::AdditiveLoft", "Loft")
+    )
+    result = ToolResult()
+    first_solid = not subtractive and not _has_solid(body)
+    with transaction(doc, f"{prefix}: {purpose or first.Label}"):
+        before = _volume(body.Tip) if body.Tip else 0.0
+        feature = _new(body, type_id, prefix, purpose, first.Label.removeprefix("Sketch_"))
+        feature.Profile = first
+        feature.Sections = sections
+        feature.Ruled = ruled
+        feature.Closed = closed
+        for sketch in (first, *sections):
+            sketch.Visibility = False
+        if subtractive:
+            _ensure_cuts(doc, feature, before, result)
+        _finish(doc, feature, result)
+    if first_solid:
+        _show_first_base_feature(doc, feature, result)
+    return result
+
+
 def _thread_size(feature: Any, size: str) -> str:
     options = feature.getEnumerationsOfProperty("ThreadSize")
     wanted = size.strip().upper().replace(" ", "")

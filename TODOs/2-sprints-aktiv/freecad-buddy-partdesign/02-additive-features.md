@@ -32,7 +32,6 @@ Enthaltene Aufgaben: #2.2, #2.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #2.1 | `features.loft(body, sketches[], subtractive, ruled, closed, name)` → `PartDesign::AdditiveLoft`/`SubtractiveLoft` (`Profile` + `Sections`); Bridge `feature.loft`; Server-Tool `loft`; Tests: Trichter aus zwei Kreisen (XY + `datum_plane` mit Parameter), Parameterfolge, subtraktiv, `validation` bei < 2 Skizzen | Geplant | `core`, `bridge`, `server` | #1.3 | — | AC-01 |
 | #2.2 | `features.helix(body, sketch, axis, pitch, height\|turns, angle, left_handed, subtractive, name)` → `PartDesign::AdditiveHelix`/`SubtractiveHelix`; `thread.py` ruft den gemeinsamen Kern; Bridge `feature.helix`; Server-Tool `helix`; Tests: Feder (Windungen aus pitch/height), Nut, Achse als Datum Line (nach #3.1 nachziehen), Ablehnung pitch ≤ 0, bestehende `thread`-Tests | Geplant | `core`, `bridge`, `server` | #1.3 | — | AC-02 |
 | #2.3 | `features.primitive(body, kind, dims{}, plane, center, offset, subtractive, name)` mit Tabelle `kind → (Additive*, Subtractive*)` für box, cylinder, sphere, cone, torus, ellipsoid, prism, wedge; Maße als Parameter/Ausdruck; Lage per Attachment an Ursprungs-/Datum-Ebene; Bridge `feature.primitive`; Server-Tool `primitive`; Tests: 8 × additiv mit Volumenformel ±1 %, 8 × subtraktiv aus einem Pad, Warnung wenn nichts geschnitten | Geplant | `core`, `bridge`, `server` | #1.3 | — | AC-03 |
 
@@ -40,7 +39,7 @@ Enthaltene Aufgaben: #2.2, #2.3
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #2.1 | `features.loft(sketches, subtractive, ruled, closed, purpose)` → `AdditiveLoft`/`SubtractiveLoft` mit `Profile` + `Sections`; Vorprüfung: ≥ 2 Skizzen, gleicher Body, geschlossene Profile, keine zwei Skizzen auf derselben Ebene (`validation` mit Hinweis auf `datum_plane`); Bridge `feature.loft`; Server-Tool `loft`; Beispiel in `gen_tool_docs`, `docs/tools.md` regeneriert (52 Tools). Tests: Trichter (Kegelstumpf-Volumen ±1 %, folgt `Funnel_Height`), subtraktiver Kegelstumpf aus dem Quader, Ablehnungen | keins | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -54,8 +53,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
-> - Nächste Session: S1 (#2.1), danach S2
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py`, `addon/FreeCADBuddy/buddy_core/thread.py`, `src/buddy_server/tools/feature.py`
+> - Offene Aufgaben: 2
+> - Nächste Session: S2
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/thread.py`, `addon/FreeCADBuddy/buddy_core/features.py` (`loft` als frisches Muster), `src/buddy_server/tools/feature.py`, `tools/gen_tool_docs.py` (Beispiele)
 > - Architektur-Deltas: Primitive-Regel in `98-architecture-update.md`
-> - Startpunkt: #2.1
+> - Startpunkt: #2.2
