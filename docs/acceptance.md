@@ -14,6 +14,9 @@ Vorbereitung: `uv sync`, `uv run poe install-addon`, FreeCAD neu starten, `uv ru
 | G6 | AC-11 | Exportierte 3MF-Datei im Slicer öffnen | Teil liegt auf dem Bett, Maße stimmen |
 | G7 | AC-16 | TUI ansehen | Status, Sessions, Tool-Log und Meldungen verständlich |
 | G9 | Sprint 2, AC-08 | Server normal starten (Addon-Installation ist serverseitig Standard) und in FreeCAD „Addon-Installation erlauben“ klicken; danach ist nur noch „Addon-Installation sperren“ aktiv. Dann in Claude Code `install_addon` für ein kleines Addon aufrufen (Vorschlag: Makro `FCHoneycombMaker`), zuerst ablehnen, danach erneut aufrufen und zustimmen | Dialog mit Name, Quelle, Lizenz, Standard „Abbrechen“. Bei Ablehnung `user_declined`, nichts installiert. Bei Zustimmung installiert, im Addon Manager als installiert sichtbar |
+| G10 | Sprint 2, AC-11 | Platte mit Rand bauen lassen, dann `fill_pattern` je einmal mit `cell="round"` und `cell="hex"` (Feld über `field=["Plate_Width - 2*Rim_Width", …]`); in der GUI `<Name>_Pitch` und `Plate_Width` ändern und die Skizze der Startzelle öffnen | Raster gleichmäßig im Feld, Waben mit gleichem Steg; nach Änderungen folgen Anzahl und Feld; Skizze „vollständig bestimmt“; ein Undo-Schritt pro Aufruf |
+| G11 | Sprint 2, AC-14 | TUI während eines Bauvorgangs ansehen, einen Eintrag mit Enter öffnen, mit `v` umschalten | Anfrage und Antwort je Aufruf verständlich, Farben nach Erfolg/Warnung/Fehler, keine Tokens sichtbar |
+| G12 | Sprint 2, AC-16 | Bauteil bauen lassen; nach dem ersten `pad` und nach dem abschließenden `set_view` die 3D-Ansicht ansehen | Bauteil komplett sichtbar und leicht isometrisch |
 | G8 | optional | Probedruck Box mit Deckel | Deckel passt mit dem Spiel `clearance_fit` |
 
 Ergebnisse bitte im Folgeticket (`TODOs/1-backlog/freecad-buddy/gui-abnahme.md`) oder im Chat festhalten.

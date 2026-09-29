@@ -22,8 +22,6 @@ Enthaltene Aufgaben: #5.4, #5.1, #5.2, #5.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #5.1 | `gen_tool_docs.py` um Kategorien erweitern (Modellierung, Design-Tools, Addons, Druck, Diagnose), Beispiele für neue Tools, Budgettest ≤ 40 | Geplant | `server` | Phasen 1–4 | 1 | AC-12 |
-| #5.2 | `docs/architecture.md`, README (Opt-ins, `--log-file`, Chat-Log), `CHANGELOG.md` 0.2.0, Version in `pyproject.toml` und Addon (OF-06) | Geplant | `mehrere` | #5.1 | 2 | AC-12 |
 | #5.3 | `docs/acceptance.md` um G9–G11 ergänzen. GUI-Abnahme G1–G11 mit Ralf nach Freigaberegel. Ergebnisse im Session-Log und im Ticket `gui-abnahme.md` | Geplant | `keine` | #5.2 | 1 (+ Ralf) | AC-13, GA-AC-01 … 08 |
 
 ## ✔️ Done Tasks
@@ -31,6 +29,8 @@ Enthaltene Aufgaben: #5.4, #5.1, #5.2, #5.3
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
 | #5.4 | Alle MCP-Ausgaben englisch: Instructions, Regelwerk, Prompts, Resources, Tool-/Parameterbeschreibungen, Ergebnisse, Warnungen, Hinweise (`Hint:` statt `Hinweis:`), Fehler aus Server, Core und Bridge sowie Undo-Namen. UI-Texte nach OF-09 deutsch (Datei-Ausnahmen, Marker `# ui-de`). Sprachtest `tests/server/test_language.py` | Regel: MCP-Ausgaben englisch, UI deutsch (98) | 2026-09-29 |
+| #5.1 | Doku-Generator: Gruppen mit Kategorie-Präfix und Budgettest ≤ 100 bestanden bereits seit dem Referenzen-Sprint; neue Gruppe Design-Tools und Beispiele ergänzt, `docs/tools.md` aktuell (51 Tools, 11 Gruppen) | keins | 2026-09-29 |
+| #5.2 | `docs/architecture.md` mit allen Deltas aus 98 (Regelwerk, Design-Tools, verschachtelte Transaktion, Addon-Integration, Job-Muster, Sicherheit, Tool-Events, Sprache), README, `CHANGELOG.md` 0.2.0, Version 0.2.0 in `pyproject.toml`, Server, Bridge und Core, `docs/acceptance.md` mit G10–G12 | Architektur-Doku aktualisiert | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -45,8 +45,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
+> - Offene Aufgaben: 1
 > - Nächste Session: S6
 > - Relevante Dateien: `docs/*`, `CHANGELOG.md`
 > - Architektur-Deltas: alle aus `98-architecture-update.md` übernehmen
-> - Startpunkt: #5.1 (Doku-Generator, Kategorien und Budget sind seit dem Referenzen-Sprint erledigt; nur prüfen), dann #5.2
+> - Startpunkt: #5.3 GUI-Abnahme G1–G12 mit Ralf (FreeCAD vorher neu starten); danach Sprint-Abschluss

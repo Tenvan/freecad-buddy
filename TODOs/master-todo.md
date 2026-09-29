@@ -7,7 +7,7 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 6 freigegeben | 18/21 Aufgaben; nächste: #5.2 Doku und Release 0.2.0, dann GUI-Abnahme; 48/100 Tools |
+| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 6 freigegeben | 20/21 Aufgaben; nächste: #5.3 GUI-Abnahme, dann Sprint-Abschluss; 48/100 Tools |
 
 ## Backlog (nach Domain)
 

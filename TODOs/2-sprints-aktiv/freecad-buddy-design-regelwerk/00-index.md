@@ -115,7 +115,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 - [x] AC-09: Bereits installierte, inkompatible oder Addons mit Python-Abhängigkeiten werden mit Grund abgelehnt. Nach einem Installationsabbruch bleibt kein Rest im Mod-Verzeichnis.
 - [x] AC-10: Die Grid-Recherche ist in `TODOs/5-konzepte/grid-loesungen.md` dokumentiert. Die Kandidaten kommen aus `search_addons` (mindestens die Begriffe grid, array, lattice, pattern, perforation, sieve) und sind bewertet nach PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege und Kompatibilität mit 26.3. Am Ende steht eine Empfehlung.
 - [ ] AC-11: `fill_pattern` erfüllt R-09 für `rect`. Das Sieb der Testplatte (34 × 27 Löcher Ø 1 mm, Raster 3 mm) lässt sich mit einem Aufruf erzeugen. Eine Parameteränderung (z. B. Raster 4 mm) aktualisiert das Modell. `hex` gemäß OF-05.
-- [ ] AC-12: Höchstens 100 öffentliche Tools (Stand 5). `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
+- [x] AC-12: Höchstens 100 öffentliche Tools (Stand 5). `docs/tools.md` ist erneuert, mit Kategorie Design-Tools. `uv run poe check` ist grün, alle neuen Tests laufen ohne Netz.
 - [x] AC-14: Pro Tool-Aufruf zeigt die TUI eine Anfrage-Blase (Tool, Argumente, Session) sofort beim Start und eine Antwort-Blase (Ergebnis oder Fehler mit Code und Hinweis, Warnungen, Dauer) nach Abschluss, farblich nach Anfrage, Erfolg, Warnung und Fehler unterschieden. Nachweis per Textual-Pilot-Test mit Snapshot.
 - [x] AC-15: Lange Inhalte werden gekürzt und sind per Detailansicht vollständig abrufbar. Bilder erscheinen als Platzhalter. Tokens sind maskiert (Test mit präpariertem Argument). Nach 10 000 simulierten Aufrufen mit je 50 KB Antwort bleibt die TUI bedienbar, höchstens 1 000 Einträge. Das optionale JSONL-Log (OF-07) enthält dieselben, ebenfalls maskierten Daten.
 - [x] AC-16 (Stand 2): Die Ansichtsregel ist eine Kernregel der Instructions und steht direkt nach „get_model_tree lesen“. `set_view` ist registriert und setzt die Live-Ansicht, ohne GUI liefert es `unsupported`. Das erste Basis-Feature setzt die Ansicht automatisch (G12).
@@ -154,7 +154,7 @@ Der Agent konstruiert nach einem abrufbaren, thematisch gegliederten Design-Rege
 | AC-11 | `fill_pattern` | #3.3 / P3 | Headless-Core-Test + E2E Testplatte + G10 | **automatisiert erfüllt** (`test_design_tools.py`: Sieb 34 × 27 Ø 1 Raster 3 mit einem Aufruf und einem Undo-Schritt, Raster 4, Feldmodus, `hex`, Validierung; E2E über MCP); G10 in der GUI offen |
 | AC-14 | Chat-Blasen für Anfrage und Antwort | #4.1, #4.2 / P4 | Textual-Pilot- und Snapshot-Test | **erfüllt** (`test_request_and_response_bubbles_with_state_colors`; Pilot-Test mit Widget-Assertions statt Snapshot-Plugin); Sichtung G11 offen |
 | AC-15 | Kürzung, Detailansicht, Maskierung, Last, JSONL | #4.1–#4.3 / P4 | Unit- + Pilot-Lasttest | **erfüllt** (`test_payloads.py`, `test_tool_chat_is_capped_under_load_and_stays_usable`, `test_enter_opens_full_detail_and_escape_closes`) |
-| AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | offen |
+| AC-12 | Tool-Budget, Doku, Gesamtcheck | #5.1, #5.2 / P5 | `uv run poe check` | **erfüllt** für den Sprint-Stand (51 ≤ 100 Tools, Doku aktuell, `poe check` grün bis Commit `451f715`); Gesamtcheck nach Abschluss paralleler Arbeiten im Checkout erneut |
 | AC-16 | Ansichtsregel und `set_view` | #1.6 / P1 | Unit-Test (Instructions) + Bridge-Test headless + G12 | **erfüllt** automatisiert (`test_view_rule_is_first_core_rule_after_reading_the_tree`, `test_set_view_without_gui_is_unsupported`); G12 offen |
 | AC-17 | MCP-Ausgaben englisch | #5.4 / P5 | Unit-Test (Sprachprüfung) | **erfüllt** (`test_language.py`: Instructions, Regelwerk, Prompts, Resources und Tool-Schemas dynamisch; alle Meldungstexte in Server, Core und Bridge statisch; UI-Texte nach OF-09 ausgenommen) |
 | AC-13 / GA-AC-01 … 08 | GUI-Abnahme G1–G12 | #5.3 / P5 | Nutzerabnahme | offen |
@@ -177,13 +177,13 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[█████████░] 86% — 18 von 21 Aufgaben erledigt
+[██████████] 95% — 20 von 21 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
 *Keine Blocker.*
 
-**Tool-Budget (R-10, Stand 5):** 48 öffentliche Tools nach S5 (inkl. `install_addon`, ohne `execute_python`), Grenze 100. Das Risiko aus S4 ist mit Spec-Stand 5 erledigt.
+**Tool-Budget (R-10, Stand 5):** 51 öffentliche Tools (nach S5 und der parallelen Arbeit an Zahnrädern, Normteilen und Slicer) (inkl. `install_addon`, ohne `execute_python`), Grenze 100. Das Risiko aus S4 ist mit Spec-Stand 5 erledigt.
 
 ## Phasen-Übersicht
 
@@ -193,7 +193,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2 — Addon-Manager-Integration | [02-addon-manager.md](02-addon-manager.md) | `mehrere` | 0 | 5 | [██████████] 100% |
 | 3 — Grid-Recherche & Design-Tools | [03-design-tools.md](03-design-tools.md) | `core`, `server` | 0 | 3 | [██████████] 100% |
 | 4 — TUI-Chat-Log | [04-tui-chat-log.md](04-tui-chat-log.md) | `server` | 0 | 3 | [██████████] 100% |
-| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 3 | 1 | [██▌░░░░░░░] 25% |
+| 5 — Doku, Release & GUI-Abnahme | [05-abschluss-abnahme.md](05-abschluss-abnahme.md) | `keine` | 1 | 3 | [███████▌░░] 75% |
 
 ## 📅 Session-Übersicht
 

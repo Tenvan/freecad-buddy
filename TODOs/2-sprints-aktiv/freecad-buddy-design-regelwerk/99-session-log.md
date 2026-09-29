@@ -5,6 +5,30 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 6b — 2026-09-29
+
+**Ziel:** #5.1 und #5.2 (Doku, CHANGELOG, Version 0.2.0).
+
+**Erledigt:**
+- Commit `451f715` (S5 + #5.4) auf Ralfs Wunsch vor #5.2.
+- #5.1 geprüft: Generator mit Gruppen und Budgettest bestand bereits, `docs/tools.md` aktuell.
+- #5.2 `docs/architecture.md` (alle Deltas aus 98; veraltete Stelle „Tool-Events über `ToolContext.call`“ korrigiert), README, `CHANGELOG.md` 0.2.0 (inklusive Referenzen-Sprint), Version 0.2.0 in `pyproject.toml`, `uv.lock`, Server, Bridge und Core, `docs/acceptance.md` G10–G12.
+
+**Release-Änderungen:**
+- `[doc][architecture]` Architektur 0.2.0: Regelwerk, Design-Tools, Addon-Integration, Sprache.
+- `[misc][release]` Version 0.2.0.
+
+**Blocker:**
+- Im Checkout laufen parallel fremde Änderungen (`gears.py`, `parts_catalog.py`, `slicer.py`, Änderungen an `methods.py`, `assembly.py`, `tools/feature.py`, `tools/printing.py`) mit 5 pyright-Fehlern. Entscheidung Ralf: warten, nichts committen. Blockiert den Commit von #5.2 und den Gesamtcheck.
+
+**Validierung:**
+- ruff ✅; pyright rot nur im fremden Code; Tests nicht erneut gelaufen (Gesamtcheck erst nach Abschluss der parallelen Arbeit).
+
+**Nächste Session:**
+- Nach Abschluss der parallelen Arbeit: `poe check`, #5.2 committen, #5.3 GUI-Abnahme G1–G12, Sprint-Abschluss.
+
+---
+
 ## Session 6a — 2026-09-29
 
 **Ziel:** HexFill-Pfad streichen (Ralf: „dann lass weg“) und #5.4 englische MCP-Ausgaben.

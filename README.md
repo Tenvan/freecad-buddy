@@ -6,13 +6,16 @@ MCP-Server mit Terminal-Oberfläche für FreeCAD: Ein Agent (z. B. Claude Code) 
 
 | Thema | FreeCAD Buddy |
 |---|---|
-| Werkzeuge | 32 Intent-Level-Tools statt einer API-Kopie; `execute_python` nur per Opt-in |
+| Werkzeuge | 51 Intent-Level-Tools in 11 Gruppen statt einer API-Kopie; `execute_python` nur per Opt-in |
+| Design-Tools | Wiederkehrende Aufgaben in einem Aufruf: `fill_pattern` für Sieb-, Loch-, Lüftungs- und Wabenraster (runde oder Sechseck-Zellen), parametrisch und ohne Addon; fehlende Tools schlägt der Agent mit `propose_design_tool` vor |
+| Addons | `search_addons`/`get_addon` durchsuchen den offiziellen FreeCAD-Katalog (offline aus dem Cache); `install_addon` installiert nach Bestätigung im FreeCAD-Dialog |
+| Agentenführung | Design-Regelwerk nach Themen mit Werten aus dem Druckerprofil; alle MCP-Ausgaben englisch, FreeCAD-Oberfläche und TUI deutsch |
 | Skizzen | Profile (Rechteck, abgerundetes Rechteck, Langloch, Kreis, Polygon, Lochbild, Polyline) sind vollständig bestimmt: Symmetrie zum Ursprung, `Equal`, benannte Maße, keine Block-Constraints |
 | Parameter | Maße als Zahl, Parametername oder Ausdruck (`"Box_Width - 2*Wall"`) – gebunden per FreeCAD-Expression |
 | Robustheit | Kanten/Flächen über semantische Selektoren (`edges:vertical`, `face:top`, `edges:parallel=X,y=Thickness`); nach Parameteränderungen neu aufgelöst |
 | Sicherheit im Modell | Jeder Tool-Aufruf ist genau ein benannter Undo-Schritt; Fehler rollen zurück; offene Nutzer-Bearbeitung wird respektiert |
 | 3D-Druck | Druckerprofil, Druckbarkeitsprüfung (Solid, Bauraum, Überhang, Wandstärke, Details), Export STL/3MF/STEP aufs Druckbett mit Reimport-Kontrolle |
-| Übersicht | TUI zeigt Bridge-Status, MCP-Sessions, jeden Tool-Aufruf mit Dauer und Ergebnis |
+| Übersicht | TUI zeigt Bridge-Status, MCP-Sessions und jeden Tool-Aufruf als farbigen Chat aus Anfrage und Antwort |
 
 ## Aufbau
 
@@ -75,11 +78,26 @@ Optionen: `--port` (Standard 8765), `--bridge-port` (Standard 9876), `--headless
 
 - Design-Regelwerk: Die Server-Instructions enthalten die Kernregeln. Das vollständige Regelwerk nach Themen liefert `get_design_rules(topic)` mit den Werten des aktiven Druckerprofils. Dasselbe gibt es als MCP-Resource `buddy://design-rules/{topic}` und als Prompt `human_modeling_guide`. Quelle ist `src/buddy_server/design_rules.py`.
 - MCP-Prompt `design_part` („Konstruiere eine Box 80×50×30 mit Deckel“) führt den Agenten durch den Workflow.
+- Design-Tool-Vorschläge landen in `%APPDATA%\FreeCADBuddy\design-tool-proposals.json` und erscheinen in der TUI; `list_design_tool_proposals` listet sie nach Häufigkeit.
 - Referenzprojekte gegen den laufenden Server bauen:
 
 ```bash
 uv run python examples/reference_projects.py box bracket knob --out out
 ```
+
+## Addons und externe Tools
+
+Alle Punkte sind optional. Ein Tool, das ein fehlendes Addon braucht, meldet `[unsupported]` mit Installationshinweis. Buddy schlägt die Installation erst dann vor, wenn die Aufgabe das Addon wirklich braucht.
+
+| Addon / Tool | Tools | Quelle | Hinweis |
+|---|---|---|---|
+| Fasteners Workbench | `add_fastener` | Addon Manager (`fasteners`) | Normteile (Schrauben, Muttern, Scheiben) |
+| freecad.gears | `add_gear` | Addon Manager (`freecad.gears`) | Zahnräder als Feature im Body (Evolvente, Hohlrad, Zahnstange, Zykloide, Kegel, Schnecke, Zahnriemen) |
+| Assembly4 | `create_assembly` & Co. | Addon Manager (`Assembly4`) | Buddy schreibt die Asm4-Konvention selbst. Das Addon brauchst du nur, um die Baugruppe in der GUI zu bearbeiten |
+| step.parts | `search_parts`, `insert_part` | Katalog direkt von GitHub (MIT), kein Addon | Referenzteile als STEP (Boards, Lüfter, Motoren, Lager), Cache in `%APPDATA%\FreeCADBuddy\parts-catalog` |
+| OrcaSlicer | `export_body` | [orcaslicer.com](https://www.orcaslicer.com) | Ist er installiert, schickt `export_body` stl/3mf automatisch durch den Slicer und liefert Druckzeit und Filament. Die Suchreihenfolge ist `FREECAD_BUDDY_ORCASLICER`, dann `PATH`, dann der Standard-Installationsordner. Eigene Presets setzt du mit `FREECAD_BUDDY_ORCA_SETTINGS="machine.json;process.json"` und `FREECAD_BUDDY_ORCA_FILAMENT=filament.json`, sonst gelten Orcas Standardwerte |
+
+Ein Modell mit Addon-Objekten (Fasteners, Gears) lässt sich nur mit dem Addon neu berechnen. Deshalb führt das README des jeweiligen Projekts die verwendeten Addons im Abschnitt „Benötigte Addons“ auf.
 
 ## Entwicklung
 

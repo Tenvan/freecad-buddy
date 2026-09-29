@@ -1,6 +1,6 @@
 # Architektur-Update — FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche
 
-> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-29 │ Status: offen
+> Erstellt: 2026-09-28 │ Letzte Aktualisierung: 2026-09-29 │ Status: in `docs/architecture.md` übernommen (#5.2)
 
 ## Zweck
 

@@ -1,14 +1,15 @@
 # Architektur — FreeCAD Buddy
 
-> Stand: 2026-09-27 (Sprint `freecad-buddy-aufbau`, S1; Spec-Stand 2: TUI-Server + Streamable HTTP, Name „FreeCAD Buddy“) │ Zielversion: FreeCAD 26.3 weekly, Python 3.13
+> Stand: 2026-09-29 (Version 0.2.0, Sprint `freecad-buddy-design-regelwerk`: Regelwerk, Design-Tools, Addon-Integration, Chat-Log, englische MCP-Ausgaben) │ Zielversion: FreeCAD 26.3 weekly, Python 3.13
 
 ## Leitprinzipien
 
-- **Konstruktionsabsicht statt API-Spiegel:** Tools beschreiben, *was* ein Konstrukteur tut („zentriertes Rechteck auf XY, 60 × 40“), nicht einzelne FreeCAD-Aufrufe. Höchstens 40 öffentliche Tools.
+- **Konstruktionsabsicht statt API-Spiegel:** Tools beschreiben, *was* ein Konstrukteur tut („zentriertes Rechteck auf XY, 60 × 40“), nicht einzelne FreeCAD-Aufrufe. Höchstens 100 öffentliche Tools; zusammengelegt wird nur, wenn es fachlich Sinn ergibt.
 - **Menschlich weiterbearbeitbar:** Das Ergebnis sieht aus wie von Hand gebaut und bleibt in der GUI parametrisch änderbar.
 - **Live-Zustand ist die Wahrheit:** Der Nutzer arbeitet parallel. Kein Tool verlässt sich auf gecachten Zustand.
 - **Jede Mutation ist atomar:** ein Tool-Aufruf = eine benannte Undo-Transaktion, Rollback bei Fehler.
-- **Sicher per Default:** nur localhost, Token, keine beliebige Codeausführung ohne Opt-in.
+- **Sicher per Default:** nur localhost, Token, keine beliebige Codeausführung und keine Addon-Installation ohne Opt-in.
+- **Sprache:** Alles, was der MCP-Server an Clients liefert, ist englisch (Instructions, Regelwerk, Tool-Beschreibungen, Ergebnisse, Hinweise, Fehler, Undo-Namen). FreeCAD-Oberfläche, Bestätigungsdialog, Konsole und TUI bleiben deutsch. UI-Texte außerhalb der UI-Module tragen den Marker `# ui-de`; `tests/server/test_language.py` prüft das dynamisch und per AST.
 
 ## Prozess- und Schichtenmodell
 
@@ -40,7 +41,8 @@ Die Trennung in zwei Prozesse ist Standard bei allen untersuchten Projekten und 
 - **Schutz:** Bindung nur an `127.0.0.1`; `TransportSecuritySettings` mit DNS-Rebinding-Schutz (`allowed_hosts`/`allowed_origins` = `127.0.0.1`/`localhost` mit Port); statisches Bearer-Token aus `%APPDATA%\FreeCADBuddy\mcp-token` über den `token_verifier`-Mechanismus bzw. die Auth-Middleware des SDK.
 - **Claude-Code-Anbindung:** `.mcp.json` mit `"type": "http"`, `"url": "http://127.0.0.1:8765/mcp"` und `"headers": {"Authorization": "Bearer ${FREECAD_BUDDY_TOKEN}"}` (Env-Expansion, Token nicht im Repo) oder `claude mcp add --transport http freecad-buddy http://127.0.0.1:8765/mcp --header "Authorization: Bearer <token>"`.
 - **Headless-Modus:** `freecad-buddy --headless` startet denselben Server-Kern ohne TUI (Logging auf stderr), z. B. für Tests.
-- **Server-Kern und TUI entkoppelt:** Der Kern veröffentlicht Ereignisse (Tool-Aufruf gestartet/beendet, Bridge-Status, Sessions, Konsole); die TUI abonniert sie. Kein Widget-Zugriff aus dem Kern.
+- **Server-Kern und TUI entkoppelt:** Der Kern veröffentlicht Ereignisse (Tool-Aufruf gestartet/beendet, Bridge-Status, Sessions, Design-Tool-Vorschlag, Konsole); TUI, Headless-Ausgabe und das optionale JSONL-Log (`--log-file`) abonnieren sie. Kein Widget-Zugriff aus dem Kern.
+- **Tool-Ereignisse:** Die MCP-Middleware `calllog.ToolCallLog` erzeugt `ToolStarted`/`ToolFinished` auf Protokollebene. Die Payloads sind vor dem Bus aufbereitet (`payloads.py`): Geheimnisse maskiert, lange Inhalte gekürzt, Bilder als Platzhalter mit Größe. Front-Ends lesen nur diese Daten.
 
 ## TUI (Textual)
 
@@ -48,8 +50,8 @@ Die Trennung in zwei Prozesse ist Standard bei allen untersuchten Projekten und 
 |---|---|
 | Kopfzeile | Bridge-Status (verbunden/wartet/Fehler), FreeCAD-Version, MCP-Endpunkt |
 | MCP-Sessions | Anzahl und Beginn verbundener Client-Sessions |
-| Tool-Log | Tool-Name, Dauer, Ergebnis (ok/Fehlercode); begrenzt auf 1000 Einträge; externe Texte escaped |
-| FreeCAD-Konsole | mitgeschnittene Warnungen/Fehler aus den `ToolResult`s |
+| Tool-Chat | je Aufruf eine Anfrage-Blase (Tool, kompakte Argumente, Session) und eine Antwort-Blase (Kernwerte bzw. Fehlercode mit Hinweis, Warnungen, Dauer), farbig nach Anfrage/Erfolg/Warnung/Fehler; laufende Aufrufe sichtbar; Enter öffnet das vollständige JSON, `v` schaltet auf die Einzeilen-Liste; begrenzt auf 1000 Einträge; externe Texte escaped |
+| Meldungen | Bridge-Zustand, Server-Meldungen, Design-Tool-Vorschläge (hervorgehoben); per Splitter in der Höhe verstellbar |
 | Tastenaktionen | Bridge neu verbinden, `claude mcp add`-Befehl kopieren, `execute_python` umschalten, beenden |
 
 Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
@@ -62,9 +64,14 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 | `addon/FreeCADBuddy/buddy_core/` | Core-Paket |
 | `addon/FreeCADBuddy/buddy_bridge/` | Bridge-Paket (S2) |
 | `src/buddy_server/` | Server-Paket: Server-Kern (MCP, Bridge-Client, Ereignisse) und TUI |
-| `src/buddy_server/tools/` | MCP-Tools, ein Modul je Tool-Gruppe (Arbeitsphase: `session`, `model`, `sketch`, `reference`, `feature`, `assembly`, `appearance`, `printing`, `rules`, `expert`); `base.py` mit Argumenttypen, `ToolContext` und `Registration`. Die Gruppe (`GROUP`, `buddy_server.catalog.Group`) ist das Modul, das ein Tool registriert |
+| `src/buddy_server/tools/` | MCP-Tools, ein Modul je Tool-Gruppe (Arbeitsphase: `session`, `model`, `sketch`, `reference`, `feature`, `design`, `assembly`, `appearance`, `printing`, `rules`, `expert`); `base.py` mit Argumenttypen, `ToolContext` und `Registration`. Die Gruppe (`GROUP`, `buddy_server.catalog.Group`) ist das Modul, das ein Tool registriert |
 | `addon/FreeCADBuddy/buddy_core/sketch/external.py` | Externe Geometrie (`x<N>`): Quellenprüfung, Abbildung `g<N>` → `EdgeN`, Beschreibung, hängende Referenzen |
 | `addon/FreeCADBuddy/buddy_core/binder.py` | `shape_binder` (`PartDesign::SubShapeBinder`) für Bezüge über Body-Grenzen |
+| `addon/FreeCADBuddy/buddy_core/design_tools.py` | Design-Tools (`fill_pattern`): zusammengesetzt aus bestehenden Core-Operationen in einer Transaktion |
+| `addon/FreeCADBuddy/buddy_core/addons/` | Einziger Adapter zum FreeCAD-Addon-Manager: Installationsstatus, Installation mit Dialog und Job-Muster |
+| `src/buddy_server/design_rules.py` | Design-Regelwerk, einzige Quelle für Instructions, `get_design_rules`, Resource und Prompts |
+| `src/buddy_server/addon_catalog.py`, `addon_service.py` | Addon-Katalog: Parser, Ranking, eigener Cache mit SHA-256-Prüfung, Offline-Fallback |
+| `src/buddy_server/proposals.py` | Vorschlagsliste für Design-Tools (`design-tool-proposals.json` im Buddy-Home) |
 | `tests/core/` | Core-Tests, laufen in FreeCADs `python.exe` |
 | `tests/server/`, `tests/tools/` | Tests im Projekt-venv |
 | `tools/` | `freecad_env.py` (FreeCAD finden, Core-Tests starten), `run_core_tests.py` (Einstieg in FreeCADs Python) |
@@ -77,7 +84,8 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 - **Framing:** NDJSON – ein JSON-Objekt pro Zeile, UTF-8, maximale Nachrichtengröße 32 MiB (Screenshots als Base64).
 - **Protokoll:** JSON-RPC 2.0. Erste Nachricht ist `auth.hello` mit Token; ohne gültiges Token schließt die Bridge die Verbindung.
 - **Methoden:** Namensraum je Core-Modul (`system.status`, `document.*`, `sketch.*`, `feature.*`, `print.*`, `view.*`). Parameter und Ergebnisse sind reine JSON-Typen.
-- **Timeouts:** Server-seitig pro Methode; Standard 30 s, `view.screenshot` 60 s (`saveImage` kann bei großen Szenen lange blockieren).
+- **Timeouts:** Server-seitig pro Methode; Standard 30 s, `view.screenshot` 60 s (`saveImage` kann bei großen Szenen lange blockieren), aufwendige Features wie `feature.thread` und `design.fill_pattern` 120 s.
+- **Job-Muster für lange Laufzeiten:** `addons.install` antwortet sofort mit einer Job-Id; die Arbeit startet per `QTimer.singleShot` nach der Antwort (Bestätigungsdialog, Download in eigener Event-Schleife), `addons.install_status` pollt. Damit laufen weder GUI noch Bridge in Timeouts. Alle übrigen Methoden bleiben synchron.
 
 | Fehlercode | Bedeutung |
 |---|---|
@@ -104,6 +112,7 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
   1. Arbeitet der Nutzer gerade (offene Transaktion mit Änderungen oder GUI-Bearbeitungsmodus), wird mit `busy_user_transaction` abgebrochen, ohne etwas zu ändern. FreeCAD öffnet Transaktionen lazy – `HasPendingTransaction` wird erst mit der ersten Änderung wahr.
   2. `UndoMode` aktivieren, `openTransaction`, Operation ausführen, `recompute`; **neu** ungültig gewordene Objekte (vorher schon defekte des Nutzers zählen nicht) führen zu `recompute_failed` mit FreeCAD-Statustext und Hinweisen aus dem Fehlerkatalog (`buddy_core.diagnostics`).
   3. Bei Fehler: `abortTransaction`, `recompute`, Fehler mit `state = rolled_back`.
+- **Verschachtelung:** Ruft ein Core-Aufruf innerhalb einer offenen Buddy-Transaktion weitere Core-Aufrufe auf (Design-Tools), hängen sich die inneren an die äußere an. Nur die äußere öffnet, prüft, recomputet und schreibt den Undo-Schritt, deshalb bleibt ein Design-Tool genau ein Undo-Schritt.
 - **Abweichung vom Konzept:** FreeCAD 26.3 bietet keinen Python-Observer für Konsolenmeldungen (`FreeCAD.Console` kennt nur `GetObservers`). Statt eines Konsolen-Mitschnitts liefern Fehler den Objektstatus (`getStatusString`), den Fehlerkatalog-Hinweis und bei Skizzen die Solver-Analyse.
 - Einheitliches Ergebnisobjekt `ToolResult`:
 
@@ -121,6 +130,8 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 - Jede Maßangabe (`values.resolve`) ist eine Zahl, ein Parametername oder ein Ausdruck über Parameter (`"Box_Width - 2*Wall"`). Ausdrücke werden sicher über den Python-AST ausgewertet (nur Zahlen, Parameternamen, `+ - * /`, Klammern) und die FreeCAD-Expression wird aus dem AST erzeugt. Zahlen in Summen/Differenzen erhalten die Einheit des Parameters (`Height + 2` → `(<<Parameters>>.Height + 2 mm)`), Faktoren bleiben einheitenlos – FreeCAD lehnt gemischte Einheiten ab.
 - Parameternamen, die FreeCAD als Einheit oder Konstante liest (`N`, `mm`, `h`, `pi`, `e`, …), werden abgelehnt; geprüft wird per `FreeCAD.Units.parseQuantity`.
 - Subtraktive Features (Pocket, Groove, Hole), die kein Material entfernen, werden einmal automatisch umgedreht – mit Warnung im Ergebnis.
+- Zahlen in Ausdrücken werden mit 12 signifikanten Stellen in die FreeCAD-Expression geschrieben.
+- VarSet-Parameter dürfen selbst Expressions auf andere Parameter tragen. Das nutzt `fill_pattern` im Feldmodus: `<Name>_Count_X/Y` sind `floor(…)`-Expressions über Feld, Rand, Zellgröße und Raster und folgen deren Änderungen.
 
 ## Semantische Selektoren
 
@@ -135,6 +146,8 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
   - `mcp-token` – vom Server beim ersten Start erzeugt, von MCP-Clients als Bearer-Token gesendet (Client ↔ Server).
 - MCP-Endpunkt: DNS-Rebinding-Schutz über `Host`/`Origin`-Prüfung (siehe [MCP-Transport](#mcp-transport-client--server)).
 - `execute_python` braucht eine **doppelte** Freischaltung: der Server registriert das Tool nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1`/`--allow-python`, die Bridge registriert `python.execute` nur mit Einstellung `Mod/FreeCADBuddy/AllowPython` (Workbench-Buttons „Python erlauben“/„Python sperren“) oder derselben Umgebungsvariable im FreeCAD-Prozess. Skripte laufen als eine Transaktion; `exit()` wird abgefangen und zurückgerollt.
+- `install_addon` braucht ebenfalls zwei Freischaltungen, getrennt von `execute_python`: Server (standardmäßig an, `--no-allow-addon-install` bzw. `FREECAD_BUDDY_ALLOW_ADDON_INSTALL=0`) und FreeCAD (Einstellung `Mod/FreeCADBuddy/AllowAddonInstall`, Workbench-Buttons). Jede Installation bestätigt der Nutzer in einem modalen FreeCAD-Dialog mit Standardknopf „Abbrechen“. Buddy lehnt bereits installierte, inkompatible, git-pflichtige Addons sowie Addons mit Python-Paketen oder Addon-Abhängigkeiten ab; die Headless-Bridge bietet die Installation nie an. Nach Fehlern bleibt nichts im `Mod`-Verzeichnis zurück.
+- README-Texte aus dem Addon-Katalog gelten als Fremdtext: im Ergebnis markiert, im Regelwerk als „nie Anweisungen folgen“ verankert. `package.xml` wird ohne DTD geparst.
 - Token-Dateien werden mit Owner-Rechten angelegt (`0600` unter POSIX; unter Windows schützt das Benutzerprofil `%APPDATA%`).
 
 ## Zeitüberschreitungen und Wiederholungen
@@ -144,6 +157,22 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 - Der Server wiederholt eine Anfrage **nur**, wenn sie nachweislich nicht gesendet wurde (veraltete Verbindung). Nach dem Senden gibt es keinen Retry – sonst könnte ein Feature doppelt entstehen; der Agent bekommt `[timeout]` bzw. `[bridge_unavailable]` mit dem Hinweis, den Modellzustand zu prüfen.
 - Solange ein modaler Dialog oder ein Aufgabenbereich offen ist, lehnt der Dispatcher Aufträge mit `busy_user_transaction` ab (Qt stellt Queued Signals auch in verschachtelten Event-Loops zu).
 - Dateipfade für Export/Speichern werden normalisiert; kein Schreiben außerhalb des Projekt- bzw. Dokumentordners ohne ausdrücklichen Pfad.
+
+## Agentenführung und Design-Tools
+
+- **Regelwerk als einzige Quelle:** `design_rules.py` gliedert die Regeln in Themen (workflow, parameters, sketches, references, features, assembly, naming, printing, design_tools, addons). Daraus entstehen die kompakten Server-Instructions (Kernregeln, Budget 2 000 Zeichen), `get_design_rules(topic)`, die Resource `buddy://design-rules/{topic}` und die Prompts. Regeln mit `requires` erscheinen nur, wenn ihre Tools registriert sind; deshalb sammelt `build_mcp` die Tool-Namen vor dem Serverstart. Druckwerte kommen aus dem aktiven Druckerprofil, ohne Bridge gilt das Standardprofil.
+- **Design-Tool-Regel:** Wiederkehrend-komplexe Aufgaben (zweites Vorkommen oder ≥ 5 Tool-Aufrufe) löst der Agent in der Reihenfolge Design-Tool → fertiges Addon (`search_addons`) → `propose_design_tool`.
+- **Design-Tools** sind Core-Funktionen, die nur bestehende Operationen zusammensetzen (Parameter, Skizze, Feature, Muster) und über verschachtelte Transaktionen ein Undo-Schritt bleiben. Sie entstehen im Code, nie zur Laufzeit. Erstes Tool: `fill_pattern` (runde oder Sechseck-Zellen, rein nativ über einen MultiTransform, kein Addon).
+- **Vorschläge** speichert der Server in `design-tool-proposals.json`; gleichnamige werden zusammengeführt und gezählt, das Event `DesignToolProposed` erscheint in TUI und Headless-Log.
+
+## Addon-Integration
+
+| Teil | Läuft in | Aufgabe |
+|---|---|---|
+| Katalog (`addon_catalog.py`, `addon_service.py`) | Server | Download von `addons.freecad.org` mit SHA-256-Prüfung, eigener Cache im Buddy-Home, asynchron, offline aus dem Cache mit Warnung; `search_addons`, `get_addon` |
+| Status und Installation (`buddy_core/addons/`) | Bridge/FreeCAD | Installierte Addons und Makros, Installation über FreeCADs `AddonInstaller`/`MacroInstaller` mit Dialog und Job-Muster |
+
+Grund für die Aufteilung (Spike S3): Der Addon-Manager lädt offline seinen lokalen Cache nicht, schreibt beim Abruf Preferences und blockiert den Hauptthread bis zu ~100 s. Nur der Adapter unter `buddy_core/addons/` importiert Module des Addon-Managers, ein Kompatibilitätstest prüft dessen API gegen den laufenden Build.
 
 ## Modellierungsregeln (Human-Style)
 
@@ -191,7 +220,7 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 | Bridge-Start (OF-07) | Beides: Autostart (Standard an, Parameter `Mod/FreeCADBuddy/Autostart`) und Workbench-Befehle Start/Stop/Status/Autostart |
 | uvicorn im Textual-Loop | `Server.serve()` als async Worker; Signal-Handler von uvicorn deaktiviert (Frontend besitzt Ctrl+C). `sse_starlette.AppStatus.should_exit` ist prozessweit und wird vor jedem Start zurückgesetzt – sonst beendet ein früher gestoppter Server alle SSE-Streams späterer Instanzen (Neustart per `p`, mehrere Server in Tests) |
 | Bearer-Auth | Eigene ASGI-Middleware (zeitkonstanter Vergleich); der `token_verifier` des SDK setzt einen OAuth-Aufbau (`AuthSettings.issuer_url`) voraus |
-| Tool-Aufruf-Ereignisse | Das SDK bietet keinen Hook; jedes Tool läuft über `ToolContext.call`, das `ToolStarted`/`ToolFinished` publiziert |
+| Tool-Aufruf-Ereignisse | MCP-Middleware `ToolCallLog` auf Protokollebene (seit 0.2.0, vorher `ToolContext.call`), damit auch rein serverseitige Tools wie `get_design_rules` im Chat-Log erscheinen |
 | Logging in der TUI | mcp/uvicorn loggen ab WARNING; im TUI-Modus leitet `logs.route_logging_to_bus` alles in den Event-Bus, damit nichts ins Terminal schreibt |
 | MCP-Port (OF-08) | `8765`, per `--port` änderbar |
 | Skizzengeometrie-Referenzen | Textreferenzen `g<N>`, `g<N>.start/end/center`, `origin`, `x_axis`, `y_axis`; Profil-Tools liefern die erzeugten IDs zurück |
@@ -199,4 +228,4 @@ Keine Secrets im Log; Token werden nie angezeigt, nur „gesetzt/fehlt“.
 
 ## Tool-Katalog
 
-45 öffentliche Tools inkl. `execute_python` (opt-in) in 10 Gruppen nach Arbeitsphase; Budget ≤ 100, Tools werden nur zusammengelegt, wenn es fachlich Sinn ergibt (z. B. `document(action=new|open|save|close|revert)`). Jede Tool-Beschreibung beginnt mit `[<Kategorie>]`, weil MCP Tools flach listet. Generiert dokumentiert in [`docs/tools.md`](tools.md) (Index) und `docs/tools/<gruppe>.md`; `tests/tools/test_tool_docs.py` prüft Gruppenzuordnung, Präfix und Aktualität. Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.
+51 öffentliche Tools inkl. `install_addon` und `execute_python` (beide opt-in) in 11 Gruppen nach Arbeitsphase, darunter die Gruppe Design-Tools; Budget ≤ 100, Tools werden nur zusammengelegt, wenn es fachlich Sinn ergibt (z. B. `document(action=new|open|save|close|revert)`). Jede Tool-Beschreibung beginnt mit `[<Kategorie>]`, weil MCP Tools flach listet. Generiert dokumentiert in [`docs/tools.md`](tools.md) (Index) und `docs/tools/<gruppe>.md`; `tests/tools/test_tool_docs.py` prüft Gruppenzuordnung, Präfix und Aktualität. Der Test `tests/tools/test_tool_contract.py` stellt sicher, dass jedes Tool eine registrierte Bridge-Methode aufruft und keine Bridge-Methode ungenutzt ist.
