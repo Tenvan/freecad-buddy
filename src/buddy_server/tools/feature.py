@@ -224,3 +224,33 @@ def register(reg: Registration) -> None:
             "thread", "feature.thread", center=center, diameter=diameter, pitch=pitch, length=length,
             z_start=z_start, left_handed=left_handed, body=body, purpose=purpose, document=document,
         )  # fmt: skip
+
+    @tool
+    async def add_gear(
+        kind: Literal["involute", "internal", "rack", "cycloid", "bevel", "worm", "timing"] = "involute",
+        teeth: Annotated[int | str, Field(description="Number of teeth (number or integer parameter)")] = 15,
+        module: Annotated[
+            float | str | None, Field(description="Module in mm; empty = addon default")
+        ] = None,
+        height: Annotated[
+            float | str | None, Field(description="Gear width in mm; empty = addon default")
+        ] = None,
+        properties: Annotated[
+            dict[str, Any] | None,
+            Field(
+                description="Further gear properties, e.g. {pressure_angle: 20, backlash: 0.1, axle_hole: true, "
+                "axle_holesize: 5, helix_angle: 15}"
+            ),
+        ] = None,
+        body: Annotated[
+            str | None, Field(description="Body label; empty when there is only one body")
+        ] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per
+        body. Values accept parameter names/expressions. Returns pitch/addendum/root diameter."""
+        return await ctx.call(
+            "add_gear", "feature.gear", timeout=120, kind=kind, teeth=teeth, module=module, height=height,
+            properties=properties, body=body, purpose=purpose, document=document,
+        )  # fmt: skip

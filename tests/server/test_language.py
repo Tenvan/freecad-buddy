@@ -53,7 +53,8 @@ def _texts(value: Any) -> list[str]:
 
 
 def _german(texts: list[str]) -> list[str]:
-    return [text[:160] for text in texts if GERMAN.search(text)]
+    allowed = "'Benötigte Addons'"  # literal README heading the rules ask for (design_rules, # ui-de)
+    return [text[:160] for text in texts if GERMAN.search(text.replace(allowed, ""))]
 
 
 def test_instructions_rulebook_prompts_and_schemas_are_english() -> None:

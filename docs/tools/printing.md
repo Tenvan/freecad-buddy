@@ -9,7 +9,7 @@ Kategorie-Präfix: `[Print]` · 4 Tools
 | [`get_printer_profile`](#get_printer_profile) | Active printer profile (build volume, nozzle, minimum wall, overhang angle, fit clearance). |
 | [`set_printer_profile`](#set_printer_profile) | Change the printer profile (stored permanently). |
 | [`check_printability`](#check_printability) | Check printability: valid solid, build volume, overhangs, wall thickness, too small details. |
-| [`export_body`](#export_body) | Export the part (placed on the print bed) and verify the file by re-importing it. |
+| [`export_body`](#export_body) | Export the part (placed on the print bed) and verify the file by re-importing it. With OrcaSlicer |
 
 ## get_printer_profile
 
@@ -61,7 +61,8 @@ Beispiel:
 
 ## export_body
 
-[Print] Export the part (placed on the print bed) and verify the file by re-importing it.
+[Print] Export the part (placed on the print bed) and verify the file by re-importing it. With OrcaSlicer
+installed, stl/3mf are sliced too: print time and filament in 'slice'.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
@@ -70,6 +71,7 @@ Beispiel:
 | `path` | string \| null | nein | `null` | File or folder; empty = <document folder>/export |
 | `place_on_bed` | boolean | nein | `true` |  |
 | `overwrite` | boolean | nein | `false` | Overwrite an existing file |
+| `slice` | boolean \| null | nein | `null` | Slice with the OrcaSlicer CLI; empty = only if OrcaSlicer is installed |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:

@@ -18,6 +18,7 @@ from buddy_bridge.protocol import RpcError
 from buddy_server.addon_service import AddonCatalogService, CatalogError
 from buddy_server.bridge import Bridge, BridgeTimeout, BridgeUnavailable
 from buddy_server.events import EventBus
+from buddy_server.parts_catalog import PartsCatalog
 from buddy_server.proposals import ProposalStore
 
 Doc = Annotated[str | None, Field(description="Document name or label; empty = active document")]
@@ -66,11 +67,13 @@ class ToolContext:
         bus: EventBus,
         addons: AddonCatalogService | None = None,
         proposals: ProposalStore | None = None,
+        parts: PartsCatalog | None = None,
     ) -> None:
         self.bridge = bridge
         self.bus = bus
         self.addons = addons
         self.proposals = proposals
+        self.parts = parts
 
     async def installed(self) -> dict[str, Any] | None:
         """Installed addons/macros and FreeCAD version from the bridge, ``None`` if it cannot answer."""
@@ -89,6 +92,11 @@ class ToolContext:
             hint = "check network/proxy" if error.code == "catalog_unavailable" else "try again later"
             raise ToolError(f"[{error.code}] {error}\nHint: {hint}") from None
         return self.addons, state.as_dict()
+
+    def parts_catalog(self) -> PartsCatalog:
+        if self.parts is None:
+            raise ToolError("[unsupported] No parts catalogue configured in this server")
+        return self.parts
 
     async def call(self, tool: str, method: str, timeout: float | None = None, **params: Any) -> Any:
         clean = {key: value for key, value in params.items() if value is not None}

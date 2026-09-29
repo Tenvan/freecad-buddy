@@ -2,13 +2,15 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Assembly]` · 5 Tools
+Kategorie-Präfix: `[Assembly]` · 7 Tools
 
 | Tool | Zweck |
 |---|---|
 | [`create_assembly`](#create_assembly) | Create an Assembly4 assembly in the document (bodies move into a 'Parts' group). Then |
 | [`add_to_assembly`](#add_to_assembly) | Insert a body into the assembly as App::Link placed by Assembly4 (LCS_Origin * AttachmentOffset). |
 | [`add_fastener`](#add_fastener) | Standard parts from the Fasteners workbench (needs the addon), placed in the assembly if there |
+| [`search_parts`](#search_parts) | Search the step.parts catalogue of open STEP models (boards, fans, motors, bearings, profiles, |
+| [`insert_part`](#insert_part) | Download a step.parts STEP model (cached) and insert it as a plain solid, in the assembly if |
 | [`explode_assembly`](#explode_assembly) | Exploded view as Assembly4 configuration: saves 'Assembled' once, moves the listed parts and |
 | [`apply_configuration`](#apply_configuration) | Apply a saved Assembly4 configuration (positions of all assembly parts). |
 
@@ -74,6 +76,52 @@ Beispiel:
       7
     ]
   ]
+}
+```
+
+## search_parts
+
+[Assembly] Search the step.parts catalogue of open STEP models (boards, fans, motors, bearings, profiles,
+fasteners): reference geometry for fits and cut-outs. Insert a hit with insert_part.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `query` | string | ja | `—` | Search terms, all must match, e.g. 'raspberry pi 5' or '608 bearing' |
+| `category` | string \| null | nein | `null` | e.g. fastener, electronics, bearing, motion, thermal, power-transmission |
+| `limit` | integer | nein | `10` |  |
+
+Beispiel:
+
+```json
+{
+  "query": "raspberry pi 5",
+  "category": "electronics"
+}
+```
+
+## insert_part
+
+[Assembly] Download a step.parts STEP model (cached) and insert it as a plain solid, in the assembly if
+there is one. Reference only: model own parts around it, do not print it.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `part_id` | string | ja | `—` | id from search_parts, e.g. 'raspberry_pi_5' |
+| `position` | array<number> \| null | nein | `null` | [x, y, z]; empty = origin |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "part_id": "raspberry_pi_5",
+  "position": [
+    0,
+    0,
+    3
+  ],
+  "purpose": "Pi"
 }
 ```
 

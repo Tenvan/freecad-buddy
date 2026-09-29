@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Feature]` · 10 Tools
+Kategorie-Präfix: `[Feature]` · 11 Tools
 
 | Tool | Zweck |
 |---|---|
@@ -16,6 +16,7 @@ Kategorie-Präfix: `[Feature]` · 10 Tools
 | [`shell`](#shell) | Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings. |
 | [`pattern`](#pattern) | Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times). |
 | [`thread`](#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
+| [`add_gear`](#add_gear) | Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per |
 
 ## pad
 
@@ -269,5 +270,36 @@ Beispiel:
   "pitch": 1.5,
   "length": 15,
   "z_start": 5
+}
+```
+
+## add_gear
+
+[Feature] Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per
+body. Values accept parameter names/expressions. Returns pitch/addendum/root diameter.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `kind` | `involute` \| `internal` \| `rack` \| `cycloid` \| `bevel` \| `worm` \| `timing` | nein | `"involute"` |  |
+| `teeth` | integer \| string | nein | `15` | Number of teeth (number or integer parameter) |
+| `module` | number \| string \| null | nein | `null` | Module in mm; empty = addon default |
+| `height` | number \| string \| null | nein | `null` | Gear width in mm; empty = addon default |
+| `properties` | object \| null | nein | `null` | Further gear properties, e.g. {pressure_angle: 20, backlash: 0.1, axle_hole: true, axle_holesize: 5, helix_angle: 15} |
+| `body` | string \| null | nein | `null` | Body label; empty when there is only one body |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "kind": "involute",
+  "teeth": "Gear_Teeth",
+  "module": 1.5,
+  "height": 8,
+  "properties": {
+    "backlash": 0.1
+  },
+  "purpose": "Drive"
 }
 ```

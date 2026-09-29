@@ -294,7 +294,7 @@ TOPICS: tuple[Topic, ...] = (
             ),
             Rule(
                 "A model that uses addon objects needs the addon to recompute: list every addon it uses in the "
-                "project README (section 'Required addons')."
+                "project README (section 'Benötigte Addons')."  # ui-de: literal heading of the German project READMEs
             ),
             Rule("Prefer PartDesign-compatible solutions; Part objects inside a body break the workflow."),
             Rule(

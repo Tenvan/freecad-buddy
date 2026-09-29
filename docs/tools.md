@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-48 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+51 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
@@ -10,9 +10,9 @@
 | [Modell & Parameter](tools/model.md) | `[Model]` | 6 |
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
 | [Referenzen](tools/reference.md) | `[Reference]` | 3 |
-| [Features](tools/feature.md) | `[Feature]` | 10 |
+| [Features](tools/feature.md) | `[Feature]` | 11 |
 | [Design-Tools](tools/design.md) | `[Design tools]` | 3 |
-| [Baugruppe](tools/assembly.md) | `[Assembly]` | 5 |
+| [Baugruppe](tools/assembly.md) | `[Assembly]` | 7 |
 | [Material & Ansicht](tools/appearance.md) | `[Appearance]` | 3 |
 | [3D-Druck](tools/printing.md) | `[Print]` | 4 |
 | [Regelwerk & Addons](tools/rules.md) | `[Rules & addons]` | 4 |
@@ -70,6 +70,7 @@
 | [`shell`](tools/feature.md#shell) | Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings. |
 | [`pattern`](tools/feature.md#pattern) | Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times). |
 | [`thread`](tools/feature.md#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
+| [`add_gear`](tools/feature.md#add_gear) | Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per |
 
 ## Design-Tools
 
@@ -86,6 +87,8 @@
 | [`create_assembly`](tools/assembly.md#create_assembly) | Create an Assembly4 assembly in the document (bodies move into a 'Parts' group). Then |
 | [`add_to_assembly`](tools/assembly.md#add_to_assembly) | Insert a body into the assembly as App::Link placed by Assembly4 (LCS_Origin * AttachmentOffset). |
 | [`add_fastener`](tools/assembly.md#add_fastener) | Standard parts from the Fasteners workbench (needs the addon), placed in the assembly if there |
+| [`search_parts`](tools/assembly.md#search_parts) | Search the step.parts catalogue of open STEP models (boards, fans, motors, bearings, profiles, |
+| [`insert_part`](tools/assembly.md#insert_part) | Download a step.parts STEP model (cached) and insert it as a plain solid, in the assembly if |
 | [`explode_assembly`](tools/assembly.md#explode_assembly) | Exploded view as Assembly4 configuration: saves 'Assembled' once, moves the listed parts and |
 | [`apply_configuration`](tools/assembly.md#apply_configuration) | Apply a saved Assembly4 configuration (positions of all assembly parts). |
 
@@ -104,7 +107,7 @@
 | [`get_printer_profile`](tools/printing.md#get_printer_profile) | Active printer profile (build volume, nozzle, minimum wall, overhang angle, fit clearance). |
 | [`set_printer_profile`](tools/printing.md#set_printer_profile) | Change the printer profile (stored permanently). |
 | [`check_printability`](tools/printing.md#check_printability) | Check printability: valid solid, build volume, overhangs, wall thickness, too small details. |
-| [`export_body`](tools/printing.md#export_body) | Export the part (placed on the print bed) and verify the file by re-importing it. |
+| [`export_body`](tools/printing.md#export_body) | Export the part (placed on the print bed) and verify the file by re-importing it. With OrcaSlicer |
 
 ## Regelwerk & Addons
 

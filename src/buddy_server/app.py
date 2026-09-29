@@ -17,6 +17,7 @@ from buddy_server.calllog import ToolCallLog
 from buddy_server.config import Settings
 from buddy_server.design_rules import build_instructions
 from buddy_server.events import Console, EventBus, SessionsChanged
+from buddy_server.parts_catalog import PartsCatalog
 from buddy_server.payloads import Masker
 from buddy_server.prompts import register_prompts
 from buddy_server.proposals import ProposalStore
@@ -117,6 +118,7 @@ def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPSer
         bus,
         AddonCatalogService(settings.home / "addon-catalog"),
         ProposalStore(settings.home / "design-tool-proposals.json"),
+        PartsCatalog(settings.home / "parts-catalog"),
     )
     # Instructions only mention registered tools, so collect the names before creating the server.
     available = set(register_tools(NameCollector(), ctx, settings.allow_python, settings.allow_addon_install))

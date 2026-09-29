@@ -1,4 +1,5 @@
-"""Assemblies in the Assembly4 convention, fasteners (Fasteners workbench) and exploded configurations.
+"""Assemblies in the Assembly4 convention, fasteners (Fasteners workbench), STEP reference parts and
+exploded configurations.
 
 Assembly4 is a data convention on plain FreeCAD objects, so this module builds it directly and needs
 neither the Asm4 GUI nor its modules: an ``App::Part`` named ``Assembly`` (``Type='Assembly'``) with
@@ -14,6 +15,7 @@ from collections.abc import Sequence
 from typing import Any
 
 import FreeCAD
+import Part
 
 from buddy_core import naming
 from buddy_core.documents import resolve_document, resolve_object
@@ -192,6 +194,39 @@ def add_fastener(
     result.data["fasteners"] = [describe(o) for o in created]
     if assembly is None:
         result.warnings.append("No assembly: fasteners placed absolutely at the document root")
+    return result
+
+
+def insert_step(
+    path: str,
+    label: str,
+    position: Sequence[float] | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Reference part from a STEP file as a plain Part::Feature (placed in the assembly if there is one)."""
+    doc = resolve_document(document)
+    shape = Part.Shape()
+    try:
+        shape.read(path)
+    except Exception as error:  # OCC reports read errors as generic exceptions
+        raise validation(f"STEP file '{path}' could not be read: {error}") from None
+    assembly = get_assembly(doc, required=False)
+    result = ToolResult()
+    with transaction(doc, f"Part: {label}"):
+        obj = doc.addObject("Part::Feature", "Part")
+        obj.Shape = shape
+        obj.Label = naming.make_label(doc, "Part", label)
+        vector = _vector(position)
+        if assembly is not None:
+            assembly.addObject(obj)
+            _attach(obj, vector)
+        else:
+            obj.Placement = FreeCAD.Placement(vector, FreeCAD.Rotation())
+        doc.recompute()
+        result.add_created(obj)
+    box = obj.Shape.BoundBox
+    result.data["part"] = describe(obj)
+    result.data["size"] = [round(v, 3) for v in (box.XLength, box.YLength, box.ZLength)]
     return result
 
 

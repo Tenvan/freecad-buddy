@@ -1,11 +1,13 @@
-"""Baugruppe (Assembly): Assemblies (Assembly4 convention), fasteners, configurations."""
+"""Baugruppe (Assembly): Assemblies (Assembly4 convention), fasteners, STEP parts, configurations."""
 
 from __future__ import annotations
 
 from typing import Annotated, Any
 
+from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
 
+from buddy_server.addon_service import CatalogError
 from buddy_server.catalog import Group
 from buddy_server.tools.base import Doc, Purpose, Registration
 
@@ -58,6 +60,48 @@ def register(reg: Registration) -> None:
             "add_fastener", "assembly.fastener", type=type, diameter=diameter, positions=positions,
             thread=thread, purpose=purpose, document=document,
         )  # fmt: skip
+
+    @tool
+    async def search_parts(
+        query: Annotated[
+            str, Field(description="Search terms, all must match, e.g. 'raspberry pi 5' or '608 bearing'")
+        ],
+        category: Annotated[
+            str | None,
+            Field(description="e.g. fastener, electronics, bearing, motion, thermal, power-transmission"),
+        ] = None,
+        limit: Annotated[int, Field(ge=1, le=50)] = 10,
+    ) -> dict[str, Any]:
+        """Search the step.parts catalogue of open STEP models (boards, fans, motors, bearings, profiles,
+        fasteners): reference geometry for fits and cut-outs. Insert a hit with insert_part."""
+        try:
+            return await ctx.parts_catalog().search(query, category, limit)
+        except CatalogError as error:
+            raise ToolError(f"[{error.code}] {error}\nHint: check network/proxy") from None
+
+    @tool
+    async def insert_part(
+        part_id: Annotated[str, Field(description="id from search_parts, e.g. 'raspberry_pi_5'")],
+        position: Annotated[list[float] | None, Field(description="[x, y, z]; empty = origin")] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Download a step.parts STEP model (cached) and insert it as a plain solid, in the assembly if
+        there is one. Reference only: model own parts around it, do not print it."""
+        catalog = ctx.parts_catalog()
+        try:
+            part = await catalog.find(part_id)
+            if part is None:
+                raise ToolError(f"[not_found] No part '{part_id}' in step.parts\nHint: search_parts first")
+            path = await catalog.step_file(part_id)
+        except CatalogError as error:
+            raise ToolError(f"[{error.code}] {error}") from None
+        result = await ctx.call(
+            "insert_part", "assembly.insert_step", timeout=120, path=str(path),
+            label=purpose or part_id, position=position, document=document,
+        )  # fmt: skip
+        result["source"] = {"id": part_id, "name": part.get("name"), "catalogue": "step.parts (MIT)"}
+        return result
 
     @tool
     async def explode_assembly(

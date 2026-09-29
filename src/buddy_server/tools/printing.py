@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
+from buddy_server import slicer
 from buddy_server.catalog import Group
 from buddy_server.tools.base import Doc, Registration
 
@@ -46,10 +48,29 @@ def register(reg: Registration) -> None:
         ] = None,
         place_on_bed: bool = True,
         overwrite: Annotated[bool, Field(description="Overwrite an existing file")] = False,
+        slice: Annotated[
+            bool | None,
+            Field(description="Slice with the OrcaSlicer CLI; empty = only if OrcaSlicer is installed"),
+        ] = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Export the part (placed on the print bed) and verify the file by re-importing it."""
-        return await ctx.call(
+        """Export the part (placed on the print bed) and verify the file by re-importing it. With OrcaSlicer
+        installed, stl/3mf are sliced too: print time and filament in 'slice'."""
+        result = await ctx.call(
             "export_body", "print.export", timeout=150, format=format, target=target, path=path,
             place_on_bed=place_on_bed, overwrite=overwrite, document=document,
         )  # fmt: skip
+        if slice is False or format == "step":
+            return result
+        exe = slicer.find_orca()
+        if exe is None:
+            if slice:
+                result.setdefault("warnings", []).append(
+                    "OrcaSlicer not found (PATH, default install folder or FREECAD_BUDDY_ORCASLICER)"
+                )
+            return result
+        try:
+            result["slice"] = await slicer.slice_model(Path(result["path"]), exe)
+        except (RuntimeError, OSError) as error:  # the export itself succeeded
+            result.setdefault("warnings", []).append(f"Slicing failed: {error}")
+        return result
