@@ -47,8 +47,8 @@ def _finish(doc: Any, feature: Any, result: ToolResult) -> None:
     if len(shape.Solids) > 1:
         raise CoreError(
             RECOMPUTE_FAILED,
-            f"'{feature.Label}' erzeugt {len(shape.Solids)} getrennte Körper",
-            {"hints": ["Profil muss den bestehenden Körper berühren oder überlappen."]},
+            f"'{feature.Label}' creates {len(shape.Solids)} separate solids",
+            {"hints": ["The profile must touch or overlap the existing solid."]},
         )
     result.add_created(feature)
     result.data["feature"] = describe(feature)
@@ -79,13 +79,13 @@ def _ensure_cuts(doc: Any, feature: Any, volume_before: float, result: ToolResul
     doc.recompute()
     if feature.isValid() and volume_before - _volume(feature) > _VOLUME_TOL:
         result.warnings.append(
-            f"Richtung von '{feature.Label}' automatisch umgekehrt (entfernte sonst nichts)."
+            f"Direction of '{feature.Label}' reversed automatically (it removed nothing otherwise)."
         )
         return
     raise CoreError(
         RECOMPUTE_FAILED,
-        f"'{feature.Label}' entfernt in keiner Richtung Material",
-        {"hints": ["Skizzenlage und Tiefe prüfen: Profil muss den Körper überdecken."]},
+        f"'{feature.Label}' removes no material in either direction",
+        {"hints": ["Check sketch position and depth: the profile must cover the solid."]},
     )
 
 
@@ -121,7 +121,7 @@ def pad(
                     values.resolve(doc, length2 if length2 is not None else length, "length2"),
                 )
             elif mode != "length":
-                raise validation("mode muss length, symmetric, two_sides oder up_to_last sein")
+                raise validation("mode must be length, symmetric, two_sides or up_to_last")
         profile.Visibility = False
         _finish(doc, feature, result)
     if first:
@@ -153,7 +153,7 @@ def pocket(
             if mode == "symmetric":
                 feature.SideType = "Symmetric"
             elif mode != "length":
-                raise validation("mode muss length, symmetric oder through_all sein")
+                raise validation("mode must be length, symmetric or through_all")
         profile.Visibility = False
         _ensure_cuts(doc, feature, before, result)
         _finish(doc, feature, result)
@@ -166,7 +166,7 @@ def _revolve_axis(sketch: Any, body: Any, axis: str) -> tuple[Any, list[str]]:
         return sketch, [key.replace("_AXIS", "_Axis")]
     if key in ("X", "Y", "Z"):
         return origin_feature(body, key), [""]
-    raise validation("axis muss V_Axis, H_Axis (Skizzenachsen) oder X/Y/Z (Body-Achsen) sein")
+    raise validation("axis must be V_Axis, H_Axis (sketch axes) or X/Y/Z (body axes)")
 
 
 def revolve(
@@ -216,10 +216,10 @@ def sweep(
     section, body = _profile(doc, profile)
     spine = resolve_sketch(doc, path)
     if body_of(spine) is not body:
-        raise validation("Profil und Pfad müssen im selben Body liegen")
+        raise validation("Profile and path must be in the same body")
     edges = spine.Shape.Edges if not spine.Shape.isNull() else []
     if not edges:
-        raise validation(f"Pfad '{spine.Label}' enthält keine Kanten")
+        raise validation(f"Path '{spine.Label}' contains no edges")
     type_id, prefix = (
         ("PartDesign::SubtractivePipe", "SweepCut") if subtractive else ("PartDesign::AdditivePipe", "Sweep")
     )
@@ -247,7 +247,7 @@ def _thread_size(feature: Any, size: str) -> str:
         normalized = option.upper()
         if normalized == wanted or normalized.startswith(f"{wanted}X"):
             return option
-    raise validation(f"Unbekannte Gewindegröße '{size}'", available=options[:40])
+    raise validation(f"Unknown thread size '{size}'", available=options[:40])
 
 
 def hole(
@@ -274,10 +274,10 @@ def hole(
     profile, body = _profile(doc, sketch)
     cut_types = {"none": "None", "countersink": "Countersink", "counterbore": "Counterbore"}
     if cut not in cut_types:
-        raise validation("cut muss none, countersink oder counterbore sein")
+        raise validation("cut must be none, countersink or counterbore")
     custom = _hole_cut_values(doc, cut, cut_diameter, cut_depth, countersink_angle)
     result = ToolResult()
-    with transaction(doc, f"Bohrung {size}: {purpose or profile.Label}"):
+    with transaction(doc, f"Hole {size}: {purpose or profile.Label}"):
         before = _volume(body.Tip) if body.Tip else 0.0
         feature = _new(body, "PartDesign::Hole", "Hole", purpose or f"{size}_{cut}", profile.Label)
         feature.Profile = profile
@@ -299,7 +299,7 @@ def hole(
         _finish(doc, feature, result)
     if not threaded and diameter is None:
         result.hints.append(
-            "Für gedruckte Durchgangsbohrungen ggf. 'diameter' mit Spiel angeben (z. B. M3 → 3.4)."
+            "For printed through holes pass 'diameter' with clearance if needed (e.g. M3 → 3.4)."
         )
     return result
 
@@ -367,7 +367,7 @@ def _dress_up(
     body = resolve_body(doc, body_ref)
     base = body.Tip
     if base is None or base.Shape.isNull():
-        raise validation("Body hat noch keine Geometrie")
+        raise validation("The body has no geometry yet")
     names = select.resolve(base.Shape, selector, single=False, doc=doc)
     result = ToolResult()
     with transaction(doc, f"{prefix}: {purpose or selector}"):
@@ -427,7 +427,7 @@ def shell(
 def _occurrences(doc: Any, feature: Any, count: values.ValueSpec, what: str = "count") -> None:
     occurrences = values.resolve(doc, count, what)
     if occurrences.number < 2 or occurrences.number != int(occurrences.number):
-        raise validation(f"{what} muss eine ganze Zahl >= 2 sein")
+        raise validation(f"{what} must be a whole number >= 2")
     if occurrences.expression:
         feature.setExpression("Occurrences", occurrences.expression)
     else:
@@ -472,7 +472,7 @@ def pattern(
     """
     doc = resolve_document(document)
     if not features:
-        raise validation("features darf nicht leer sein")
+        raise validation("features must not be empty")
     originals = [resolve_object(doc, ref) for ref in features]
     body = body_of(originals[0])
     kinds = {
@@ -482,12 +482,12 @@ def pattern(
         "grid": ("PartDesign::MultiTransform", "Grid"),
     }
     if kind not in kinds:
-        raise validation("kind muss mirrored, linear, polar oder grid sein")
+        raise validation("kind must be mirrored, linear, polar or grid")
     transformed = [o.Label for o in originals if o.TypeId in {t for t, _ in kinds.values()}]
     if transformed:
         raise validation(
-            f"Muster auf Muster ({', '.join(transformed)}) kann PartDesign nicht berechnen – "
-            "für Raster kind='grid' auf das Ausgangsfeature verwenden"
+            f"PartDesign cannot compute a pattern of a pattern ({', '.join(transformed)}) - "
+            "for rasters use kind='grid' on the original feature"
         )
     type_id, prefix = kinds[kind]
     result = ToolResult()
@@ -541,9 +541,9 @@ def datum_plane(
     target = resolve_body(doc, body)
     axes = {"X": FreeCAD.Vector(1, 0, 0), "Y": FreeCAD.Vector(0, 1, 0), "Z": FreeCAD.Vector(0, 0, 1)}
     if rotation_axis.upper() not in axes:
-        raise validation("rotation_axis muss X, Y oder Z sein")
+        raise validation("rotation_axis must be X, Y or Z")
     result = ToolResult()
-    with transaction(doc, f"Bezugsebene: {purpose or base}"):
+    with transaction(doc, f"Datum plane: {purpose or base}"):
         plane = target.newObject("PartDesign::Plane", "DatumPlane")
         plane.Label = naming.make_label(doc, "DatumPlane", purpose or f"{base}_Offset")
         plane.AttachmentSupport = [(origin_feature(target, base), "")]
@@ -560,5 +560,5 @@ def datum_plane(
             plane.setExpression(".AttachmentOffset.Rotation.Angle", angle_value.expression)
         result.add_created(plane)
     result.data["plane"] = describe(plane)
-    result.hints.append(f"create_sketch(plane='{plane.Label}') legt eine Skizze auf diese Ebene.")
+    result.hints.append(f"create_sketch(plane='{plane.Label}') puts a sketch on this plane.")
     return result

@@ -17,7 +17,7 @@ def register(reg: Registration) -> None:
 
     @tool
     async def pad(
-        sketch: Annotated[str, Field(description="Skizzen-Label mit geschlossenem Profil")],
+        sketch: Annotated[str, Field(description="Sketch label with a closed profile")],
         length: Num = 10,
         mode: Literal["length", "symmetric", "two_sides", "up_to_last"] = "length",
         length2: Num | None = None,
@@ -25,7 +25,7 @@ def register(reg: Registration) -> None:
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Profil aufpolstern (additiv)."""
+        """Extrude a profile (additive)."""
         return await ctx.call(
             "pad", "feature.pad", sketch=sketch, length=length, mode=mode, length2=length2,
             reversed=reversed, purpose=purpose, document=document,
@@ -33,16 +33,16 @@ def register(reg: Registration) -> None:
 
     @tool
     async def pocket(
-        sketch: Annotated[str, Field(description="Skizzen-Label mit geschlossenem Profil")],
+        sketch: Annotated[str, Field(description="Sketch label with a closed profile")],
         depth: Num = 5,
         mode: Literal["length", "symmetric", "through_all"] = "length",
         reversed: Annotated[
-            bool, Field(description="Richtung; wird automatisch umgekehrt, falls nichts geschnitten")
+            bool, Field(description="Direction; reversed automatically if nothing is cut")
         ] = False,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Tasche schneiden (subtraktiv)."""
+        """Cut a pocket (subtractive)."""
         return await ctx.call(
             "pocket", "feature.pocket", sketch=sketch, depth=depth, mode=mode, reversed=reversed,
             purpose=purpose, document=document,
@@ -52,14 +52,14 @@ def register(reg: Registration) -> None:
     async def revolve(
         sketch: Annotated[str, Field(description="Skizzen-Label")],
         axis: Annotated[
-            str, Field(description="V_Axis/H_Axis (Skizzenachse) oder X/Y/Z (Body-Achse)")
+            str, Field(description="V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis)")
         ] = "V_Axis",
         angle: Num = 360,
         subtractive: Annotated[bool, Field(description="true = Nut (Groove)")] = False,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Rotationskörper (Revolution) oder Rotationsnut (Groove)."""
+        """Solid of revolution (Revolution) or rotational groove (Groove)."""
         return await ctx.call(
             "revolve", "feature.revolve", sketch=sketch, axis=axis, angle=angle, subtractive=subtractive,
             purpose=purpose, document=document,
@@ -68,17 +68,16 @@ def register(reg: Registration) -> None:
     @tool
     async def sweep(
         profile: Annotated[
-            str, Field(description="Skizze mit geschlossenem Querschnitt am Pfadanfang, z. B. Kreis")
+            str, Field(description="Sketch with a closed cross-section at the path start, e.g. a circle")
         ],
-        path: Annotated[str, Field(description="Pfad-Skizze, z. B. add_profile kind='u_path'")],
-        subtractive: Annotated[
-            bool, Field(description="true = Material entlang des Pfads entfernen")
-        ] = False,
+        path: Annotated[str, Field(description="Path sketch, e.g. add_profile kind='u_path'")],
+        subtractive: Annotated[bool, Field(description="true = remove material along the path")] = False,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Querschnitt entlang eines Pfads ziehen (PartDesign AdditivePipe/SubtractivePipe): runde Griffe,
-        Bügel, Kabelkanäle. Querschnitt senkrecht zum Pfadanfang legen (Pfad startet vertikal → Kreis auf XY)."""
+        """Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles,
+        brackets, cable ducts. Place the cross-section perpendicular to the path start
+        (path starts vertically → circle on XY)."""
         return await ctx.call(
             "sweep", "feature.sweep", profile=profile, path=path, subtractive=subtractive, purpose=purpose,
             document=document,
@@ -87,14 +86,14 @@ def register(reg: Registration) -> None:
     @tool
     async def hole(
         sketch: Annotated[
-            str, Field(description="Skizze mit Kreisen an den Bohrungspositionen (z. B. hole_rect)")
+            str, Field(description="Sketch with circles at the hole positions (e.g. hole_rect)")
         ],
         size: Annotated[str, Field(description="ISO-Metrisch, z. B. M3, M4")] = "M3",
         cut: Literal["none", "countersink", "counterbore"] = "none",
-        depth: Annotated[float | str | None, Field(description="leer = durch alles")] = None,
+        depth: Annotated[float | str | None, Field(description="empty = through all")] = None,
         threaded: bool = False,
         diameter: Annotated[
-            float | str | None, Field(description="Durchmesser-Override, z. B. 3.4 für M3-Spiel")
+            float | str | None, Field(description="Diameter override, e.g. 3.4 for M3 clearance")
         ] = None,
         purpose: Purpose = None,
         document: Doc = None,
@@ -125,7 +124,7 @@ def register(reg: Registration) -> None:
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Kanten verrunden. Der Selektor wird gespeichert und nach Parameteränderungen neu aufgelöst."""
+        """Round edges. The selector is stored and resolved again after parameter changes."""
         return await ctx.call(
             "fillet",
             "feature.fillet",
@@ -144,7 +143,7 @@ def register(reg: Registration) -> None:
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Kanten fasen (an der Druckbett-Unterseite besser als Verrundung – gegen Elefantenfuß)."""
+        """Chamfer edges (on the bed side better than a fillet - against elephant foot)."""
         return await ctx.call(
             "chamfer",
             "feature.chamfer",
@@ -157,14 +156,14 @@ def register(reg: Registration) -> None:
 
     @tool
     async def shell(
-        selector: Annotated[str, Field(description="Öffnungsfläche(n), z. B. face:top")] = "face:top",
+        selector: Annotated[str, Field(description="Opening face(s), e.g. face:top")] = "face:top",
         thickness: Num = 2,
         outward: bool = False,
         body: Annotated[str | None, Field(description="Body-Label")] = None,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Körper aushöhlen (Thickness) mit Wandstärke; gewählte Flächen werden zur Öffnung."""
+        """Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings."""
         return await ctx.call(
             "shell", "feature.shell", selector=selector, thickness=thickness, outward=outward, body=body,
             purpose=purpose, document=document,
@@ -172,30 +171,28 @@ def register(reg: Registration) -> None:
 
     @tool
     async def pattern(
-        features: Annotated[list[str], Field(description="Labels der zu vervielfältigenden Features")],
+        features: Annotated[list[str], Field(description="Labels of the features to repeat")],
         kind: Annotated[
             Literal["mirrored", "linear", "polar", "grid"],
-            Field(
-                description="grid = 2D-Raster (MultiTransform); Muster auf Muster ist in PartDesign nicht möglich"
-            ),
+            Field(description="grid = 2D raster (MultiTransform); PartDesign cannot pattern a pattern"),
         ],
         plane: Annotated[str, Field(description="mirrored: XY/XZ/YZ")] = "YZ",
         direction: Annotated[str, Field(description="linear/grid: X/Y/Z")] = "X",
         axis: Annotated[str, Field(description="polar: X/Y/Z")] = "Z",
         length: Annotated[
-            float | str, Field(description="linear/grid: Gesamtlänge (mm, Parameter, Ausdruck)")
+            float | str, Field(description="linear/grid: total length (mm, parameter, expression)")
         ] = 20,
         angle: Annotated[float | str, Field(description="polar: Gesamtwinkel")] = 360,
         count: Annotated[
-            int | str, Field(description="Anzahl (linear/polar/grid), Zahl oder Integer-Parameter")
+            int | str, Field(description="Count (linear/polar/grid), number or integer parameter")
         ] = 2,
-        direction2: Annotated[str, Field(description="grid: zweite Richtung X/Y/Z")] = "Y",
-        length2: Annotated[float | str, Field(description="grid: Gesamtlänge der zweiten Richtung")] = 20,
-        count2: Annotated[int | str, Field(description="grid: Anzahl in der zweiten Richtung")] = 2,
+        direction2: Annotated[str, Field(description="grid: second direction X/Y/Z")] = "Y",
+        length2: Annotated[float | str, Field(description="grid: total length of the second direction")] = 20,
+        count2: Annotated[int | str, Field(description="grid: count in the second direction")] = 2,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Features spiegeln oder linear/polar/als Raster vervielfältigen (statt Geometrie mehrfach zu zeichnen)."""
+        """Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times)."""
         return await ctx.call(
             "pattern", "feature.pattern", features=features, kind=kind, plane=plane, direction=direction,
             axis=axis, length=length, angle=angle, count=count, direction2=direction2, length2=length2,

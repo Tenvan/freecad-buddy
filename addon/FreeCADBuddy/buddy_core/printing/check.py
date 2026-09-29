@@ -25,7 +25,7 @@ def resolve_target(target: str | None, document: str | None) -> tuple[Any, Any]:
         obj = resolve_object(doc, target)
         shape = getattr(obj, "Shape", None)
         if shape is None or shape.isNull():
-            raise validation(f"'{obj.Label}' hat keine Shape")
+            raise validation(f"'{obj.Label}' has no shape")
         return doc, obj
     return doc, resolve_body(doc)
 
@@ -75,8 +75,8 @@ def _check_overhang(shape: Any, profile: PrinterProfile) -> dict[str, Any] | Non
         "severity": "warning",
         "code": "overhang",
         "message": (
-            f"{len(faces)} Fläche(n) mit insgesamt {area:.1f} mm² ({ratio * 100:.1f} % der Oberfläche) "
-            f"überschreiten den Überhangwinkel von {profile.overhang_angle:g}°."
+            f"{len(faces)} face(s) with {area:.1f} mm² in total ({ratio * 100:.1f} % of the surface) "
+            f"exceed the overhang angle of {profile.overhang_angle:g}°."
         ),
         "faces": faces,
         "value": {"area": area, "ratio": ratio},
@@ -150,14 +150,18 @@ def _check_small_features(shape: Any, profile: PrinterProfile) -> list[dict[str,
         return []
     parts = []
     if small_circular:
-        parts.append(f"{len(small_circular)} runde Kante(n) mit Radius unter Düse ({profile.nozzle:g} mm)")
+        parts.append(
+            f"{len(small_circular)} round edge(s) with a radius below the nozzle ({profile.nozzle:g} mm)"
+        )
     if small_straight:
-        parts.append(f"{len(small_straight)} gerade Kante(n) kürzer als die Düse ({profile.nozzle:g} mm)")
+        parts.append(
+            f"{len(small_straight)} straight edge(s) shorter than the nozzle ({profile.nozzle:g} mm)"
+        )
     return [
         {
             "severity": "info",
             "code": "small_feature",
-            "message": "Details unterhalb der Düsengröße: " + ", ".join(parts) + ".",
+            "message": "Details below the nozzle size: " + ", ".join(parts) + ".",
             "faces": small_circular + small_straight,
         }
     ]
@@ -180,21 +184,19 @@ def check_printability(
             {
                 "severity": "error",
                 "code": "invalid_shape",
-                "message": "Shape ist nicht gültig (Geometrie-/Topologiefehler).",
+                "message": "Shape is not valid (geometry/topology error).",
             }
         )
 
     solids = shape.Solids
     if not solids:
-        issues.append(
-            {"severity": "error", "code": "no_solid", "message": "Shape enthält keinen Volumenkörper."}
-        )
+        issues.append({"severity": "error", "code": "no_solid", "message": "Shape contains no solid."})
     elif len(solids) > 1:
         issues.append(
             {
                 "severity": "error",
                 "code": "multiple_solids",
-                "message": f"Shape enthält {len(solids)} getrennte Volumenkörper statt eines einzelnen.",
+                "message": f"Shape contains {len(solids)} separate solids instead of one.",
                 "value": len(solids),
             }
         )
@@ -205,7 +207,7 @@ def check_printability(
             {
                 "severity": "error",
                 "code": "not_closed",
-                "message": f"{unclosed} Schale(n) sind nicht geschlossen (offene Kanten/Löcher).",
+                "message": f"{unclosed} shell(s) are not closed (open edges/holes).",
                 "value": unclosed,
             }
         )
@@ -218,7 +220,7 @@ def check_printability(
                 "severity": "error",
                 "code": "build_volume",
                 "message": (
-                    f"Bauteil ({size[0]:.1f} x {size[1]:.1f} x {size[2]:.1f} mm) passt nicht in den Bauraum "
+                    f"Part ({size[0]:.1f} x {size[1]:.1f} x {size[2]:.1f} mm) does not fit the build volume "
                     f"({profile.build_x:.1f} x {profile.build_y:.1f} x {profile.build_z:.1f} mm)."
                 ),
                 "value": size,
@@ -238,8 +240,8 @@ def check_printability(
                     "severity": "warning",
                     "code": "thin_wall",
                     "message": (
-                        f"Minimale gemessene Wandstärke {min_wall_sampled:.2f} mm liegt unter dem Minimum "
-                        f"von {profile.min_wall:g} mm."
+                        f"Minimum measured wall thickness {min_wall_sampled:.2f} mm is below the minimum "
+                        f"of {profile.min_wall:g} mm."
                     ),
                     "faces": thin_faces,
                     "value": min_wall_sampled,
@@ -268,18 +270,18 @@ def check_printability(
 
 _HINTS: dict[str, str] = {
     "overhang": (
-        "Überhänge: Fasen mit ≤ {overhang_angle:g}° statt waagrechter Unterseiten/Verrundungen, "
-        "Bauteil drehen oder Stützstruktur einplanen."
+        "Overhangs: chamfers with ≤ {overhang_angle:g}° instead of horizontal undersides/fillets, "
+        "rotate the part or plan supports."
     ),
-    "thin_wall": "Wandstärke als Parameter ≥ {min_wall:g} mm (2 × Düse) setzen, z. B. Wall im VarSet.",
-    "small_feature": "Details unter {nozzle:g} mm werden nicht sauber gedruckt – vergrößern oder entfernen.",
-    "build_volume": "Bauteil teilen oder drehen; Bauraum {build_x:g} × {build_y:g} × {build_z:g} mm.",
-    "multiple_solids": "Getrennte Körper verbinden oder als eigene Bodies modellieren.",
+    "thin_wall": "Set the wall thickness as a parameter ≥ {min_wall:g} mm (2 × nozzle), e.g. Wall in the VarSet.",
+    "small_feature": "Details below {nozzle:g} mm do not print cleanly - enlarge or remove them.",
+    "build_volume": "Split or rotate the part; build volume {build_x:g} × {build_y:g} × {build_z:g} mm.",
+    "multiple_solids": "Join separate solids or model them as their own bodies.",
 }
 _GENERAL_HINTS = (
-    "Unterkante fasen (chamfer edges:bottom, ~0.4 mm) statt verrunden – gegen Elefantenfuß.",
-    "Passungen mit Spiel {clearance_fit:g} mm (Pressung {press_fit:g} mm) als Parameter modellieren; "
-    "Durchgangsbohrungen ca. +0.4 mm größer (M3 → 3.4).",
+    "Chamfer the bottom edge (chamfer edges:bottom, ~0.4 mm) instead of rounding - against elephant foot.",
+    "Model fits with clearance {clearance_fit:g} mm (press fit {press_fit:g} mm) as parameters; "
+    "through holes about +0.4 mm larger (M3 → 3.4).",
 )
 
 

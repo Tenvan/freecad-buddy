@@ -24,6 +24,7 @@ from buddy_server.config import Settings
 from buddy_server.events import (
     BridgeState,
     Console,
+    DesignToolProposed,
     Event,
     EventBus,
     ServerFailed,
@@ -154,6 +155,12 @@ class BuddyApp(App[None]):
                 self._write_message(event.at, f"FEHLER: {event.message}", error=True)
             case ToolStarted() | ToolFinished():
                 self.query_one("#tool-log", ToolChat).add(event)
+            case DesignToolProposed():
+                self._write_message(
+                    event.at,
+                    f"Design-Tool-Vorschlag: {event.name} ({event.count}×) – {event.problem}",
+                    warning=True,
+                )
             case Console():
                 self._write_message(
                     event.at, event.text, error=event.level == "error", warning=event.level == "warning"

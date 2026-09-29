@@ -10,7 +10,7 @@ from pydantic import Field
 from buddy_server.catalog import Group
 from buddy_server.tools.base import Doc, Registration
 
-GROUP = Group("session", "Session", "Session & Dokument")
+GROUP = Group("session", "Session", "Session & Dokument")  # ui-de
 
 
 def register(reg: Registration) -> None:
@@ -18,7 +18,7 @@ def register(reg: Registration) -> None:
 
     @tool
     async def get_status() -> dict[str, Any]:
-        """Status von FreeCAD und Bridge: Version, offene Dokumente, fehlende Objekttypen. Zuerst aufrufen."""
+        """Status of FreeCAD and the bridge: version, open documents, missing object types. Call first."""
         return await ctx.call("get_status", "system.status")
 
     @tool
@@ -63,7 +63,7 @@ def register(reg: Registration) -> None:
 
     @tool
     async def undo(
-        steps: Annotated[int, Field(ge=1, le=20, description="Anzahl Schritte")] = 1, document: Doc = None
+        steps: Annotated[int, Field(ge=1, le=20, description="Number of steps")] = 1, document: Doc = None
     ) -> dict[str, Any]:
-        """Letzte Änderung(en) rückgängig machen. Jeder Tool-Aufruf ist genau ein Schritt."""
+        """Undo the last change(s). Every tool call is exactly one step."""
         return await ctx.call("undo", "document.undo", steps=steps, document=document)

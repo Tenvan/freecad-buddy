@@ -37,7 +37,7 @@ class MethodRegistry:
         self, name: str, fn: Callable[..., Any], *, main_thread: bool = True, timeout: float = DEFAULT_TIMEOUT
     ) -> None:
         if name in self._methods:
-            raise ValueError(f"Methode '{name}' ist bereits registriert")
+            raise ValueError(f"Method '{name}' is already registered")
         self._methods[name] = Method(fn, main_thread, timeout)
 
     def names(self) -> list[str]:
@@ -46,11 +46,11 @@ class MethodRegistry:
     def invoke(self, request: Request, dispatcher: Dispatcher) -> Any:
         method = self._methods.get(request.method)
         if method is None:
-            raise RpcError(METHOD_NOT_FOUND, f"Unbekannte Methode '{request.method}'")
+            raise RpcError(METHOD_NOT_FOUND, f"Unknown method '{request.method}'")
         try:
             inspect.signature(method.fn).bind(**request.params)
         except TypeError as error:
-            raise RpcError(INVALID_PARAMS, f"Ungültige Parameter für '{request.method}': {error}") from None
+            raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{request.method}': {error}") from None
 
         def run() -> Any:
             result = method.fn(**request.params)

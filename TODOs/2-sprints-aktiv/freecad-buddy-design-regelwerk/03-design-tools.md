@@ -1,16 +1,16 @@
 # Phase 3 — Grid-Recherche & Design-Tools
 
-> **Ziel:** Als Beispiel für die Addon-Suche klären, ob es eine fertige Grid-Lösung gibt. Außerdem die Vorschlagsliste für Design-Tools und das erste Design-Tool `hole_grid` umsetzen.
+> **Ziel:** Als Beispiel für die Addon-Suche klären, ob es eine fertige Grid-Lösung gibt. Außerdem die Vorschlagsliste für Design-Tools und das erste Design-Tool `fill_pattern` umsetzen.
 
 > **Spec-Bezug:** [Sprint-Spezifikation](00-index.md#spezifikation), Stand 1, Kriterien AC-04, AC-05, AC-10, AC-11. Spec-Stand 1 freigegeben am 2026-09-28.
 
 ## Session-Pakete
 
-### 📦 Session S5 — Grid-Recherche, Vorschlagsliste, `hole_grid`
+### 📦 Session S5 — Grid-Recherche, Vorschlagsliste, `fill_pattern`
 
 - **Kontext-Anker:** `addon/FreeCADBuddy/buddy_core/features.py` (`pattern`, `grid`), `buddy_core/sketch/profiles.py`, `src/buddy_server/tools.py`, `src/buddy_server/tui.py`, `TODOs/5-konzepte/`
 - **Einstiegspunkt:** #3.1 — Grid-Recherche über `search_addons`
-- **Erfolgskriterium:** Recherche dokumentiert. Das Sieb der Testplatte entsteht mit einem `hole_grid`-Aufruf. Vorschläge erscheinen in der TUI.
+- **Erfolgskriterium:** Recherche dokumentiert. Das Sieb der Testplatte entsteht mit einem `fill_pattern`-Aufruf. Vorschläge erscheinen in der TUI.
 - **Architektur-Relevanz:** `docs/architecture.md` (Tool-Kategorien, Design-Tools)
 - **Architektur-Notiz:** Design-Tools sind zusammengesetzte Core-Funktionen mit einer Transaktion und bauen auf bestehenden Features auf, ohne neue Primitive.
 
@@ -22,15 +22,15 @@ Enthaltene Aufgaben: #3.1, #3.2, #3.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #3.1 | Grid-Recherche: `search_addons` mit grid, array, lattice, pattern, perforation, sieve und gridfinity. Kandidaten bewerten (PartDesign-Tauglichkeit, Parametrik, Lizenz, Pflege, 26.3-Kompatibilität, Portabilität der Modelle), Empfehlung in `TODOs/5-konzepte/grid-loesungen.md`. Regelwerk-Thema `addons` (wann Addon, wann eigenes Tool) nachziehen. Live-Suche nur mit Ralfs Zustimmung | Geplant | `keine` | #2.2 | 2 | AC-10, AC-04 |
-| #3.2 | `propose_design_tool(name, problem, inputs, steps, example)` plus `list_design_tool_proposals`: Ablage `%APPDATA%\FreeCADBuddy\design-tool-proposals.json`, Zusammenführung per Name mit Zähler, TUI-Meldung (Event `DesignToolProposed`) | Geplant | `server` | #1.2 | 2 | AC-05 |
-| #3.3 | Design-Tool `hole_grid` (Core und Tool): Parameter im VarSet, vollständig bestimmte Startloch-Skizze, Pocket, Raster über MultiTransform, Layout `rect` (und `hex` laut OF-05), Validierung von Feld und Raster, ein Undo-Schritt. Tests: Sieb der Testplatte (34 × 27, Ø 1, Raster 3) und Parameteränderung auf Raster 4 | Geplant | `core`, `server` | #3.1 | 4 | AC-11 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #3.1 | Grid-Recherche auf dem lokalen Katalog-Cache (grid, array, lattice, pattern, perforation, sieve, gridfinity, honeycomb): [`grid-loesungen.md`](../../5-konzepte/grid-loesungen.md). Empfehlung: eigenes `fill_pattern`, kein Addon. Regel im Thema `addons` zur Portabilität ergänzt | keins | 2026-09-29 |
+| #3.2 | `propose_design_tool` und `list_design_tool_proposals`: Ablage `<Buddy-Home>/design-tool-proposals.json`, Zusammenführung per Name mit Zähler, Event `DesignToolProposed` in TUI und Headless-Log | Vorschlagsablage im Server (98) | 2026-09-29 |
+| #3.3 | Design-Tool `fill_pattern` (`buddy_core/design_tools.py`, Bridge `design.fill_pattern`, Tool-Gruppe `[Design tools]`): Parameter im VarSet, vollständig bestimmte Startloch-Skizze, Pocket, ein MultiTransform, `rect` und `hex` (zweites Startloch mit halbem Versatz, ein MultiTransform statt zwei), `count` oder `field` (Anzahl per `floor`-Expression im VarSet, folgt Raster und Feld), ein Undo-Schritt über verschachtelbare Transaktionen | verschachtelbare Transaktion (98) | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -38,14 +38,14 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| G10 (AC-11): Sieb der Testplatte per `hole_grid`, in der GUI Parameter `Sieve_Pitch` ändern und Skizze öffnen (vollständig bestimmt) | offen | ausstehend | ausstehend |
+| G10 (AC-11): Sieb der Testplatte per `fill_pattern`, in der GUI Parameter `Sieve_Pitch` ändern und Skizze öffnen (vollständig bestimmt) | offen | ausstehend | ausstehend |
 
 ## 🔄 Nächste Session
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 3
-> - Nächste Session: S5
-> - Relevante Dateien: `buddy_core/features.py`, `src/buddy_server/tools.py`
-> - Architektur-Deltas: Kategorie Design-Tools
-> - Startpunkt: #3.1
+> - Offene Aufgaben: 0
+> - Nächste Session: S6 (Phase 5)
+> - Relevante Dateien: [05-abschluss-abnahme.md](05-abschluss-abnahme.md)
+> - Architektur-Deltas: Kategorie Design-Tools, verschachtelbare Transaktion (98)
+> - Startpunkt: #5.4 (englische MCP-Ausgaben), danach G10 in der GUI

@@ -77,7 +77,7 @@ def test_rejected_token_is_explained(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr("buddy_server.bridge.BridgeClient.connect", reject)
 
-    with pytest.raises(BridgeUnavailable, match="Token abgelehnt"):
+    with pytest.raises(BridgeUnavailable, match="rejected the token"):
         bridge.call_sync("system.ping")
 
 

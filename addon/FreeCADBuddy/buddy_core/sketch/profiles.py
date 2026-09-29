@@ -24,17 +24,17 @@ Params = dict[str, Any]
 
 def _value(doc: Any, params: Params, key: str, positive: bool = True) -> Value:
     if key not in params:
-        raise validation(f"Parameter '{key}' fehlt")
+        raise validation(f"Parameter '{key}' is missing")
     value = values.resolve(doc, params[key], key)
     if positive and value.number <= 0:
-        raise validation(f"'{key}' muss > 0 sein")
+        raise validation(f"'{key}' must be > 0")
     return value
 
 
 def _center(doc: Any, params: Params) -> tuple[Value, Value]:
     center = params.get("center", [0, 0])
     if not isinstance(center, list | tuple) or len(center) != 2:
-        raise validation("'center' muss [x, y] sein")
+        raise validation("'center' must be [x, y]")
     return values.resolve(doc, center[0], "center.x"), values.resolve(doc, center[1], "center.y")
 
 
@@ -61,7 +61,7 @@ def rectangle(b: SketchBuilder, doc: Any, params: Params, construction: bool = F
     if anchor == "corner":
         x0, y0, x1, y1 = cx, cy, cx + w.number, cy + h.number
     elif anchor != "center":
-        raise validation("'anchor' muss 'center' oder 'corner' sein")
+        raise validation("'anchor' must be 'center' or 'corner'")
     bottom = b.line((x0, y0), (x1, y0), construction)
     right = b.line((x1, y0), (x1, y1), construction)
     top = b.line((x1, y1), (x0, y1), construction)
@@ -86,7 +86,7 @@ def rectangle(b: SketchBuilder, doc: Any, params: Params, construction: bool = F
 def rounded_rectangle(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
     w, h, r = _value(doc, params, "width"), _value(doc, params, "height"), _value(doc, params, "radius")
     if 2 * r.number >= min(w.number, h.number):
-        raise validation("'radius' muss kleiner als die halbe Breite und Höhe sein")
+        raise validation("'radius' must be smaller than half the width and height")
     center = _center(doc, params)
     cx, cy = center[0].number, center[1].number
     hw, hh, rr = w.number / 2, h.number / 2, r.number
@@ -149,7 +149,7 @@ def circle(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
 def polygon(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
     sides = params.get("sides", 6)
     if not isinstance(sides, int) or sides < 3:
-        raise validation("'sides' muss eine ganze Zahl >= 3 sein")
+        raise validation("'sides' must be a whole number >= 3")
     if "across_flats" in params:
         size = _value(doc, params, "across_flats").scaled(1 / math.cos(math.pi / sides))
     else:
@@ -158,7 +158,13 @@ def polygon(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
     cx, cy = center[0].number, center[1].number
     radius = size.number / 2
     helper = b.circle((cx, cy), radius, construction=True)
-    start = -math.pi / 2 - math.pi / sides  # first edge horizontal at the bottom
+    orientation = params.get("orientation", "flat")
+    if orientation not in ("flat", "pointy"):
+        raise validation(
+            "'orientation' must be 'flat' (edge at the bottom) or 'pointy' (corner at the bottom)"
+        )
+    # flat: first edge horizontal at the bottom; pointy: first corner straight below the centre
+    start = -math.pi / 2 - (math.pi / sides if orientation == "flat" else 0)
     corners = [
         (
             cx + radius * math.cos(start + k * 2 * math.pi / sides),
@@ -172,7 +178,10 @@ def polygon(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
         b.con("PointOnObject", edge, START, helper)
     for edge in edges[1:]:
         b.con("Equal", edges[0], edge)
-    b.con("Horizontal", edges[0])
+    if orientation == "flat":
+        b.con("Horizontal", edges[0])
+    else:
+        b.con("Vertical", edges[0], START, helper, CENTER)
     b.dim("Diameter", helper, value=size, what="Diameter")
     b.anchor(helper, CENTER, center, "Center")
     return [helper, *edges]
@@ -201,7 +210,7 @@ def polyline(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
     """
     points = params.get("points")
     if not isinstance(points, list) or len(points) < 3:
-        raise validation("'points' muss eine Liste mit mindestens 3 Punkten [x, y] sein")
+        raise validation("'points' must be a list of at least 3 points [x, y]")
     coords = [(float(p[0]), float(p[1])) for p in points]
     edges = [b.line(coords[k], coords[(k + 1) % len(coords)]) for k in range(len(coords))]
     for k, edge in enumerate(edges):
@@ -228,7 +237,7 @@ def u_path(b: SketchBuilder, doc: Any, params: Params) -> list[int]:
         _value(doc, params, "radius"),
     )
     if 2 * r.number >= length.number or r.number >= height.number:
-        raise validation("'radius' muss kleiner als die halbe Länge und kleiner als die Höhe sein")
+        raise validation("'radius' must be smaller than half the length and smaller than the height")
     hl, h, rr = length.number / 2, height.number, r.number
     left = b.line((-hl, 0), (-hl, h - rr))
     arc_left = b.arc((-hl + rr, h - rr), rr, 90, 180)
@@ -272,7 +281,7 @@ def add_profile(
 ) -> ToolResult:
     """Add a profile; dimensions accept numbers or parameter names (bound via expression)."""
     if kind not in PROFILES:
-        raise validation(f"Unbekanntes Profil '{kind}' (erlaubt: {', '.join(PROFILES)})")
+        raise validation(f"Unknown profile '{kind}' (allowed: {', '.join(PROFILES)})")
 
     def action(doc: Any, sk: Any, result: ToolResult) -> None:
         builder = SketchBuilder(sk, naming.sanitize(prefix) if prefix else "")
@@ -280,4 +289,4 @@ def add_profile(
         result.data["geometry"] = geometry
         result.data["constraints"] = builder.constraints
 
-    return sketch_edit(sketch, document, f"Profil {kind}", action)
+    return sketch_edit(sketch, document, f"Profile {kind}", action)

@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-45 Tools in 10 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+48 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
@@ -11,6 +11,7 @@
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
 | [Referenzen](tools/reference.md) | `[Reference]` | 3 |
 | [Features](tools/feature.md) | `[Feature]` | 10 |
+| [Design-Tools](tools/design.md) | `[Design tools]` | 3 |
 | [Baugruppe](tools/assembly.md) | `[Assembly]` | 5 |
 | [Material & Ansicht](tools/appearance.md) | `[Appearance]` | 3 |
 | [3D-Druck](tools/printing.md) | `[Print]` | 4 |
@@ -21,54 +22,62 @@
 
 | Tool | Zweck |
 |---|---|
-| [`get_status`](tools/session.md#get_status) | Status von FreeCAD und Bridge: Version, offene Dokumente, fehlende Objekttypen. Zuerst aufrufen. |
+| [`get_status`](tools/session.md#get_status) | Status of FreeCAD and the bridge: version, open documents, missing object types. Call first. |
 | [`document`](tools/session.md#document) | Document lifecycle. new: create and activate (then set_parameters → create_body → create_sketch → |
-| [`undo`](tools/session.md#undo) | Letzte Änderung(en) rückgängig machen. Jeder Tool-Aufruf ist genau ein Schritt. |
+| [`undo`](tools/session.md#undo) | Undo the last change(s). Every tool call is exactly one step. |
 
 ## Modell & Parameter
 
 | Tool | Zweck |
 |---|---|
-| [`get_model_tree`](tools/model.md#get_model_tree) | Modellbaum lesen: Bodies mit Features in Reihenfolge, Gültigkeit, DoF der Skizzen, Undo-Liste und |
-| [`get_object`](tools/model.md#get_object) | Details eines Objekts: Status, Expressions, bei Skizzen die Analyse, bei Körpern Volumen und Maße. |
-| [`delete_object`](tools/model.md#delete_object) | Objekt löschen (ein Undo-Schritt). |
-| [`set_parameters`](tools/model.md#set_parameters) | Zentrale Parameter im VarSet 'Parameters' anlegen/ändern. Maße in Skizzen und Features können den |
-| [`list_parameters`](tools/model.md#list_parameters) | Alle Parameter mit Typ, Wert und Expression-Referenz. |
-| [`create_body`](tools/model.md#create_body) | PartDesign-Body für ein Bauteil anlegen (ein Body = ein druckbares Teil). |
+| [`get_model_tree`](tools/model.md#get_model_tree) | Read the model tree: bodies with features in order, validity, sketch DoF, undo list and label |
+| [`get_object`](tools/model.md#get_object) | Details of an object: status, expressions, the analysis for sketches, volume and size for solids. |
+| [`delete_object`](tools/model.md#delete_object) | Delete an object (one undo step). |
+| [`set_parameters`](tools/model.md#set_parameters) | Create/change central parameters in the VarSet 'Parameters'. Dimensions in sketches and features can use |
+| [`list_parameters`](tools/model.md#list_parameters) | All parameters with type, value and expression reference. |
+| [`create_body`](tools/model.md#create_body) | Create a PartDesign body for a part (one body = one printable part). |
 
 ## Skizze
 
 | Tool | Zweck |
 |---|---|
-| [`create_sketch`](tools/sketch.md#create_sketch) | Skizze auf stabiler Referenz anlegen. Bevorzugt Ursprungsebenen mit offset oder datum_plane. |
-| [`add_profile`](tools/sketch.md#add_profile) | Vollständig bestimmtes Profil zeichnen wie ein Mensch: symmetrisch zum Ursprung, Equal statt |
+| [`create_sketch`](tools/sketch.md#create_sketch) | Create a sketch on a stable reference. Prefer origin planes with offset or a datum_plane. |
+| [`add_profile`](tools/sketch.md#add_profile) | Draw a fully constrained profile like a person would: symmetric to the origin, Equal instead of |
 | [`add_geometry`](tools/sketch.md#add_geometry) | Add low-level geometry or external references. Returns g<N> (own) and x<N> (external) references |
 | [`add_constraints`](tools/sketch.md#add_constraints) | Add constraints. Conflicting/redundant constraints are rejected (rollback). |
 | [`analyze_sketch`](tools/sketch.md#analyze_sketch) | Sketch analysis: DoF, conflicts, redundancies, closed wires, external geometry (x<N> with source) |
-| [`fully_constrain_sketch`](tools/sketch.md#fully_constrain_sketch) | Restliche Freiheitsgrade finden bzw. schließen (Koinzidenzen, H/V, dann benannte X/Y-Maße). Nie Block. |
+| [`fully_constrain_sketch`](tools/sketch.md#fully_constrain_sketch) | Find or close remaining degrees of freedom (coincidences, H/V, then named X/Y dimensions). Never Block. |
 
 ## Referenzen
 
 | Tool | Zweck |
 |---|---|
-| [`datum_plane`](tools/reference.md#datum_plane) | Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche). |
+| [`datum_plane`](tools/reference.md#datum_plane) | Datum plane as a stable sketch base (instead of a sketch on a solid face). |
 | [`shape_binder`](tools/reference.md#shape_binder) | Bind geometry of another body into this body (SubShapeBinder, follows its source). Use it as |
-| [`select_geometry`](tools/reference.md#select_geometry) | Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius). |
+| [`select_geometry`](tools/reference.md#select_geometry) | Preview which faces/edges a selector hits (with centre, normal, length, radius). |
 
 ## Features
 
 | Tool | Zweck |
 |---|---|
-| [`pad`](tools/feature.md#pad) | Profil aufpolstern (additiv). |
-| [`pocket`](tools/feature.md#pocket) | Tasche schneiden (subtraktiv). |
-| [`revolve`](tools/feature.md#revolve) | Rotationskörper (Revolution) oder Rotationsnut (Groove). |
-| [`sweep`](tools/feature.md#sweep) | Querschnitt entlang eines Pfads ziehen (PartDesign AdditivePipe/SubtractivePipe): runde Griffe, |
+| [`pad`](tools/feature.md#pad) | Extrude a profile (additive). |
+| [`pocket`](tools/feature.md#pocket) | Cut a pocket (subtractive). |
+| [`revolve`](tools/feature.md#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
+| [`sweep`](tools/feature.md#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
 | [`hole`](tools/feature.md#hole) | Holes (Hole feature) at every circle centre of the sketch. Cuts without cut_* use ISO defaults; |
-| [`fillet`](tools/feature.md#fillet) | Kanten verrunden. Der Selektor wird gespeichert und nach Parameteränderungen neu aufgelöst. |
-| [`chamfer`](tools/feature.md#chamfer) | Kanten fasen (an der Druckbett-Unterseite besser als Verrundung – gegen Elefantenfuß). |
-| [`shell`](tools/feature.md#shell) | Körper aushöhlen (Thickness) mit Wandstärke; gewählte Flächen werden zur Öffnung. |
-| [`pattern`](tools/feature.md#pattern) | Features spiegeln oder linear/polar/als Raster vervielfältigen (statt Geometrie mehrfach zu zeichnen). |
+| [`fillet`](tools/feature.md#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
+| [`chamfer`](tools/feature.md#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |
+| [`shell`](tools/feature.md#shell) | Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings. |
+| [`pattern`](tools/feature.md#pattern) | Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times). |
 | [`thread`](tools/feature.md#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
+
+## Design-Tools
+
+| Tool | Zweck |
+|---|---|
+| [`fill_pattern`](tools/design.md#fill_pattern) | Fill a rectangular field with cut cells in one call and one undo step: round holes (sieve, perforation, |
+| [`propose_design_tool`](tools/design.md#propose_design_tool) | Propose a missing design tool (task recurs or needs >= 5 tool calls, no design tool or addon fits). |
+| [`list_design_tool_proposals`](tools/design.md#list_design_tool_proposals) | All design tool proposals, most requested first (name, count, problems, inputs, steps, examples). |
 
 ## Baugruppe
 
@@ -85,29 +94,29 @@
 | Tool | Zweck |
 |---|---|
 | [`set_material`](tools/appearance.md#set_material) | Assign a FreeCAD library material (density -> mass) and/or the display colour of a body. |
-| [`set_view`](tools/appearance.md#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten |
-| [`screenshot`](tools/appearance.md#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
+| [`set_view`](tools/appearance.md#set_view) | Set the live view in FreeCAD (it stays that way): default iso + fit everything. Call as the last |
+| [`screenshot`](tools/appearance.md#screenshot) | Image of the 3D view for a visual check (only with a running FreeCAD GUI). |
 
 ## 3D-Druck
 
 | Tool | Zweck |
 |---|---|
-| [`get_printer_profile`](tools/printing.md#get_printer_profile) | Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel). |
-| [`set_printer_profile`](tools/printing.md#set_printer_profile) | Druckerprofil ändern (dauerhaft gespeichert). |
-| [`check_printability`](tools/printing.md#check_printability) | Druckbarkeit prüfen: gültiger Solid, Bauraum, Überhänge, Wandstärke, zu kleine Details. |
-| [`export_body`](tools/printing.md#export_body) | Bauteil exportieren (auf das Druckbett gelegt) und die Datei per Reimport prüfen. |
+| [`get_printer_profile`](tools/printing.md#get_printer_profile) | Active printer profile (build volume, nozzle, minimum wall, overhang angle, fit clearance). |
+| [`set_printer_profile`](tools/printing.md#set_printer_profile) | Change the printer profile (stored permanently). |
+| [`check_printability`](tools/printing.md#check_printability) | Check printability: valid solid, build volume, overhangs, wall thickness, too small details. |
+| [`export_body`](tools/printing.md#export_body) | Export the part (placed on the print bed) and verify the file by re-importing it. |
 
 ## Regelwerk & Addons
 
 | Tool | Zweck |
 |---|---|
-| [`get_design_rules`](tools/rules.md#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
-| [`search_addons`](tools/rules.md#search_addons) | Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit |
-| [`get_addon`](tools/rules.md#get_addon) | Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung, |
+| [`get_design_rules`](tools/rules.md#get_design_rules) | Design rulebook for FreeCAD modelling and FDM printing (values from the active printer profile). |
+| [`search_addons`](tools/rules.md#search_addons) | Search the official FreeCAD addon catalogue (workbenches, macros, preference packs): hits with |
+| [`get_addon`](tools/rules.md#get_addon) | Details of an addon or macro: licence, maintainer, repository, last update, |
 | [`install_addon`](tools/rules.md#install_addon) | Install an addon or macro through FreeCAD's Addon Manager (needs FreeCAD's opt-in). FreeCAD shows the user |
 
 ## Experte
 
 | Tool | Zweck |
 |---|---|
-| [`execute_python`](tools/expert.md#execute_python) | Notausgang (nur mit FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD als ein Undo-Schritt. |
+| [`execute_python`](tools/expert.md#execute_python) | Escape hatch (only with FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD as one undo step. |

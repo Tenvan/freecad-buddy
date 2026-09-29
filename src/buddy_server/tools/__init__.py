@@ -14,6 +14,7 @@ from buddy_server.catalog import Group
 from buddy_server.tools import (
     appearance,
     assembly,
+    design,
     expert,
     feature,
     model,
@@ -27,7 +28,7 @@ from buddy_server.tools.base import NameCollector, Registration, ToolContext, To
 
 __all__ = ["MODULES", "NameCollector", "ToolContext", "ToolRegistrar", "register_tools", "tool_groups"]
 
-MODULES = (session, model, sketch, reference, feature, assembly, appearance, printing, rules, expert)
+MODULES = (session, model, sketch, reference, feature, design, assembly, appearance, printing, rules, expert)
 """Tool modules in working-phase order (the order of ``docs/tools.md``)."""
 
 

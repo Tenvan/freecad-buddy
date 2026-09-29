@@ -40,7 +40,7 @@ def create_sketch(
     doc = resolve_document(document)
     target_body = resolve_body(doc, body)
     result = ToolResult()
-    with transaction(doc, f"Skizze anlegen: {purpose or plane}"):
+    with transaction(doc, f"Create sketch: {purpose or plane}"):
         sketch = target_body.newObject("Sketcher::SketchObject", "Sketch")
         sketch.Label = naming.make_label(doc, "Sketch", purpose or plane)
         support, face_warning = _support(doc, target_body, plane, allow_face_attachment)
@@ -57,7 +57,7 @@ def create_sketch(
             result.warnings.append(face_warning)
         result.add_created(sketch)
     result.data["sketch"] = describe(sketch)
-    result.hints.append("Nächster Schritt: add_profile (z. B. rectangle, circle, slot) in diese Skizze.")
+    result.hints.append("Next step: add_profile (e.g. rectangle, circle, slot) into this sketch.")
     return result
 
 
@@ -67,21 +67,21 @@ def _support(doc: Any, body: Any, plane: str, allow_face: bool) -> tuple[tuple[A
     if plane.lower().startswith("face:"):
         if not allow_face:
             raise validation(
-                "Skizzen auf Körperflächen sind anfällig für TNP. Ursprungsebene oder datum_plane verwenden "
-                "oder allow_face_attachment=true setzen."
+                "Sketches on solid faces are prone to TNP. Use an origin plane or datum_plane "
+                "or set allow_face_attachment=true."
             )
         from buddy_core import select
 
         tip = body.Tip
         if tip is None:
-            raise validation("Body hat noch keine Geometrie für eine Flächenreferenz")
+            raise validation("The body has no geometry for a face reference yet")
         faces = select.resolve(tip.Shape, plane, single=True)
         return (tip, faces[0]), (
-            f"Skizze hängt an {tip.Label}.{faces[0]} – bei Topologieänderungen kann die Referenz springen."
+            f"Sketch is attached to {tip.Label}.{faces[0]} - the reference may jump on topology changes."
         )
     datum = resolve_object(doc, plane)
     if datum.TypeId not in ("PartDesign::Plane", "App::Plane"):
-        raise validation(f"'{plane}' ist keine Ebene (erlaubt: XY, XZ, YZ, Datum-Ebene, face:<selector>)")
+        raise validation(f"'{plane}' is not a plane (allowed: XY, XZ, YZ, datum plane, face:<selector>)")
     return (datum, ""), None
 
 
@@ -96,19 +96,19 @@ def checked_edit(doc: Any, sketch: Any, label: str, result: ToolResult) -> Itera
         if blocking:
             raise CoreError(
                 SKETCH_INVALID,
-                f"Skizze '{sketch.Label}' ungültig: {'; '.join(blocking)}",
+                f"Sketch '{sketch.Label}' invalid: {'; '.join(blocking)}",
                 {"sketch": report},
             )
         result.sketch = report
         result.add_modified(sketch)
         if report["dof"] > 0:
             result.warnings.append(
-                f"Skizze hat noch {report['dof']} Freiheitsgrad(e) – fully_constrain_sketch oder Maße ergänzen."
+                f"Sketch still has {report['dof']} degree(s) of freedom - use fully_constrain_sketch or add dimensions."
             )
         if report["open_wires"]:
             result.warnings.append(
-                f"{report['open_wires']} offene(r) Linienzug(e): als Pfad für sweep richtig, "
-                "als Profil für Pad/Pocket ungeeignet."
+                f"{report['open_wires']} open wire(s): right as a sweep path, "
+                "unsuitable as a pad/pocket profile."
             )
 
 

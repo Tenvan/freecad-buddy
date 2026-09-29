@@ -64,17 +64,17 @@ def _apply(profile: dict[str, Any], updates: dict[str, Any]) -> None:
     """Merge ``updates`` into ``profile`` in place; unknown keys or bad values are rejected."""
     for key, value in updates.items():
         if key not in profile:
-            raise validation(f"Unbekannter Profil-Wert '{key}'", available=sorted(profile))
+            raise validation(f"Unknown profile value '{key}'", available=sorted(profile))
         if key == "material":
             if not isinstance(value, str) or not value.strip():
-                raise validation("'material' muss ein nicht-leerer Text sein")
+                raise validation("'material' must be a non-empty text")
             if any(ord(char) < 32 or ord(char) == 127 for char in value):
-                raise validation("'material' darf keine Steuerzeichen (z. B. Zeilenumbrüche) enthalten")
+                raise validation("'material' must not contain control characters (e.g. line breaks)")
         else:
             if isinstance(value, bool) or not isinstance(value, int | float):
-                raise validation(f"'{key}' muss eine Zahl sein, nicht {value!r}")
+                raise validation(f"'{key}' must be a number, not {value!r}")
             if value <= 0:
-                raise validation(f"'{key}' muss positiv sein, nicht {value!r}")
+                raise validation(f"'{key}' must be positive, not {value!r}")
         profile[key] = value
 
 

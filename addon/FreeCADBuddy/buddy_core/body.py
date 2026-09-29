@@ -29,7 +29,7 @@ def resolve_body(doc: Any, ref: str | None = None) -> Any:
     if len(bodies) == 1:
         return bodies[0]
     if not bodies:
-        raise not_found("Kein Body im Dokument. Erst create_body aufrufen.")
+        raise not_found("No body in the document. Call create_body first.")
     raise CoreError(
         AMBIGUOUS, "Mehrere Bodies: 'body' angeben", {"candidates": [describe(b) for b in bodies]}
     )
@@ -47,13 +47,13 @@ def origin_feature(body: Any, role: str) -> Any:
     for feature in body.Origin.OriginFeatures:
         if feature.Role == key:
             return feature
-    raise validation(f"Unbekannte Ursprungsreferenz '{role}' (erlaubt: {', '.join(ORIGIN_ROLES)})")
+    raise validation(f"Unknown origin reference '{role}' (allowed: {', '.join(ORIGIN_ROLES)})")
 
 
 def create_body(label: str, document: str | None = None) -> ToolResult:
     doc = resolve_document(document)
     result = ToolResult()
-    with transaction(doc, f"Body anlegen: {label}"):
+    with transaction(doc, f"Create body: {label}"):
         body = doc.addObject("PartDesign::Body", "Body")
         body.Label = naming.unique_label(doc, naming.sanitize(label) or "Part")
         display.apply_selection_style(body)
@@ -67,7 +67,7 @@ def create_body(label: str, document: str | None = None) -> ToolResult:
             if view is not None:
                 view.setActiveObject("pdbody", body)
         except Exception:  # the body exists already; activating it is only a convenience
-            result.warnings.append("Body angelegt, konnte aber in der GUI nicht aktiviert werden.")
+            result.warnings.append("Body created, but it could not be activated in the GUI.")
     result.data["body"] = describe(body)
-    result.hints.append("Nächster Schritt: create_sketch auf XY/XZ/YZ und add_profile.")
+    result.hints.append("Next step: create_sketch on XY/XZ/YZ and add_profile.")
     return result

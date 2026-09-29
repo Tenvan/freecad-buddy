@@ -99,12 +99,14 @@ class AddonManagerBackend:
             f"Quelle: {details.get('repository') or '–'}",
             f"Lizenz: {details.get('license') or 'unbekannt'}",
             f"Maintainer: {details.get('maintainer') or 'unbekannt'}",
-            f"Abhängigkeiten: {', '.join(details.get('addon_dependencies') or []) or 'keine'}",
+            f"Abhängigkeiten: {', '.join(details.get('addon_dependencies') or []) or 'keine'}",  # ui-de
             "",
-            "Addons sind fremder Code, der in FreeCAD ausgeführt wird. Nur installieren, wenn du der Quelle vertraust.",
+            # ui-de: the confirmation dialog is FreeCAD user interface (OF-09)
+            "Addons sind fremder Code, der in FreeCAD ausgeführt wird. "  # ui-de
+            "Nur installieren, wenn du der Quelle vertraust.",
         ]
         if job.kind != "macro":
-            lines.append("Nach der Installation ist ein FreeCAD-Neustart nötig.")
+            lines.append("Nach der Installation ist ein FreeCAD-Neustart nötig.")  # ui-de
         box = QtWidgets.QMessageBox(FreeCADGui.getMainWindow())
         box.setIcon(QtWidgets.QMessageBox.Warning)
         box.setWindowTitle("FreeCAD Buddy – Addon installieren")

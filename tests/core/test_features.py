@@ -30,7 +30,7 @@ def test_pocket_on_bottom_plane_is_flipped_automatically(doc: Any, part: Any) ->
 
     result = features.pocket(sketch.Name, depth=5, purpose="Cutout", document=doc.Name).to_dict()
 
-    assert any("umgekehrt" in w for w in result["warnings"])
+    assert any("reversed automatically" in w for w in result["warnings"])
     assert abs(result["volume"] - (60 * 40 * 20 - 3.14159265 * 25 * 5)) < 1e-2
 
 

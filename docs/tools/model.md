@@ -6,21 +6,21 @@ Kategorie-Präfix: `[Model]` · 6 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`get_model_tree`](#get_model_tree) | Modellbaum lesen: Bodies mit Features in Reihenfolge, Gültigkeit, DoF der Skizzen, Undo-Liste und |
-| [`get_object`](#get_object) | Details eines Objekts: Status, Expressions, bei Skizzen die Analyse, bei Körpern Volumen und Maße. |
-| [`delete_object`](#delete_object) | Objekt löschen (ein Undo-Schritt). |
-| [`set_parameters`](#set_parameters) | Zentrale Parameter im VarSet 'Parameters' anlegen/ändern. Maße in Skizzen und Features können den |
-| [`list_parameters`](#list_parameters) | Alle Parameter mit Typ, Wert und Expression-Referenz. |
-| [`create_body`](#create_body) | PartDesign-Body für ein Bauteil anlegen (ein Body = ein druckbares Teil). |
+| [`get_model_tree`](#get_model_tree) | Read the model tree: bodies with features in order, validity, sketch DoF, undo list and label |
+| [`get_object`](#get_object) | Details of an object: status, expressions, the analysis for sketches, volume and size for solids. |
+| [`delete_object`](#delete_object) | Delete an object (one undo step). |
+| [`set_parameters`](#set_parameters) | Create/change central parameters in the VarSet 'Parameters'. Dimensions in sketches and features can use |
+| [`list_parameters`](#list_parameters) | All parameters with type, value and expression reference. |
+| [`create_body`](#create_body) | Create a PartDesign body for a part (one body = one printable part). |
 
 ## get_model_tree
 
-[Model] Modellbaum lesen: Bodies mit Features in Reihenfolge, Gültigkeit, DoF der Skizzen, Undo-Liste und
-Label-Probleme. Vor Änderungen aufrufen – der Nutzer kann parallel in FreeCAD arbeiten.
+[Model] Read the model tree: bodies with features in order, validity, sketch DoF, undo list and label
+issues. Call before changes - the user may work in FreeCAD at the same time.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -30,12 +30,12 @@ Beispiel:
 
 ## get_object
 
-[Model] Details eines Objekts: Status, Expressions, bei Skizzen die Analyse, bei Körpern Volumen und Maße.
+[Model] Details of an object: status, expressions, the analysis for sketches, volume and size for solids.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `ref` | string | ja | `—` | Objektname oder Label |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `ref` | string | ja | `—` | Object name or label |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -47,12 +47,12 @@ Beispiel:
 
 ## delete_object
 
-[Model] Objekt löschen (ein Undo-Schritt).
+[Model] Delete an object (one undo step).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `ref` | string | ja | `—` | Objektname oder Label |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `ref` | string | ja | `—` | Object name or label |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -64,13 +64,13 @@ Beispiel:
 
 ## set_parameters
 
-[Model] Zentrale Parameter im VarSet 'Parameters' anlegen/ändern. Maße in Skizzen und Features können den
-Parameternamen statt einer Zahl nutzen – so bleibt das Modell in FreeCAD per Parameter änderbar.
+[Model] Create/change central parameters in the VarSet 'Parameters'. Dimensions in sketches and features can use
+the parameter name instead of a number - so the model stays editable by parameter in FreeCAD.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `parameters` | object | ja | `—` | Name → Wert oder {value, type, description}; type: length (Standard), distance, angle, integer, float, bool. Namen englisch/ASCII, z. B. Box_Width. |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `parameters` | object | ja | `—` | Name → value or {value, type, description}; type: length (default), distance, angle, integer, float, bool. Names in English/ASCII, e.g. Box_Width. |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -88,11 +88,11 @@ Beispiel:
 
 ## list_parameters
 
-[Model] Alle Parameter mit Typ, Wert und Expression-Referenz.
+[Model] All parameters with type, value and expression reference.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -102,12 +102,12 @@ Beispiel:
 
 ## create_body
 
-[Model] PartDesign-Body für ein Bauteil anlegen (ein Body = ein druckbares Teil).
+[Model] Create a PartDesign body for a part (one body = one printable part).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `label` | string | ja | `—` | Bauteilname, z. B. 'Box' oder 'Lid' |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `label` | string | ja | `—` | Part name, e.g. 'Box' or 'Lid' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

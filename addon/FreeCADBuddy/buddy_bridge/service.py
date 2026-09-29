@@ -73,9 +73,9 @@ def gui_busy() -> str | None:
 
     app = QtWidgets.QApplication.instance()
     if isinstance(app, QtWidgets.QApplication) and app.activeModalWidget() is not None:
-        return "In FreeCAD ist ein Dialog offen. Dialog schließen und erneut versuchen."
+        return "A dialog is open in FreeCAD. Close it and try again."
     if FreeCADGui.Control.activeDialog():
-        return "In FreeCAD ist ein Aufgabenbereich offen (z. B. Skizze oder Feature in Bearbeitung). Erst abschließen."
+        return "A task panel is open in FreeCAD (e.g. a sketch or feature being edited). Finish it first."
     return None
 
 
@@ -134,13 +134,13 @@ class BridgeService:
             self._server.stop()
             self._server = None
 
-    def describe(self) -> str:
-        state = f"läuft auf 127.0.0.1:{self.port}" if self.running else "gestoppt"
+    def describe(self) -> str:  # ui-de: shown in the FreeCAD console only
+        state = f"läuft auf 127.0.0.1:{self.port}" if self.running else "gestoppt"  # ui-de
         clients = f", {self._server.client_count()} Verbindung(en)" if self._server else ""
         return (
-            f"Bridge {state}{clients}; Token: {self._token_path}; Autostart: {autostart_enabled()}; "
-            f"Python-Ausführung: {'erlaubt' if self.allow_python else 'gesperrt'}; "
-            f"Addon-Installation: {'erlaubt' if self.allow_addon_install else 'gesperrt'}"
+            f"Bridge {state}{clients}; Token: {self._token_path}; Autostart: {autostart_enabled()}; "  # ui-de
+            f"Python-Ausführung: {'erlaubt' if self.allow_python else 'gesperrt'}; "  # ui-de
+            f"Addon-Installation: {'erlaubt' if self.allow_addon_install else 'gesperrt'}"  # ui-de
         )
 
     def _log(self, level: str, message: str) -> None:

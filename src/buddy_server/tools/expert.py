@@ -19,10 +19,10 @@ def register(reg: Registration) -> None:
 
         @tool
         async def execute_python(
-            code: Annotated[str, Field(description="Python-Code; Variable 'result' wird zurückgegeben")],
+            code: Annotated[str, Field(description="Python code; the variable 'result' is returned")],
             document: Doc = None,
         ) -> dict[str, Any]:
-            """Notausgang (nur mit FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD als ein Undo-Schritt."""
+            """Escape hatch (only with FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD as one undo step."""
             return await ctx.call(
                 "execute_python", "python.execute", timeout=150, code=code, document=document
             )

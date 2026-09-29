@@ -72,35 +72,35 @@ class Request:
 def encode(message: dict[str, Any]) -> bytes:
     data = json.dumps(message, ensure_ascii=False, separators=(",", ":")).encode("utf-8") + b"\n"
     if len(data) > MAX_MESSAGE_BYTES:
-        raise RpcError(INTERNAL_ERROR, f"Nachricht zu groß ({len(data)} Bytes, max. {MAX_MESSAGE_BYTES})")
+        raise RpcError(INTERNAL_ERROR, f"Message too large ({len(data)} bytes, max. {MAX_MESSAGE_BYTES})")
     return data
 
 
 def decode(line: bytes) -> Any:
     if len(line) > MAX_MESSAGE_BYTES:
-        raise RpcError(INVALID_REQUEST, f"Nachricht zu groß (max. {MAX_MESSAGE_BYTES} Bytes)")
+        raise RpcError(INVALID_REQUEST, f"Message too large (max. {MAX_MESSAGE_BYTES} bytes)")
     try:
         return json.loads(line.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise RpcError(PARSE_ERROR, f"Ungültiges JSON: {error}") from None
+        raise RpcError(PARSE_ERROR, f"Invalid JSON: {error}") from None
 
 
 def parse_request(message: Any) -> Request:
     if not isinstance(message, dict):
-        raise RpcError(INVALID_REQUEST, "Anfrage muss ein JSON-Objekt sein")
+        raise RpcError(INVALID_REQUEST, "Request must be a JSON object")
     if message.get("jsonrpc") != JSONRPC_VERSION:
-        raise RpcError(INVALID_REQUEST, "Feld 'jsonrpc' muss '2.0' sein")
+        raise RpcError(INVALID_REQUEST, "Field 'jsonrpc' must be '2.0'")
     request_id = message.get("id")
     if isinstance(request_id, bool) or not isinstance(request_id, int | str):
         raise RpcError(
-            INVALID_REQUEST, "Feld 'id' (Zahl oder Text) fehlt; Notifications werden nicht unterstützt"
+            INVALID_REQUEST, "Field 'id' (number or text) missing; notifications are not supported"
         )
     method = message.get("method")
     if not isinstance(method, str) or not method:
-        raise RpcError(INVALID_REQUEST, "Feld 'method' fehlt")
+        raise RpcError(INVALID_REQUEST, "Field 'method' missing")
     params = message.get("params", {})
     if not isinstance(params, dict):
-        raise RpcError(INVALID_PARAMS, "Nur benannte Parameter (JSON-Objekt) werden unterstützt")
+        raise RpcError(INVALID_PARAMS, "Only named parameters (JSON object) are supported")
     return Request(id=request_id, method=method, params=params)
 
 
@@ -126,6 +126,4 @@ def error_from_message(message: dict[str, Any]) -> RpcError:
     error = message.get("error") or {}
     data = dict(error.get("data") or {})
     data.pop("name", None)
-    return RpcError(
-        int(error.get("code", INTERNAL_ERROR)), str(error.get("message", "Unbekannter Fehler")), data
-    )
+    return RpcError(int(error.get("code", INTERNAL_ERROR)), str(error.get("message", "Unknown error")), data)

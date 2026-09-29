@@ -22,8 +22,7 @@ class BridgeTimeout(Exception):
 
 
 HOW_TO_START = (
-    "FreeCAD starten und in der Workbench 'FreeCAD Buddy' auf 'Bridge starten' klicken "
-    "(oder Autostart aktivieren)."
+    "Start FreeCAD and click 'Bridge starten' in the 'FreeCAD Buddy' workbench (or enable autostart)."
 )
 MAX_WATCHDOG_INTERVAL = 15.0
 
@@ -69,10 +68,10 @@ class Bridge:
             client.close()
             if error.code == UNAUTHORIZED:
                 raise BridgeUnavailable(
-                    "Die Bridge hat das Token abgelehnt – läuft FreeCAD mit einem anderen "
-                    f"FREECAD_BUDDY_HOME? Erwartet: {self._settings.bridge_token_path}"
+                    "The bridge rejected the token - does FreeCAD run with a different "
+                    f"FREECAD_BUDDY_HOME? Expected: {self._settings.bridge_token_path}"
                 ) from None
-            raise BridgeUnavailable(f"Bridge lehnt die Verbindung ab: {error.message}") from None
+            raise BridgeUnavailable(f"The bridge refuses the connection: {error.message}") from None
         self.freecad_version = status.get("freecad", {}).get("version")
         self._client = client
         self._set_state("connected", f"FreeCAD {self.freecad_version}")
@@ -90,14 +89,14 @@ class Bridge:
                     self._client = None
                     if error.timed_out:
                         raise BridgeTimeout(
-                            f"{error}. Mit get_model_tree prüfen, ob die Änderung angekommen ist, bevor "
-                            "der Aufruf wiederholt wird."
+                            f"{error}. Check with get_model_tree whether the change arrived before "
+                            "repeating the call."
                         ) from None
                     if error.sent or attempt == 2:
                         # Never resend: the request may already have run in FreeCAD.
                         self._set_state("waiting", str(error))
                         raise BridgeUnavailable(
-                            f"Verbindung zur Bridge verloren: {error}. Modellzustand mit get_model_tree prüfen."
+                            f"Connection to the bridge lost: {error}. Check the model state with get_model_tree."
                         ) from None
                     # stale connection that failed before sending: reconnect once and send
             raise AssertionError("unreachable")

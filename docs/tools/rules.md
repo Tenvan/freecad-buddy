@@ -6,19 +6,19 @@ Kategorie-Präfix: `[Rules & addons]` · 4 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`get_design_rules`](#get_design_rules) | Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil). |
-| [`search_addons`](#search_addons) | Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit |
-| [`get_addon`](#get_addon) | Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung, |
+| [`get_design_rules`](#get_design_rules) | Design rulebook for FreeCAD modelling and FDM printing (values from the active printer profile). |
+| [`search_addons`](#search_addons) | Search the official FreeCAD addon catalogue (workbenches, macros, preference packs): hits with |
+| [`get_addon`](#get_addon) | Details of an addon or macro: licence, maintainer, repository, last update, |
 | [`install_addon`](#install_addon) | Install an addon or macro through FreeCAD's Addon Manager (needs FreeCAD's opt-in). FreeCAD shows the user |
 
 ## get_design_rules
 
-[Rules & addons] Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil).
-Vor einer neuen Konstruktion die passenden Themen lesen, z. B. sketches und printing.
+[Rules & addons] Design rulebook for FreeCAD modelling and FDM printing (values from the active printer profile).
+Read the matching topics before a new design, e.g. sketches and printing.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `topic` | string \| null | nein | `null` | Thema: workflow, parameters, sketches, references, features, assembly, naming, printing, design_tools, addons; leer = Themenübersicht |
+| `topic` | string \| null | nein | `null` | Topic: workflow, parameters, sketches, references, features, assembly, naming, printing, design_tools, addons; empty = topic overview |
 
 Beispiel:
 
@@ -30,15 +30,15 @@ Beispiel:
 
 ## search_addons
 
-[Rules & addons] Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit
-Kompatibilität zum laufenden FreeCAD und Installationsstatus. Vor einem eigenen Design-Tool prüfen.
+[Rules & addons] Search the official FreeCAD addon catalogue (workbenches, macros, preference packs): hits with
+compatibility to the running FreeCAD and install status. Check before proposing an own design tool.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `query` | string | ja | `—` | Suchbegriffe, alle müssen passen, z. B. 'grid' oder 'honeycomb' |
+| `query` | string | ja | `—` | Search terms, all must match, e.g. 'grid' or 'honeycomb' |
 | `kind` | `any` \| `workbench` \| `macro` \| `preference_pack` | nein | `"any"` |  |
 | `limit` | integer | nein | `10` |  |
-| `refresh` | boolean | nein | `false` | Katalog sofort neu laden (sonst höchstens täglich) |
+| `refresh` | boolean | nein | `false` | Reload the catalogue now (otherwise at most daily) |
 
 Beispiel:
 
@@ -51,13 +51,13 @@ Beispiel:
 
 ## get_addon
 
-[Rules & addons] Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung,
-Abhängigkeiten (FreeCAD, Addons, Python), Kompatibilität, Installationsstatus und README-Auszug.
+[Rules & addons] Details of an addon or macro: licence, maintainer, repository, last update,
+dependencies (FreeCAD, addons, Python), compatibility, install status and README excerpt.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `addon_id` | string | ja | `—` | Id oder Name aus search_addons, z. B. 'lattice2' |
-| `readme` | boolean | nein | `true` | README-Auszug aus dem Repository laden |
+| `addon_id` | string | ja | `—` | Id or name from search_addons, e.g. 'lattice2' |
+| `readme` | boolean | nein | `true` | Load a README excerpt from the repository |
 
 Beispiel:
 

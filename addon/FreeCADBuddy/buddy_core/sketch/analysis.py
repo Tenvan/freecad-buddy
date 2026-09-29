@@ -24,18 +24,24 @@ def lint(sketch: Any) -> list[dict[str, Any]]:
     for index, constraint in enumerate(sketch.Constraints):
         if constraint.Type == "Block":
             issues.append(
-                {"severity": "error", "constraint": index, "issue": "Block-Constraint statt echter Maße"}
+                {
+                    "severity": "error",
+                    "constraint": index,
+                    "issue": "Block constraint instead of real dimensions",
+                }
             )
         if constraint.Type in DIMENSIONAL and constraint.Driving:
             if not constraint.Name:
-                issues.append({"severity": "warning", "constraint": index, "issue": "Maß ohne Namen"})
+                issues.append(
+                    {"severity": "warning", "constraint": index, "issue": "Dimension without a name"}
+                )
             elif f"Constraints.{constraint.Name}" not in expressions:
                 issues.append(
                     {
                         "severity": "info",
                         "constraint": index,
                         "name": constraint.Name,
-                        "issue": "Maß nicht an einen Parameter gebunden",
+                        "issue": "Dimension not bound to a parameter",
                     }
                 )
     for entry in external.describe(sketch):
@@ -94,12 +100,12 @@ def problems(report: dict[str, Any]) -> list[str]:
     """Blocking solver problems (conflicts, redundancies, malformed) as readable text."""
     found = []
     for key, text in (
-        ("conflicting", "widersprüchliche"),
-        ("redundant", "redundante"),
-        ("malformed", "fehlerhafte"),
+        ("conflicting", "conflicting"),
+        ("redundant", "redundant"),
+        ("malformed", "malformed"),
     ):
         if report[key]:
             found.append(f"{text} Constraints {report[key]}")
     if not report["solver_ok"] and not found:
-        found.append("Solver konnte die Skizze nicht lösen")
+        found.append("The solver could not solve the sketch")
     return found

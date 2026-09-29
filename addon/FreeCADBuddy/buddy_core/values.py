@@ -42,15 +42,23 @@ def _check(node: ast.AST) -> None:
     for child in ast.walk(node):
         allowed = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Name, ast.Load, ast.Constant)
         if not isinstance(child, allowed) and type(child) not in _BINARY and type(child) not in _UNARY:
-            raise validation("Ausdruck darf nur Zahlen, Parameternamen, + - * / und Klammern enthalten")
+            raise validation(
+                "An expression may only contain numbers, parameter names, + - * / and parentheses"
+            )
         if isinstance(child, ast.BinOp) and type(child.op) not in _BINARY:
-            raise validation("Ausdruck darf nur Zahlen, Parameternamen, + - * / und Klammern enthalten")
+            raise validation(
+                "An expression may only contain numbers, parameter names, + - * / and parentheses"
+            )
         if isinstance(child, ast.UnaryOp) and type(child.op) not in _UNARY:
-            raise validation("Ausdruck darf nur Zahlen, Parameternamen, + - * / und Klammern enthalten")
+            raise validation(
+                "An expression may only contain numbers, parameter names, + - * / and parentheses"
+            )
         if isinstance(child, ast.Constant) and (
             isinstance(child.value, bool) or not isinstance(child.value, int | float)
         ):
-            raise validation("Ausdruck darf nur Zahlen, Parameternamen, + - * / und Klammern enthalten")
+            raise validation(
+                "An expression may only contain numbers, parameter names, + - * / and parentheses"
+            )
 
 
 def _evaluate(node: ast.AST, doc: Any) -> float:
@@ -63,11 +71,11 @@ def _evaluate(node: ast.AST, doc: Any) -> float:
     if isinstance(node, ast.BinOp):
         left, right = _evaluate(node.left, doc), _evaluate(node.right, doc)
         if isinstance(node.op, ast.Div) and right == 0:
-            raise validation("Division durch 0 im Ausdruck")
+            raise validation("Division by 0 in the expression")
         return _BINARY[type(node.op)](left, right)
     if isinstance(node, ast.UnaryOp):
         return _UNARY[type(node.op)](_evaluate(node.operand, doc))
-    raise validation("Ungültiger Ausdruck")
+    raise validation("Invalid expression")
 
 
 def _unit(node: ast.AST, doc: Any) -> str | None:
@@ -90,7 +98,7 @@ def _emit(node: ast.AST, doc: Any, unit: str | None) -> str:
     if isinstance(node, ast.Expression):
         return _emit(node.body, doc, _unit(node.body, doc))
     if isinstance(node, ast.Constant):
-        text = f"{node.value:g}" if isinstance(node.value, float) else str(node.value)
+        text = f"{node.value:.12g}" if isinstance(node.value, float) else str(node.value)
         return f"{text} {unit}" if unit else text
     if isinstance(node, ast.Name):
         return parameters.expression(node.id)
@@ -107,14 +115,14 @@ def _emit(node: ast.AST, doc: Any, unit: str | None) -> str:
         else:  # factors stay unitless: 2 * Wall, Width / 2
             left, right = _emit(node.left, doc, None), _emit(node.right, doc, None)
         return f"({left} {_SYMBOLS[type(node.op)]} {right})"
-    raise validation("Ungültiger Ausdruck")
+    raise validation("Invalid expression")
 
 
 def _expression(doc: Any, text: str, what: str) -> Value:
     try:
         tree = ast.parse(text, mode="eval")
     except SyntaxError:
-        raise validation(f"{what}: ungültiger Ausdruck '{text}'") from None
+        raise validation(f"{what}: invalid expression '{text}'") from None
     _check(tree)
     number = _evaluate(tree, doc)
     if not any(isinstance(node, ast.Name) for node in ast.walk(tree)):
@@ -124,7 +132,7 @@ def _expression(doc: Any, text: str, what: str) -> Value:
 
 def resolve(doc: Any, spec: ValueSpec, what: str) -> Value:
     if isinstance(spec, bool):
-        raise validation(f"{what}: Zahl, Parametername oder Ausdruck erwartet, nicht {spec!r}")
+        raise validation(f"{what}: number, parameter name or expression expected, not {spec!r}")
     if isinstance(spec, int | float):
         return Value(float(spec))
     if isinstance(spec, str):
@@ -132,7 +140,7 @@ def resolve(doc: Any, spec: ValueSpec, what: str) -> Value:
         if _NAME.match(text):
             return Value(parameters.numeric_value(doc, text), parameters.expression(text))
         return _expression(doc, text, what)
-    raise validation(f"{what}: Zahl, Parametername oder Ausdruck erwartet, nicht {spec!r}")
+    raise validation(f"{what}: number, parameter name or expression expected, not {spec!r}")
 
 
 def number(doc: Any, spec: ValueSpec, what: str) -> float:

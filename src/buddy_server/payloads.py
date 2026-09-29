@@ -226,7 +226,9 @@ def describe_result(result: Any, mask: Masker) -> Response:
         match = _ERROR_CODE.match(message)
         code = match.group(1) if match else "error"
         lines = message.splitlines()
-        compact = "\n".join([lines[0], *[line for line in lines[1:] if line.startswith("Hinweis")][:2]])
+        compact = "\n".join(
+            [lines[0], *[line for line in lines[1:] if line.startswith(("Hint", "Hinweis"))][:2]]
+        )
         return Response(False, message, code, error_code=code, compact=compact)
     structured = data.get("structuredContent")
     if isinstance(structured, Mapping) and set(structured) == {"result"}:

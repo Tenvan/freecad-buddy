@@ -18,17 +18,18 @@ from buddy_bridge.protocol import RpcError
 from buddy_server.addon_service import AddonCatalogService, CatalogError
 from buddy_server.bridge import Bridge, BridgeTimeout, BridgeUnavailable
 from buddy_server.events import EventBus
+from buddy_server.proposals import ProposalStore
 
-Doc = Annotated[str | None, Field(description="Dokumentname oder -label; leer = aktives Dokument")]
+Doc = Annotated[str | None, Field(description="Document name or label; empty = active document")]
 Num = Annotated[
     float | str,
-    Field(description="Zahl in mm/Grad oder Name eines Parameters (wird per Expression gebunden)"),
+    Field(description="Number in mm/degrees or the name of a parameter (bound by expression)"),
 ]
-Purpose = Annotated[str | None, Field(description="Zweck für das Label, z. B. 'Base' → 'Pad_Base'")]
+Purpose = Annotated[str | None, Field(description="Purpose for the label, e.g. 'Base' → 'Pad_Base'")]
 
 SELECTOR_HELP = (
-    "Semantischer Selektor, z. B. edges:top, edges:vertical, edges:bottom, faces:top, face:top, "
-    "edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry zeigt die Treffer vorab."
+    "Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, "
+    "edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits."
 )
 
 
@@ -46,7 +47,7 @@ class NameCollector:
 def _error_text(error: RpcError) -> str:
     lines = [f"[{error.name}] {error.message}"]
     hints = error.data.get("hints") or []
-    lines.extend(f"Hinweis: {hint}" for hint in hints)
+    lines.extend(f"Hint: {hint}" for hint in hints)
     extra = {k: v for k, v in error.data.items() if k not in ("hints", "state")}
     if extra:
         lines.append("Details: " + json.dumps(extra, ensure_ascii=False, default=str)[:4000])
@@ -59,10 +60,17 @@ class ToolContext:
     Request/response logging happens in ``calllog.ToolCallLog`` (MCP middleware), not here.
     """
 
-    def __init__(self, bridge: Bridge, bus: EventBus, addons: AddonCatalogService | None = None) -> None:
+    def __init__(
+        self,
+        bridge: Bridge,
+        bus: EventBus,
+        addons: AddonCatalogService | None = None,
+        proposals: ProposalStore | None = None,
+    ) -> None:
         self.bridge = bridge
         self.bus = bus
         self.addons = addons
+        self.proposals = proposals
 
     async def installed(self) -> dict[str, Any] | None:
         """Installed addons/macros and FreeCAD version from the bridge, ``None`` if it cannot answer."""
@@ -74,12 +82,12 @@ class ToolContext:
 
     async def catalog(self, refresh: bool = False) -> tuple[AddonCatalogService, dict[str, Any]]:
         if self.addons is None:
-            raise ToolError("[unsupported] Addon-Katalog ist in diesem Server nicht konfiguriert")
+            raise ToolError("[unsupported] No addon catalogue configured in this server")
         try:
             state = await self.addons.ensure(refresh)
         except CatalogError as error:
-            hint = "Netz/Proxy prüfen" if error.code == "catalog_unavailable" else "später erneut versuchen"
-            raise ToolError(f"[{error.code}] {error}\nHinweis: {hint}") from None
+            hint = "check network/proxy" if error.code == "catalog_unavailable" else "try again later"
+            raise ToolError(f"[{error.code}] {error}\nHint: {hint}") from None
         return self.addons, state.as_dict()
 
     async def call(self, tool: str, method: str, timeout: float | None = None, **params: Any) -> Any:

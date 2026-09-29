@@ -13,7 +13,19 @@ import FreeCAD
 import buddy_core
 from buddy_bridge import __version__
 from buddy_bridge.registry import MethodRegistry
-from buddy_core import appearance, assembly, binder, body, compat, documents, features, select, thread, view
+from buddy_core import (
+    appearance,
+    assembly,
+    binder,
+    body,
+    compat,
+    design_tools,
+    documents,
+    features,
+    select,
+    thread,
+    view,
+)
 from buddy_core import parameters as model_parameters
 from buddy_core.addons import install as addon_install
 from buddy_core.addons import status as addon_status
@@ -70,9 +82,7 @@ def execute_python(code: str, document: str | None = None) -> dict[str, Any]:
         try:
             exec(compile(code, "<freecad-buddy>", "exec"), namespace)
         except SystemExit:
-            raise validation(
-                "exit()/SystemExit ist in Skripten nicht erlaubt – Änderungen zurückgerollt"
-            ) from None
+            raise validation("exit()/SystemExit is not allowed in scripts - changes rolled back") from None
     value = namespace.get("result")
     try:
         import json
@@ -116,6 +126,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.datum_plane": (features.datum_plane, {}),
     "feature.shape_binder": (binder.shape_binder, {}),
     "feature.thread": (thread.thread, {"timeout": 120.0}),
+    "design.fill_pattern": (design_tools.fill_pattern, {"timeout": 120.0}),
     "appearance.set_material": (appearance.set_material, {}),
     "assembly.create": (assembly.create_assembly, {}),
     "assembly.add": (assembly.add_to_assembly, {}),

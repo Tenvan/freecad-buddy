@@ -7,7 +7,7 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 5 freigegeben | 14/21 Aufgaben; nächste: S5; Tool-Budget ≤ 100 (Stand 5) |
+| FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md`](2-sprints-aktiv/freecad-buddy-design-regelwerk/00-index.md) | 🔵 Aktiv – Spec-Stand 6 freigegeben | 18/21 Aufgaben; nächste: #5.2 Doku und Release 0.2.0, dann GUI-Abnahme; 48/100 Tools |
 
 ## Backlog (nach Domain)
 
@@ -20,6 +20,7 @@
 | Name | Pfad | Notiz |
 |---|---|---|
 | Marktanalyse bestehender FreeCAD-MCP-Server | [`5-konzepte/freecad-mcp-marktanalyse.md`](5-konzepte/freecad-mcp-marktanalyse.md) | Vergleich bestehender Projekte, Lücken |
+| Grid-Lösungen für Loch- und Wabenraster | [`5-konzepte/grid-loesungen.md`](5-konzepte/grid-loesungen.md) | Addon-Recherche (AC-10); Entscheidung: `fill_pattern` (round/hex), kein Addon |
 
 ## Erledigte Sprints
 

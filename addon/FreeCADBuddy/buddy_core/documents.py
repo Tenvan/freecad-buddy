@@ -30,9 +30,9 @@ def resolve_document(name: str | None = None) -> Any:
         return by_label[0]
     if by_label:
         raise CoreError(
-            AMBIGUOUS, f"Mehrere Dokumente heißen '{name}'", {"candidates": [d.Name for d in by_label]}
+            AMBIGUOUS, f"Several documents are called '{name}'", {"candidates": [d.Name for d in by_label]}
         )
-    raise not_found(f"Dokument '{name}' nicht gefunden", available=list(docs))
+    raise not_found(f"Document '{name}' not found", available=list(docs))
 
 
 def resolve_object(doc: Any, ref: str, type_prefix: str | None = None) -> Any:
@@ -44,10 +44,8 @@ def resolve_object(doc: Any, ref: str, type_prefix: str | None = None) -> Any:
     if len(candidates) == 1:
         return candidates[0]
     if candidates:
-        raise CoreError(
-            AMBIGUOUS, f"'{ref}' ist mehrdeutig", {"candidates": [describe(c) for c in candidates]}
-        )
-    raise not_found(f"Objekt '{ref}' nicht gefunden in Dokument '{doc.Label}'")
+        raise CoreError(AMBIGUOUS, f"'{ref}' is ambiguous", {"candidates": [describe(c) for c in candidates]})
+    raise not_found(f"Object '{ref}' not found in document '{doc.Label}'")
 
 
 def new_document(name: str, activate: bool = True) -> ToolResult:
@@ -60,14 +58,14 @@ def new_document(name: str, activate: bool = True) -> ToolResult:
     _mark_saved(doc)
     result = ToolResult()
     result.data["document"] = {"name": doc.Name, "label": doc.Label}
-    result.hints.append("Nächster Schritt: set_parameters für zentrale Maße, dann create_body.")
+    result.hints.append("Next step: set_parameters for the central dimensions, then create_body.")
     return result
 
 
 def open_document(path: str) -> ToolResult:
     file = Path(path)
     if not file.is_file():
-        raise not_found(f"Datei '{path}' existiert nicht")
+        raise not_found(f"File '{path}' does not exist")
     doc = FreeCAD.openDocument(str(file))
     doc.UndoMode = 1
     FreeCAD.setActiveDocument(doc.Name)
@@ -83,13 +81,13 @@ def save_document(document: str | None = None, path: str | None = None) -> ToolR
     if path:
         target = Path(path)
         if target.suffix.lower() != ".fcstd":
-            raise validation("Dateiendung muss .FCStd sein")
+            raise validation("File extension must be .FCStd")
         target.parent.mkdir(parents=True, exist_ok=True)
         doc.saveAs(str(target))
     elif doc.FileName:
         doc.save()
     else:
-        raise validation("Dokument wurde noch nie gespeichert: 'path' angeben")
+        raise validation("The document was never saved: pass 'path'")
     _mark_saved(doc)
     result = ToolResult()
     result.data["document"] = {"name": doc.Name, "label": doc.Label, "file": doc.FileName}
@@ -299,7 +297,7 @@ def delete_object(ref: str, document: str | None = None) -> ToolResult:
     doc = resolve_document(document)
     obj = resolve_object(doc, ref)
     result = ToolResult()
-    with transaction(doc, f"Löschen: {obj.Label}"):
+    with transaction(doc, f"Delete: {obj.Label}"):
         label = obj.Label
         # a MultiTransform owns its steps (FreeCAD's GUI deletes them together as well)
         steps = list(obj.Transformations) if obj.TypeId == "PartDesign::MultiTransform" else []
@@ -315,11 +313,9 @@ def undo(document: str | None = None, steps: int = 1) -> ToolResult:
     doc = resolve_document(document)
     ensure_user_not_editing(doc)
     if steps < 1:
-        raise validation("steps muss >= 1 sein")
+        raise validation("steps must be >= 1")
     if doc.UndoCount < steps:
-        raise validation(
-            f"Nur {doc.UndoCount} Rückgängig-Schritt(e) verfügbar", available=list(doc.UndoNames)
-        )
+        raise validation(f"Only {doc.UndoCount} undo step(s) available", available=list(doc.UndoNames))
     undone = list(doc.UndoNames)[:steps]
     for _ in range(steps):
         doc.undo()

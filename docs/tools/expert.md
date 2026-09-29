@@ -6,16 +6,16 @@ Kategorie-Präfix: `[Expert]` · 1 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`execute_python`](#execute_python) | Notausgang (nur mit FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD als ein Undo-Schritt. |
+| [`execute_python`](#execute_python) | Escape hatch (only with FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD as one undo step. |
 
 ## execute_python
 
-[Expert] Notausgang (nur mit FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD als ein Undo-Schritt.
+[Expert] Escape hatch (only with FREECAD_BUDDY_ALLOW_PYTHON=1): Python in FreeCAD as one undo step.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `code` | string | ja | `—` | Python-Code; Variable 'result' wird zurückgegeben |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `code` | string | ja | `—` | Python code; the variable 'result' is returned |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

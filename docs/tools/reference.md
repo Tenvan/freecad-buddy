@@ -6,23 +6,23 @@ Kategorie-Präfix: `[Reference]` · 3 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`datum_plane`](#datum_plane) | Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche). |
+| [`datum_plane`](#datum_plane) | Datum plane as a stable sketch base (instead of a sketch on a solid face). |
 | [`shape_binder`](#shape_binder) | Bind geometry of another body into this body (SubShapeBinder, follows its source). Use it as |
-| [`select_geometry`](#select_geometry) | Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius). |
+| [`select_geometry`](#select_geometry) | Preview which faces/edges a selector hits (with centre, normal, length, radius). |
 
 ## datum_plane
 
-[Reference] Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche).
+[Reference] Datum plane as a stable sketch base (instead of a sketch on a solid face).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `base` | string | nein | `"XY"` | XY, XZ oder YZ |
-| `offset` | number \| string | nein | `0` | Zahl in mm/Grad oder Name eines Parameters (wird per Expression gebunden) |
-| `angle` | number \| string | nein | `0` | Zahl in mm/Grad oder Name eines Parameters (wird per Expression gebunden) |
-| `rotation_axis` | string | nein | `"X"` | X, Y oder Z |
+| `base` | string | nein | `"XY"` | XY, XZ or YZ |
+| `offset` | number \| string | nein | `0` | Number in mm/degrees or the name of a parameter (bound by expression) |
+| `angle` | number \| string | nein | `0` | Number in mm/degrees or the name of a parameter (bound by expression) |
+| `rotation_axis` | string | nein | `"X"` | X, Y or Z |
 | `body` | string \| null | nein | `null` | Body-Label |
-| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -43,8 +43,8 @@ source for add_geometry type 'external' - the PartDesign way to reference across
 |---|---|---|---|---|
 | `sources` | array<string> | ja | `—` | Objects or elements of OTHER bodies: 'Object', 'Object:Element' or 'Body:Object[:Element]'; Element is EdgeN/FaceN/VertexN or g<N> of a sketch |
 | `body` | string \| null | nein | `null` | Target body label |
-| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -60,14 +60,14 @@ Beispiel:
 
 ## select_geometry
 
-[Reference] Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius).
+[Reference] Preview which faces/edges a selector hits (with centre, normal, length, radius).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `selector` | string | ja | `—` | Semantischer Selektor, z. B. edges:top, edges:vertical, edges:bottom, faces:top, face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry zeigt die Treffer vorab. |
-| `target` | string \| null | nein | `null` | Feature-Label; leer = Tip des Bodys |
+| `selector` | string | ja | `—` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
+| `target` | string \| null | nein | `null` | Feature label; empty = tip of the body |
 | `body` | string \| null | nein | `null` | Body-Label |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

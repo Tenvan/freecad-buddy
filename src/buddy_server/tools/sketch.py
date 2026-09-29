@@ -9,7 +9,7 @@ from pydantic import Field
 from buddy_server.catalog import Group
 from buddy_server.tools.base import Doc, Num, Purpose, Registration
 
-GROUP = Group("sketch", "Sketch", "Skizze")
+GROUP = Group("sketch", "Sketch", "Skizze")  # ui-de
 
 
 def register(reg: Registration) -> None:
@@ -19,18 +19,20 @@ def register(reg: Registration) -> None:
     async def create_sketch(
         plane: Annotated[
             str,
-            Field(description="XY, XZ, YZ (Body-Ursprung), Label einer Datum-Ebene oder face:<selector>"),
+            Field(description="XY, XZ, YZ (body origin), label of a datum plane or face:<selector>"),
         ] = "XY",
         purpose: Purpose = None,
         offset: Num = 0,
-        body: Annotated[str | None, Field(description="Body-Label; leer bei nur einem Body")] = None,
+        body: Annotated[
+            str | None, Field(description="Body label; empty when there is only one body")
+        ] = None,
         reversed: bool = False,
         allow_face_attachment: Annotated[
-            bool, Field(description="Nur wenn nötig: Flächenbezug ist anfällig für Topologie-Änderungen")
+            bool, Field(description="Only if needed: face references are prone to topology changes")
         ] = False,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Skizze auf stabiler Referenz anlegen. Bevorzugt Ursprungsebenen mit offset oder datum_plane."""
+        """Create a sketch on a stable reference. Prefer origin planes with offset or a datum_plane."""
         return await ctx.call(
             "create_sketch",
             "sketch.create",
@@ -64,21 +66,21 @@ def register(reg: Registration) -> None:
             Field(
                 description=(
                     "rectangle: width, height, [center=[x,y]], [anchor=center|corner]; "
-                    "rounded_rectangle: width, height, radius, [center]; slot: length (Mittenabstand), width, [center]; "
-                    "circle: diameter, [center]; polygon: sides, diameter|across_flats, [center]; "
-                    "hole_rect: width, height (Lochabstände), diameter, [center]; polyline: points=[[x,y],…]; "
-                    "u_path (offener Bügel-Pfad für sweep): length (Beinabstand), height, radius. "
-                    "Werte: Zahl oder Parametername."
+                    "rounded_rectangle: width, height, radius, [center]; slot: length (centre distance), width, [center]; "
+                    "circle: diameter, [center]; polygon: sides, diameter|across_flats, [center], [orientation=flat|pointy];"
+                    " hole_rect: width, height (hole distances), diameter, [center]; polyline: points=[[x,y],…]; "
+                    "u_path (open bracket path for sweep): length (leg distance), height, radius. "
+                    "Values: number or parameter name."
                 )
             ),
         ],
         prefix: Annotated[
-            str | None, Field(description="Präfix für Maßnamen, z. B. 'Base' → Base_Width")
+            str | None, Field(description="Prefix for dimension names, e.g. 'Base' → Base_Width")
         ] = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Vollständig bestimmtes Profil zeichnen wie ein Mensch: symmetrisch zum Ursprung, Equal statt
-        Doppelmaß, benannte Maße. Ergebnis enthält die Skizzenanalyse (DoF muss 0 sein)."""
+        """Draw a fully constrained profile like a person would: symmetric to the origin, Equal instead of
+        duplicate dimensions, named dimensions. The result contains the sketch analysis (DoF must be 0)."""
         return await ctx.call(
             "add_profile",
             "sketch.add_profile",
@@ -141,10 +143,10 @@ def register(reg: Registration) -> None:
     @tool
     async def fully_constrain_sketch(
         sketch: Annotated[str, Field(description="Skizzen-Label")],
-        apply: Annotated[bool, Field(description="false = nur Vorschläge, true = anwenden")] = False,
+        apply: Annotated[bool, Field(description="false = suggestions only, true = apply")] = False,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Restliche Freiheitsgrade finden bzw. schließen (Koinzidenzen, H/V, dann benannte X/Y-Maße). Nie Block."""
+        """Find or close remaining degrees of freedom (coincidences, H/V, then named X/Y dimensions). Never Block."""
         return await ctx.call(
             "fully_constrain_sketch", "sketch.fully_constrain", sketch=sketch, apply=apply, document=document
         )

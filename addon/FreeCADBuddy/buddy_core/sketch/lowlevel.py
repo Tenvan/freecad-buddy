@@ -15,7 +15,7 @@ from buddy_core.sketch.model import sketch_edit
 def _point(item: dict[str, Any], key: str) -> tuple[float, float]:
     value = item.get(key)
     if not isinstance(value, list | tuple) or len(value) != 2:
-        raise validation(f"'{key}' muss [x, y] sein")
+        raise validation(f"'{key}' must be [x, y]")
     return float(value[0]), float(value[1])
 
 
@@ -78,7 +78,7 @@ def _refs(sk: Any, item: dict[str, Any], *keys: str) -> list[tuple[int, int]]:
     parsed = []
     for key in keys:
         if key not in item:
-            raise validation(f"'{key}' fehlt für Constraint '{item.get('type')}'")
+            raise validation(f"'{key}' is missing for constraint '{item.get('type')}'")
         parsed.append(refs.parse(str(item[key]), sk))
     return parsed
 
@@ -119,7 +119,7 @@ def _add_constraint_item(b: SketchBuilder, doc: Any, item: dict[str, Any]) -> in
         return b.con("Symmetric", *a, *c, *(about if refs.is_point(about) else [about[0]]))
     if kind in _DIMENSIONS:
         if "value" not in item:
-            raise validation(f"'value' fehlt für Maß '{kind}'")
+            raise validation(f"'value' is missing for dimension '{kind}'")
         value = values.resolve(doc, item["value"], kind)
         what = naming.sanitize(str(item.get("name") or kind.replace("_", " ")))
         keys = ("a", "b") if "b" in item else ("a",)
@@ -134,7 +134,7 @@ def _add_constraint_item(b: SketchBuilder, doc: Any, item: dict[str, Any]) -> in
             args = _flat(parsed, (False, not refs.is_point(parsed[1])))
         return b.dim(_DIMENSIONS[kind], *args, value=value, what=what, angle=kind == "angle")
     raise validation(
-        f"Unbekannter Constraint '{kind}' (erlaubt: coincident, horizontal, vertical, parallel, perpendicular, "
+        f"Unknown constraint '{kind}' (allowed: coincident, horizontal, vertical, parallel, perpendicular, "
         f"equal, tangent, point_on_object, symmetric, {', '.join(_DIMENSIONS)})"
     )
 

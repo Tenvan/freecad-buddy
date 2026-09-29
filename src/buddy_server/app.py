@@ -19,6 +19,7 @@ from buddy_server.design_rules import build_instructions
 from buddy_server.events import Console, EventBus, SessionsChanged
 from buddy_server.payloads import Masker
 from buddy_server.prompts import register_prompts
+from buddy_server.proposals import ProposalStore
 from buddy_server.tools import NameCollector, ToolContext, register_tools
 
 Scope = dict[str, Any]
@@ -47,10 +48,12 @@ class BearerAuth:
             provided = (_header(scope, b"authorization") or "").encode()
             if not hmac.compare_digest(provided, self._expected):
                 self._bus.publish(
-                    Console("warning", f"MCP-Anfrage ohne gültiges Token abgewiesen ({scope['path']})")
+                    Console(
+                        "warning", f"MCP-Anfrage ohne gültiges Token abgewiesen ({scope['path']})"
+                    )  # ui-de
                 )
                 body = json.dumps(
-                    {"error": "unauthorized", "message": "Bearer-Token fehlt oder ist falsch"}
+                    {"error": "unauthorized", "message": "Bearer token missing or wrong"}
                 ).encode()
                 await send(
                     {
@@ -109,7 +112,12 @@ def transport_security(settings: Settings) -> TransportSecuritySettings:
 
 
 def build_mcp(settings: Settings, bridge: Bridge, bus: EventBus) -> tuple[MCPServer, list[str]]:
-    ctx = ToolContext(bridge, bus, AddonCatalogService(settings.home / "addon-catalog"))
+    ctx = ToolContext(
+        bridge,
+        bus,
+        AddonCatalogService(settings.home / "addon-catalog"),
+        ProposalStore(settings.home / "design-tool-proposals.json"),
+    )
     # Instructions only mention registered tools, so collect the names before creating the server.
     available = set(register_tools(NameCollector(), ctx, settings.allow_python, settings.allow_addon_install))
     secrets = [settings.mcp_token(), read_token(settings.bridge_token_path) or ""]

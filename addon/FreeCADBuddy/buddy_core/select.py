@@ -44,7 +44,7 @@ def _axis(text: str) -> FreeCAD.Vector:
     sign = -1 if text.startswith("-") else 1
     key = text.lstrip("+-").upper()
     if key not in _AXES:
-        raise validation(f"Unbekannte Achse '{text}' (erlaubt: ±X, ±Y, ±Z)")
+        raise validation(f"Unknown axis '{text}' (allowed: ±X, ±Y, ±Z)")
     return _AXES[key] * sign
 
 
@@ -118,7 +118,7 @@ def _coordinate(token: str, doc: Any | None) -> tuple[str, float]:
         return axis, float(raw)
     except ValueError:
         if doc is None:
-            raise validation(f"Parameter '{raw}' im Selektor benötigt ein Dokument") from None
+            raise validation(f"Parameter '{raw}' in the selector needs a document") from None
         from buddy_core import values
 
         return axis, values.number(doc, raw, token)
@@ -167,12 +167,12 @@ def _face_filter(shape: Any, token: str, doc: Any | None) -> set[int]:
         }
     if token.startswith("of_feature="):
         if doc is None:
-            raise validation("of_feature benötigt ein Dokument")
+            raise validation("of_feature needs a document")
         created = _new_elements(doc, token.split("=", 1)[1], "face")
         return {i for i, f in enumerate(faces) if _signature(f) in created}
     if token.startswith(_COORDINATE):
         return _at_coordinate(list(faces), token, doc)
-    raise validation(f"Unbekannter Flächenfilter '{token}'")
+    raise validation(f"Unknown face filter '{token}'")
 
 
 def _edge_filter(shape: Any, token: str, doc: Any | None) -> set[int]:
@@ -213,21 +213,21 @@ def _edge_filter(shape: Any, token: str, doc: Any | None) -> set[int]:
         }
     if token.startswith("of_feature="):
         if doc is None:
-            raise validation("of_feature benötigt ein Dokument")
+            raise validation("of_feature needs a document")
         created = _new_elements(doc, token.split("=", 1)[1], "edge")
         return {i for i, e in enumerate(edges) if _signature(e) in created}
     if token.startswith(_COORDINATE):
         return _at_coordinate(list(edges), token, doc)
-    raise validation(f"Unbekannter Kantenfilter '{token}'")
+    raise validation(f"Unknown edge filter '{token}'")
 
 
 def parse(selector: str) -> tuple[str, bool, list[str]]:
     if ":" not in selector:
-        raise validation(f"Selektor '{selector}' hat nicht die Form <art>:<filter>, z. B. 'edges:top'")
+        raise validation(f"Selector '{selector}' does not have the form <kind>:<filter>, e.g. 'edges:top'")
     kind, _, rest = selector.partition(":")
     kind = kind.strip().lower()
     if kind not in ("face", "faces", "edge", "edges"):
-        raise validation(f"Unbekannte Selektor-Art '{kind}' (erlaubt: face, faces, edge, edges)")
+        raise validation(f"Unknown selector kind '{kind}' (allowed: face, faces, edge, edges)")
     tokens = [t.strip() for t in rest.split(",") if t.strip()]
     if not tokens:
         raise validation("Selektor ohne Filter")
@@ -280,7 +280,7 @@ def select_geometry(
     doc = resolve_document(document)
     obj = resolve_object(doc, target) if target else resolve_body(doc, body).Tip
     if obj is None or obj.Shape.isNull():
-        raise not_found("Keine Geometrie zum Auswählen vorhanden")
+        raise not_found("No geometry to select from")
     names = resolve(obj.Shape, selector, single=False, doc=doc)
     return {"target": obj.Label, "selector": selector, "matches": describe_matches(obj.Shape, names)}
 

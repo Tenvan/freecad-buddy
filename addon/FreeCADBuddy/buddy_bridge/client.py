@@ -55,7 +55,7 @@ class BridgeClient:
             self._sock = socket.create_connection(self._address, timeout=self._connect_timeout)
         except OSError as error:
             host, port = self._address
-            raise BridgeConnectionError(f"Bridge unter {host}:{port} nicht erreichbar: {error}") from None
+            raise BridgeConnectionError(f"Bridge at {host}:{port} not reachable: {error}") from None
         self._reader = self._sock.makefile("rb")
         try:
             self.hello = self.call("auth.hello", {"token": self._token})
@@ -78,23 +78,23 @@ class BridgeClient:
         except TimeoutError:
             self.close()
             raise BridgeConnectionError(
-                f"Zeitüberschreitung bei '{method}' – die Operation läuft in FreeCAD eventuell noch weiter",
+                f"Timeout for '{method}' - the operation may still be running in FreeCAD",
                 sent=sent,
                 timed_out=True,
             ) from None
         except (OSError, AttributeError, ValueError) as error:  # socket/reader closed concurrently
             self.close()
-            raise BridgeConnectionError(f"Verbindung zur Bridge verloren: {error}", sent=sent) from None
+            raise BridgeConnectionError(f"Connection to the bridge lost: {error}", sent=sent) from None
         if not line:
             self.close()
-            raise BridgeConnectionError("Bridge hat die Verbindung geschlossen", sent=sent)
+            raise BridgeConnectionError("The bridge closed the connection", sent=sent)
         message = protocol.decode(line)
         if message.get("id") is None and "error" in message:
             self.close()  # connection-level rejection (auth, client limit)
             raise protocol.error_from_message(message)
         if message.get("id") != request_id:
             self.close()
-            raise BridgeConnectionError("Antwort passt nicht zur Anfrage (id)", sent=True)
+            raise BridgeConnectionError("Response does not match the request (id)", sent=True)
         if "error" in message:
             raise protocol.error_from_message(message)
         return message.get("result")

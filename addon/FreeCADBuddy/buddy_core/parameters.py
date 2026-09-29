@@ -94,12 +94,12 @@ def numeric_value(doc: Any, name: str) -> float:
     varset = find_varset(doc)
     if varset is None or name not in varset.PropertiesList:
         raise not_found(
-            f"Parameter '{name}' existiert nicht. Erst mit set_parameters anlegen.",
+            f"Parameter '{name}' does not exist. Create it with set_parameters first.",
             available=[p["name"] for p in list_parameters(doc)],
         )
     value = _raw(getattr(varset, name))
     if isinstance(value, bool) or not isinstance(value, int | float):
-        raise validation(f"Parameter '{name}' ist nicht numerisch")
+        raise validation(f"Parameter '{name}' is not numeric")
     return float(value)
 
 
@@ -115,7 +115,7 @@ def _infer_type(value: Any) -> str:
         return "bool"
     if isinstance(value, int | float):
         return "length"
-    raise validation(f"Wert {value!r} ist weder Zahl noch Bool")
+    raise validation(f"Value {value!r} is neither a number nor a bool")
 
 
 def set_parameters(doc: Any, parameters: dict[str, Any]) -> ToolResult:
@@ -125,34 +125,34 @@ def set_parameters(doc: Any, parameters: dict[str, Any]) -> ToolResult:
     default to type ``length`` (mm).
     """
     if not parameters:
-        raise validation("Keine Parameter angegeben")
+        raise validation("No parameters given")
     specs: dict[str, dict[str, Any]] = {}
     for name, spec in parameters.items():
         if not _NAME.match(name):
-            raise validation(f"Ungültiger Parametername '{name}' (Buchstabe, dann Buchstaben/Ziffern/_)")
+            raise validation(f"Invalid parameter name '{name}' (a letter, then letters/digits/_)")
         if _clashes_with_unit(name):
             raise validation(
-                f"Parametername '{name}' ist in FreeCAD eine Einheit oder Konstante und würde Ausdrücke brechen – "
-                "sprechenden Namen wählen (z. B. Box_Height statt h)"
+                f"Parameter name '{name}' is a unit or constant in FreeCAD and would break expressions - "
+                "choose a descriptive name (e.g. Box_Height instead of h)"
             )
         spec = spec if isinstance(spec, dict) else {"value": spec}
         if "value" not in spec:
-            raise validation(f"Parameter '{name}': 'value' fehlt")
+            raise validation(f"Parameter '{name}': 'value' missing")
         existing = _existing_type(doc, name)
         kind = spec.get("type") or existing or _infer_type(spec["value"])
         if kind not in TYPES:
-            raise validation(f"Parameter '{name}': unbekannter Typ '{kind}' (erlaubt: {', '.join(TYPES)})")
+            raise validation(f"Parameter '{name}': unknown type '{kind}' (allowed: {', '.join(TYPES)})")
         specs[name] = {**spec, "type": kind}
 
     result = ToolResult()
-    with transaction(doc, f"Parameter setzen: {', '.join(specs)}"):
+    with transaction(doc, f"Set parameters: {', '.join(specs)}"):
         varset = _ensure_varset(doc, result)
         for name, spec in specs.items():
             type_id = TYPES[spec["type"]]
             if name in varset.PropertiesList:
                 if varset.getTypeIdOfProperty(name) != type_id:
                     raise validation(
-                        f"Parameter '{name}' hat bereits Typ '{_TYPE_BY_ID.get(varset.getTypeIdOfProperty(name))}'"
+                        f"Parameter '{name}' already has type '{_TYPE_BY_ID.get(varset.getTypeIdOfProperty(name))}'"
                     )
             else:
                 varset.addProperty(type_id, name, GROUP, spec.get("description", ""))

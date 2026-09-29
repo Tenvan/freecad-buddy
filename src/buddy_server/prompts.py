@@ -19,34 +19,34 @@ def register_prompts(mcp: MCPServer, ctx: ToolContext, available: set[str]) -> N
 
     @mcp.prompt()
     async def human_modeling_guide() -> str:
-        """Regeln für menschlich wirkende, parametrische PartDesign-Modelle und den FDM-Druck."""
+        """Rules for human-style, parametric PartDesign models and FDM printing."""
         return await rulebook()
 
     @mcp.prompt()
     async def design_part(description: str) -> str:
-        """Workflow-Prompt: Bauteil aus einer Beschreibung Schritt für Schritt konstruieren."""
+        """Workflow prompt: design a part from a description step by step."""
         return (
-            f"Konstruiere mit FreeCAD Buddy: {description}\n\n"
-            "Vorgehen:\n"
-            "1. get_status und get_model_tree lesen (Ansicht nach dem ersten pad setzt der Server selbst).\n"
-            "2. Maße klären und als Parameter anlegen (set_parameters).\n"
-            "3. Prüfen, ob ein Design-Tool die Aufgabe abdeckt (Regeln unter design_tools).\n"
-            "4. create_body, dann Basisskizze (create_sketch + add_profile) und pad.\n"
-            "5. Weitere Features (pocket, hole, pattern, revolve), danach fillet/chamfer/shell.\n"
-            "6. Nach jedem Schritt warnings und DoF prüfen; bei Fehlern Hinweise befolgen oder undo.\n"
-            "7. check_printability ausführen, Befunde beheben, export_body (3mf).\n"
-            "8. set_view (iso), damit das fertige Bauteil komplett sichtbar ist.\n"
-            "9. Zusammenfassung: Parameter, Features, Druckhinweise.\n\n" + await rulebook()
+            f"Design with FreeCAD Buddy: {description}\n\n"
+            "Procedure:\n"
+            "1. Read get_status and get_model_tree (the server sets the view after the first pad itself).\n"
+            "2. Clarify dimensions and create them as parameters (set_parameters).\n"
+            "3. Check whether a design tool covers the task (rules under design_tools).\n"
+            "4. create_body, then the base sketch (create_sketch + add_profile) and pad.\n"
+            "5. Further features (pocket, hole, pattern, revolve), then fillet/chamfer/shell.\n"
+            "6. After every step check warnings and DoF; on errors follow the hints or undo.\n"
+            "7. Run check_printability, fix the findings, export_body (3mf).\n"
+            "8. set_view (iso), so the finished part is completely visible.\n"
+            "9. Summary: parameters, features, printing notes.\n\n" + await rulebook()
         )
 
-    @mcp.resource(RULES_URI, name="design-rules", title="Designregeln (Übersicht)", mime_type="text/markdown")
+    @mcp.resource(RULES_URI, name="design-rules", title="Design rules (overview)", mime_type="text/markdown")
     async def rules_overview() -> str:
         return design_rules.render_overview(available)
 
     @mcp.resource(
         RULES_URI + "/{topic}",
         name="design-rules-topic",
-        title="Designregeln (Thema)",
+        title="Design rules (topic)",
         mime_type="text/markdown",
     )
     async def rules_topic(topic: str) -> str:
@@ -54,4 +54,4 @@ def register_prompts(mcp: MCPServer, ctx: ToolContext, available: set[str]) -> N
             return design_rules.render_topic(topic, await ctx.printer_profile(), available)
         except KeyError:
             keys = ", ".join(t.key for t in design_rules.visible_topics(available))
-            raise ValueError(f"Unbekanntes Thema '{topic}'. Gültig: {keys}") from None
+            raise ValueError(f"Unknown topic '{topic}'. Valid: {keys}") from None

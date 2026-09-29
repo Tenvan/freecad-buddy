@@ -6,13 +6,13 @@ Kategorie-Präfix: `[Session]` · 3 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`get_status`](#get_status) | Status von FreeCAD und Bridge: Version, offene Dokumente, fehlende Objekttypen. Zuerst aufrufen. |
+| [`get_status`](#get_status) | Status of FreeCAD and the bridge: version, open documents, missing object types. Call first. |
 | [`document`](#document) | Document lifecycle. new: create and activate (then set_parameters → create_body → create_sketch → |
-| [`undo`](#undo) | Letzte Änderung(en) rückgängig machen. Jeder Tool-Aufruf ist genau ein Schritt. |
+| [`undo`](#undo) | Undo the last change(s). Every tool call is exactly one step. |
 
 ## get_status
 
-[Session] Status von FreeCAD und Bridge: Version, offene Dokumente, fehlende Objekttypen. Zuerst aufrufen.
+[Session] Status of FreeCAD and the bridge: version, open documents, missing object types. Call first.
 
 Keine Parameter.
 
@@ -35,7 +35,7 @@ the user before discarding; revert: discard all changes since the last save (ask
 | `name` | string \| null | nein | `null` | new: name of the new document |
 | `path` | string \| null | nein | `null` | open: .FCStd file; save: target path (empty = current file, new documents need one); close: target for unsaved='save' on a never-saved document |
 | `unsaved` | `refuse` \| `save` \| `discard` | nein | `"refuse"` | close: unsaved changes - refuse (default, error), save first, or discard them |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -48,12 +48,12 @@ Beispiel:
 
 ## undo
 
-[Session] Letzte Änderung(en) rückgängig machen. Jeder Tool-Aufruf ist genau ein Schritt.
+[Session] Undo the last change(s). Every tool call is exactly one step.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `steps` | integer | nein | `1` | Anzahl Schritte |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `steps` | integer | nein | `1` | Number of steps |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

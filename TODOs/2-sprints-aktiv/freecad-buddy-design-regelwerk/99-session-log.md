@@ -5,6 +5,88 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 6a — 2026-09-29
+
+**Ziel:** HexFill-Pfad streichen (Ralf: „dann lass weg“) und #5.4 englische MCP-Ausgaben.
+
+**Erledigt:**
+- HexFill komplett gestrichen: Regel im Thema `addons`, G13 und Empfehlung entfernt, OF-10 entschieden („kein Addon“).
+- OF-09 entschieden (Ralf): nur MCP-Ausgaben englisch.
+- #5.4 rund 340 Texte umgestellt: Regelwerk und Instructions, Prompts, Resources, alle Tool- und Parameterbeschreibungen, Meldungen, Hinweise und Fehler aus Server, Core und Bridge, Undo-Namen (`Create body`, `Set parameters`, …). Das Präfix `Hinweis:` heißt jetzt `Hint:`, der TUI-Chat erkennt beide.
+- Sprachtest `tests/server/test_language.py` (AC-17): dynamisch über `build_mcp` und statisch per AST über alle Quelltexte. Ausnahmen: TUI-/Konsolen-Module, Workbench-Befehle, Bestätigungsdialog und Bridge-Status mit Marker `# ui-de`.
+
+**Release-Änderungen:**
+- `[feature][server]` Alle MCP-Ausgaben (Instructions, Regelwerk, Tool-Beschreibungen, Ergebnisse, Fehler) sind englisch; FreeCAD-Oberfläche und TUI bleiben deutsch.
+- `[removal][addons]` Keine HexFill-Empfehlung im Regelwerk.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Der erste Wortlisten-Scan war zu lasch (z. B. „fehlgeschlagen“, „Unbekannte Methode“ rutschten durch). Der Test nutzt eine breitere Liste mit Umlauten und Fachwörtern.
+- Undo-Namen sind MCP-Ausgabe (`get_model_tree`), erscheinen aber auch im FreeCAD-Undo-Menü, dort also jetzt englisch.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Sprachregel MCP englisch / UI deutsch mit Marker (98)
+- Nicht übernehmen: Übersetzungsskripte
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright ✅, 173 Projekt-Python-Tests ✅, 219 FreeCAD-Python-Tests ✅.
+- GUI-/manuelle Abnahme: keine in dieser Session. Die live laufende Bridge braucht für die neuen Texte einen FreeCAD-Neustart.
+
+**Nächste Session:**
+- #5.1 prüfen, #5.2 Doku, CHANGELOG und Version 0.2.0, #5.3 GUI-Abnahme G1–G12.
+
+---
+
+## Session 5 — 2026-09-29
+
+**Ziel:** Phase 3 mit Grid-Recherche, Vorschlagsliste für Design-Tools und `hole_grid`.
+
+**Erledigt:**
+- #3.3 `hole_grid` im Core (`buddy_core/design_tools.py`), in der Bridge (`design.hole_grid`) und als Tool in der neuen Gruppe `[Design tools]`. `rect` und `hex`, `count` oder `field` mit `margin`. Bei `field` sind die Anzahlen `floor`-Expressions im VarSet und folgen Raster und Feldgröße.
+- `transaction()` ist verschachtelbar. Ein Design-Tool ruft die bestehenden Tools auf und ist trotzdem genau ein Undo-Schritt.
+- #3.2 `propose_design_tool` und `list_design_tool_proposals` (`proposals.py`, Ablage `design-tool-proposals.json` im Buddy-Home), Event `DesignToolProposed` in TUI und Headless-Log.
+- #3.1 Grid-Recherche auf dem lokalen Katalog-Cache aus S3: `TODOs/5-konzepte/grid-loesungen.md`. Regel zur Portabilität im Thema `addons`.
+- Nebenfund behoben: `values._emit` hat Konstanten in Ausdrücken mit `:g` auf 6 Stellen gerundet (z. B. 0.8660254 → 0.866025). Jetzt sind es 12 Stellen.
+
+**Release-Änderungen:**
+- ~~`[feature][design]` `hole_grid`~~ → ersetzt durch `fill_pattern` (siehe Nachtrag).
+- `[feature][design]` `propose_design_tool` und `list_design_tool_proposals`: Vorschläge für fehlende Design-Tools, zusammengeführt und gezählt, Meldung in der TUI.
+- `[bugfix][core]` Zahlen in Maßausdrücken verlieren keine Nachkommastellen mehr (bisher 6 signifikante Stellen).
+- `[doc][konzepte]` Grid-Recherche mit Empfehlung.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- VarSet-Eigenschaften dürfen Expressions auf andere Eigenschaften desselben VarSets haben (`<<Parameters>>.X`). So folgen abgeleitete Anzahlen im Feldmodus dem Raster, ohne eigenes Objekt.
+- `hex` braucht keinen zweiten MultiTransform: Zwei Startlöcher in einer Skizze plus ein Raster mit doppeltem Reihenabstand reichen.
+- Der Katalog kennt kein Addon für runde Lochraster. HexFill ist der einzige gepflegte Kandidat für echte Waben (Arbeitsweise ungeprüft).
+
+**Architektur-Erkenntnisse:**
+- Betroffene Architektur-Doku: `docs/architecture.md`
+- Doku-Delta: Design-Tools als Komposition mit verschachtelbarer Transaktion, Vorschlagsablage im Server (98, bestätigt)
+- Nicht übernehmen: Formeln der Anzahl-Expressions
+
+**Validierung:**
+- `uv run poe check`: ruff ✅, pyright 0 Fehler ✅, 102 Projekt-Python-Tests ✅, 216 FreeCAD-Python-Tests ✅.
+- GUI-/manuelle Abnahme: G10 (`hole_grid` in der GUI, `Sieve_Pitch` ändern, Skizze vollständig bestimmt) offen. Braucht Ralf.
+
+**Nachtrag (Ralfs Auftrag, Spec-Stand 6):**
+- READMEs von HexFill und Lattice2 mit Ralfs Zustimmung live geladen. HexFill ist GUI-only, hat keine API und arbeitet nicht parametrisch. Entscheidung Ralf: kein Addon, HexFill weder angesteuert noch empfohlen (OF-10); Regel und G13 entfernt.
+- `hole_grid` zu `fill_pattern` verallgemeinert: `cell` round/hex, `size` statt `diameter`, Sechseck-Zellen auf der Ecke mit gleichmäßigem Steg `pitch - size`. `add_profile polygon` kennt dafür `orientation` (`flat` | `pointy`).
+- Messung headless: 918 runde Löcher inklusive Rasteränderung ≈ 5,8 s, Waben 100 × 80 mm inklusive Größenänderung ≈ 9 s. `poe check` grün (102 + 218 Tests).
+- Release-Änderung ersetzt: `[feature][design]` `fill_pattern`: Sieb-, Loch-, Lüftungs- und Wabenraster in einem Aufruf, runde oder sechseckige Zellen, parametrisch, Anzahl fest oder aus der Feldgröße.
+- `[feature][sketch]` `add_profile polygon` mit `orientation` `pointy` (Ecke unten).
+- Live-Test in der GUI (FillTest, Platte 100 × 80 mit Rand 5 × 6): rund/rect 221 Löcher, rund/versetzt 238 Löcher, Waben 110 Zellen. Volumen rechnerisch exakt, alle Skizzen DoF 0, nach Änderung von Pitch und Size alles gültig. Befund: `field` nahm nur Zahlen an und folgte der Platte nicht. Behoben: `field` akzeptiert Parameter und Ausdrücke (`Plate_Width - 2*Rim_Width`), Test `test_field_bound_to_part_parameters_follows_the_part`. `poe check` grün (102 + 219).
+
+**Nächste Session:**
+- S6: #5.4 englische MCP-Ausgaben (Bestand), #5.1/#5.2 Doku und Release 0.2.0, #5.3 GUI-Abnahme G1–G12.
+
+---
+
 ## Session 4a — 2026-09-28 (Ralfs Direktauftrag: Opt-in-Standard, Button-Paare)
 
 **Ziel:** `--allow-addon-install` als Standard; die Schalter in FreeCAD wie „Bridge starten/stoppen“ als zwei Buttons.

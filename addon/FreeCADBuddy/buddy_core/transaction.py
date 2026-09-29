@@ -11,6 +11,9 @@ import FreeCAD
 from buddy_core import diagnostics
 from buddy_core.errors import BUSY_USER_TRANSACTION, RECOMPUTE_FAILED, CoreError
 
+_open: set[str] = set()
+"""Documents with an open Buddy transaction; design tools nest the tools they are built from."""
+
 
 def invalid_objects(doc: Any) -> dict[str, str]:
     """Objects whose last recompute failed, mapped to FreeCAD's status text."""
@@ -35,8 +38,8 @@ def ensure_user_not_editing(doc: Any) -> None:
     if _user_is_editing(doc):
         raise CoreError(
             BUSY_USER_TRANSACTION,
-            f"Dokument '{doc.Label}' wird gerade bearbeitet (offene Transaktion, Aufgabenbereich oder "
-            "Bearbeitungsmodus). Bearbeitung in FreeCAD abschließen und erneut versuchen.",
+            f"Document '{doc.Label}' is being edited (open transaction, task panel or "
+            "edit mode). Finish the edit in FreeCAD and try again.",
         )
 
 
@@ -46,12 +49,17 @@ def transaction(doc: Any, label: str) -> Iterator[None]:
 
     Raises ``busy_user_transaction`` without touching the document while the user edits,
     and ``recompute_failed`` (after rollback) if the block leaves new invalid objects.
+    Nested calls join the outer transaction, which owns the undo step and the checks.
     """
+    if doc.Name in _open:
+        yield
+        return
     ensure_user_not_editing(doc)
     before = invalid_objects(doc)
     if not doc.UndoMode:
         doc.UndoMode = 1
     doc.openTransaction(label)
+    _open.add(doc.Name)
     try:
         yield
         doc.recompute()
@@ -59,8 +67,7 @@ def transaction(doc: Any, label: str) -> Iterator[None]:
         if failed:
             raise CoreError(
                 RECOMPUTE_FAILED,
-                "Recompute fehlgeschlagen: "
-                + "; ".join(f"{doc.getObject(n).Label}: {s}" for n, s in failed.items()),
+                "Recompute failed: " + "; ".join(f"{doc.getObject(n).Label}: {s}" for n, s in failed.items()),
                 {
                     "objects": [
                         {"name": n, "label": doc.getObject(n).Label, "status": s} for n, s in failed.items()
@@ -75,3 +82,5 @@ def transaction(doc: Any, label: str) -> Iterator[None]:
         if isinstance(error, CoreError):
             error.data.setdefault("state", "rolled_back")
         raise
+    finally:
+        _open.discard(doc.Name)

@@ -7,31 +7,31 @@ import re
 _CATALOGUE: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(r"not closed|wire.*closed|open wire", re.I),
-        "Profil ist nicht geschlossen: Linienzug in der Skizze schließen (analyze_sketch zeigt offene Wires).",
+        "Profile is not closed: close the wire in the sketch (analyze_sketch shows open wires).",
     ),
     (
         re.compile(r"empty|does not intersect|no intersect|nothing to cut|resulting shape is null", re.I),
-        "Feature trifft kein Material: Richtung umkehren (reversed) oder Tiefe/Skizzenlage prüfen.",
+        "Feature hits no material: reverse the direction (reversed) or check depth/sketch position.",
     ),
     (
         re.compile(r"multiple solids|more than one solid|single solid", re.I),
-        "Ergebnis besteht aus mehreren Körpern: Profil muss den bestehenden Körper berühren oder überlappen.",
+        "Result consists of several solids: the profile must touch or overlap the existing solid.",
     ),
     (
         re.compile(r"fillet|chamfer|BRep_API|command not done", re.I),
-        "Verrundung/Fase zu groß oder Kanten ungeeignet: Radius verkleinern oder Selektor einschränken.",
+        "Fillet/chamfer too large or edges unsuitable: reduce the radius or narrow the selector.",
     ),
     (
         re.compile(r"thickness|offset", re.I),
-        "Schale (Thickness) fehlgeschlagen: Wandstärke verringern oder andere Öffnungsfläche wählen.",
+        "Shell (Thickness) failed: reduce the wall thickness or pick another opening face.",
     ),
     (
         re.compile(r"sketch.*(conflict|redundant|malformed)|solver", re.I),
-        "Skizze ist nicht lösbar: analyze_sketch aufrufen und widersprüchliche Constraints entfernen.",
+        "Sketch cannot be solved: call analyze_sketch and remove conflicting constraints.",
     ),
     (
         re.compile(r"link.*(broken|not found|missing)|not in body|out of scope", re.I),
-        "Referenz ist ungültig: Feature verweist auf gelöschte oder fremde Geometrie.",
+        "Reference is invalid: the feature points to deleted or foreign geometry.",
     ),
 ]
 

@@ -40,13 +40,11 @@ def register(reg: Registration) -> None:
         view: Literal[
             "iso", "dimetric", "trimetric", "front", "back", "top", "bottom", "left", "right", "current"
         ] = "iso",
-        fit: Annotated[
-            bool, Field(description="Alles einpassen, damit das Bauteil komplett sichtbar ist")
-        ] = True,
+        fit: Annotated[bool, Field(description="Fit everything so the whole part is visible")] = True,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten
-        Schritt aufrufen; nach dem ersten Basis-Feature setzt der Server sie selbst (nur mit FreeCAD-GUI)."""
+        """Set the live view in FreeCAD (it stays that way): default iso + fit everything. Call as the last
+        step; after the first base feature the server sets it itself (FreeCAD GUI only)."""
         return await ctx.call("set_view", "view.set", view=view, fit=fit, document=document)
 
     @tool
@@ -60,7 +58,7 @@ def register(reg: Registration) -> None:
         isolate: Annotated[str | None, Field(description="Nur dieses Objekt zeigen")] = None,
         document: Doc = None,
     ) -> Image:
-        """Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI)."""
+        """Image of the 3D view for a visual check (only with a running FreeCAD GUI)."""
         result = await ctx.call(
             "screenshot", "view.screenshot", timeout=90, view=view, width=width, height=height, fit=fit,
             isolate=isolate, document=document,

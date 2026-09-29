@@ -67,6 +67,14 @@ class ToolFinished(Event):
 
 
 @dataclass(frozen=True)
+class DesignToolProposed(Event):
+    name: str
+    count: int
+    """How often the tool has been proposed so far."""
+    problem: str
+
+
+@dataclass(frozen=True)
 class Console(Event):
     level: str  # "info" | "warning" | "error"
     text: str

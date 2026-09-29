@@ -15,6 +15,7 @@ from buddy_server.config import DEFAULT_BRIDGE_PORT, DEFAULT_PORT, Settings
 from buddy_server.events import (
     BridgeState,
     Console,
+    DesignToolProposed,
     Event,
     EventBus,
     ServerFailed,
@@ -89,6 +90,8 @@ def format_event(event: Event) -> str | None:
             status = "ok" if event.ok else "FEHLER"
             line = f"{stamp} ← {event.name} {status} ({event.duration * 1000:.0f} ms) {event.summary}"
             return line + "".join(f" ⚠ {warning}" for warning in event.warnings)
+        case DesignToolProposed():
+            return f"{stamp} Design-Tool-Vorschlag: {event.name} ({event.count}×) – {event.problem}"
         case Console():
             return f"{stamp} [{event.level}] {event.text}"
     return None

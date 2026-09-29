@@ -59,11 +59,11 @@ def register(reg: Registration) -> None:
     async def get_design_rules(
         topic: Annotated[
             str | None,
-            Field(description=f"Thema: {', '.join(design_rules.TOPIC_KEYS)}; leer = Themenübersicht"),
+            Field(description=f"Topic: {', '.join(design_rules.TOPIC_KEYS)}; empty = topic overview"),
         ] = None,
     ) -> str:
-        """Design-Regelwerk für FreeCAD-Konstruktion und FDM-Druck (Werte aus dem aktiven Druckerprofil).
-        Vor einer neuen Konstruktion die passenden Themen lesen, z. B. sketches und printing."""
+        """Design rulebook for FreeCAD modelling and FDM printing (values from the active printer profile).
+        Read the matching topics before a new design, e.g. sketches and printing."""
 
         available = set(names)
         if topic is None:
@@ -73,24 +73,22 @@ def register(reg: Registration) -> None:
             text = design_rules.render_topic(topic, profile, available)
         except KeyError:
             keys = ", ".join(t.key for t in design_rules.visible_topics(available))
-            raise ToolError(f"[validation] Unbekanntes Thema '{topic}'. Gültig: {keys}") from None
+            raise ToolError(f"[validation] Unknown topic '{topic}'. Valid: {keys}") from None
         if profile is None:
-            text += "\n\n(FreeCAD nicht erreichbar – Werte aus dem Standard-Druckerprofil)"
+            text += "\n\n(FreeCAD not reachable - values from the default printer profile)"
         return text
 
     @tool
     async def search_addons(
-        query: Annotated[
-            str, Field(description="Suchbegriffe, alle müssen passen, z. B. 'grid' oder 'honeycomb'")
-        ],
+        query: Annotated[str, Field(description="Search terms, all must match, e.g. 'grid' or 'honeycomb'")],
         kind: Literal["any", "workbench", "macro", "preference_pack"] = "any",
         limit: Annotated[int, Field(ge=1, le=50)] = 10,
         refresh: Annotated[
-            bool, Field(description="Katalog sofort neu laden (sonst höchstens täglich)")
+            bool, Field(description="Reload the catalogue now (otherwise at most daily)")
         ] = False,
     ) -> dict[str, Any]:
-        """Offiziellen FreeCAD-Addon-Katalog durchsuchen (Workbenches, Makros, Preference Packs): Treffer mit
-        Kompatibilität zum laufenden FreeCAD und Installationsstatus. Vor einem eigenen Design-Tool prüfen."""
+        """Search the official FreeCAD addon catalogue (workbenches, macros, preference packs): hits with
+        compatibility to the running FreeCAD and install status. Check before proposing an own design tool."""
         service, state = await ctx.catalog(refresh)
         status = await ctx.installed()
         version = _version(status)
@@ -100,30 +98,28 @@ def register(reg: Registration) -> None:
         ]
         warnings = [state["warning"]] if "warning" in state else []
         if status is None:
-            warnings.append("FreeCAD nicht erreichbar: Kompatibilität und Installationsstatus unbekannt")
+            warnings.append("FreeCAD not reachable: compatibility and install status unknown")
         return {"catalog": state, "freecad_version": status and status["freecad_version"], "query": query,
                 "count": len(results), "results": results, "warnings": warnings}  # fmt: skip
 
     @tool
     async def get_addon(
-        addon_id: Annotated[str, Field(description="Id oder Name aus search_addons, z. B. 'lattice2'")],
-        readme: Annotated[bool, Field(description="README-Auszug aus dem Repository laden")] = True,
+        addon_id: Annotated[str, Field(description="Id or name from search_addons, e.g. 'lattice2'")],
+        readme: Annotated[bool, Field(description="Load a README excerpt from the repository")] = True,
     ) -> dict[str, Any]:
-        """Details eines Addons oder Makros: Lizenz, Maintainer, Repository, letzte Aktualisierung,
-        Abhängigkeiten (FreeCAD, Addons, Python), Kompatibilität, Installationsstatus und README-Auszug."""
+        """Details of an addon or macro: licence, maintainer, repository, last update,
+        dependencies (FreeCAD, addons, Python), compatibility, install status and README excerpt."""
         service, state = await ctx.catalog()
         entry = service.find(addon_id)
         if entry is None:
-            raise ToolError(
-                f"[not_found] Kein Addon '{addon_id}' im Katalog\nHinweis: search_addons verwenden"
-            )
+            raise ToolError(f"[not_found] No addon '{addon_id}' in the catalogue\nHint: use search_addons")
         status = await ctx.installed()
         details = {**entry.details(_version(status)), "installed": _installed_flag(entry, status),
                    "catalog": state}  # fmt: skip
         if readme:
             text = await service.readme(entry)
             details["readme"] = text
-            details["readme_note"] = UNTRUSTED_NOTE if text else "README nicht abrufbar"
+            details["readme_note"] = UNTRUSTED_NOTE if text else "README not available"
         return details
 
     if reg.allow_addon_install:

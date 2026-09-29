@@ -15,7 +15,15 @@ from textual.widgets import Label, RichLog, Static, TextArea
 
 from buddy_server.chat import CallItem, DetailScreen, ToolChat
 from buddy_server.config import Settings
-from buddy_server.events import BridgeState, Console, EventBus, SessionsChanged, ToolFinished, ToolStarted
+from buddy_server.events import (
+    BridgeState,
+    Console,
+    DesignToolProposed,
+    EventBus,
+    SessionsChanged,
+    ToolFinished,
+    ToolStarted,
+)
 from buddy_server.runner import ServerRunner
 from buddy_server.tui import BuddyApp
 
@@ -299,5 +307,19 @@ def test_request_bubble_shows_compact_arguments() -> None:
             request = cast(CallItem, records[1].item).query_one(".request", Static)
             assert "sketch: Sketch_Plate" in str(request.render())
             assert '"sketch"' in records[1].detail()
+
+    asyncio.run(scenario())
+
+
+def test_design_tool_proposal_appears_in_the_messages() -> None:
+    """AC-05: new proposals are reported in the TUI."""
+
+    async def scenario() -> None:
+        app, runner = _make_app()
+        async with app.run_test() as pilot:
+            runner.bus.publish(DesignToolProposed("screw_boss", 2, "bosses in housings"))
+            await pilot.pause()
+            text = _log_text(app.query_one("#message-log", RichLog))
+            assert "Design-Tool-Vorschlag: screw_boss (2×)" in text
 
     asyncio.run(scenario())

@@ -44,7 +44,7 @@ def test_parameter_names_that_are_units_are_rejected(doc: Any, name: str) -> Non
         set_params(doc, **{name: 5})
 
     assert info.value.name == VALIDATION
-    assert "Einheit" in info.value.message
+    assert "unit or constant" in info.value.message
 
 
 def test_export_enforces_extension_and_overwrite(doc: Any, part: Any, tmp_path: Path) -> None:
@@ -53,13 +53,13 @@ def test_export_enforces_extension_and_overwrite(doc: Any, part: Any, tmp_path: 
     features.pad(sketch.Name, length=5, document=doc.Name)
     profile_file = str(tmp_path / "profile.toml")
 
-    with pytest.raises(CoreError, match="Dateiendung"):
+    with pytest.raises(CoreError, match="File extension"):
         export.export_body(
             "3mf", path=str(tmp_path / "teil.stl"), document=doc.Name, profile_path=profile_file
         )
     target = tmp_path / "teil.3mf"
     export.export_body("3mf", path=str(target), document=doc.Name, profile_path=profile_file)
-    with pytest.raises(CoreError, match="existiert bereits"):
+    with pytest.raises(CoreError, match="already exists"):
         export.export_body("3mf", path=str(target), document=doc.Name, profile_path=profile_file)
     assert export.export_body(
         "3mf", path=str(target), document=doc.Name, profile_path=profile_file, overwrite=True
@@ -81,5 +81,5 @@ def test_undo_respects_user_edit(doc: Any, part: Any) -> None:
 
 
 def test_material_with_control_characters_is_rejected(tmp_path: Path) -> None:
-    with pytest.raises(CoreError, match="Steuerzeichen"):
+    with pytest.raises(CoreError, match="control characters"):
         profile.set_printer_profile({"material": "PLA\nnozzle = 0"}, path=str(tmp_path / "p.toml"))

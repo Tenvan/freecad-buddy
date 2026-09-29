@@ -35,7 +35,7 @@ def _resolve_path(path: str | None, doc: Any, obj: Any, extension: str) -> Path:
     allowed = (".stp", ".step") if extension == "step" else (f".{extension}",)
     if candidate.suffix.lower() not in allowed:
         raise validation(
-            f"Dateiendung '{candidate.suffix}' passt nicht zum Format '{extension}' (erwartet: {', '.join(allowed)})"
+            f"File extension '{candidate.suffix}' does not match the format '{extension}' (expected: {', '.join(allowed)})"
         )
     return candidate
 
@@ -57,7 +57,7 @@ def _write_mesh(shape: Any, target: Path, format_name: str, profile: PrinterProf
     except Exception as error:
         raise CoreError(
             UNSUPPORTED,
-            f"Export als '{format_name}' wird von dieser FreeCAD-Version nicht unterstützt: {error}",
+            f"Export as '{format_name}' is not supported by this FreeCAD version: {error}",
         ) from error
 
 
@@ -73,7 +73,7 @@ def export_body(
     format_name = format.lower()
     extension = _EXTENSIONS.get(format_name)
     if extension is None:
-        raise validation(f"Unbekanntes Format '{format}' (erlaubt: {', '.join(_EXTENSIONS)})")
+        raise validation(f"Unknown format '{format}' (allowed: {', '.join(_EXTENSIONS)})")
 
     doc, obj = resolve_target(target, document)
     shape = obj.Shape.copy()  # never touch the model itself
@@ -87,7 +87,7 @@ def export_body(
 
     target_path = _resolve_path(path, doc, obj, extension)
     if target_path.exists() and not overwrite:
-        raise validation(f"Datei '{target_path}' existiert bereits – overwrite=true zum Überschreiben setzen")
+        raise validation(f"File '{target_path}' already exists - set overwrite=true to replace it")
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
     if extension == "step":
@@ -101,8 +101,8 @@ def export_body(
     warnings: list[str] = []
     if deviation_percent > 1.0:
         warnings.append(
-            f"Volumenabweichung nach Reimport: {deviation_percent:.2f} % "
-            f"(Modell {volume_model:.2f} mm³, Datei {volume_file:.2f} mm³)."
+            f"Volume deviation after re-import: {deviation_percent:.2f} % "
+            f"(model {volume_model:.2f} mm³, file {volume_file:.2f} mm³)."
         )
 
     return {

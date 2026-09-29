@@ -17,15 +17,15 @@ def register(reg: Registration) -> None:
 
     @tool
     async def datum_plane(
-        base: Annotated[str, Field(description="XY, XZ oder YZ")] = "XY",
+        base: Annotated[str, Field(description="XY, XZ or YZ")] = "XY",
         offset: Num = 0,
         angle: Num = 0,
-        rotation_axis: Annotated[str, Field(description="X, Y oder Z")] = "X",
+        rotation_axis: Annotated[str, Field(description="X, Y or Z")] = "X",
         body: Annotated[str | None, Field(description="Body-Label")] = None,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Bezugsebene als stabile Skizzenbasis (statt Skizze auf Körperfläche)."""
+        """Datum plane as a stable sketch base (instead of a sketch on a solid face)."""
         return await ctx.call(
             "datum_plane", "feature.datum_plane", base=base, offset=offset, angle=angle,
             rotation_axis=rotation_axis, body=body, purpose=purpose, document=document,
@@ -54,11 +54,11 @@ def register(reg: Registration) -> None:
     @tool
     async def select_geometry(
         selector: Annotated[str, Field(description=SELECTOR_HELP)],
-        target: Annotated[str | None, Field(description="Feature-Label; leer = Tip des Bodys")] = None,
+        target: Annotated[str | None, Field(description="Feature label; empty = tip of the body")] = None,
         body: Annotated[str | None, Field(description="Body-Label")] = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Vorschau: welche Flächen/Kanten ein Selektor trifft (mit Mittelpunkt, Normale, Länge, Radius)."""
+        """Preview which faces/edges a selector hits (with centre, normal, length, radius)."""
         return await ctx.call(
             "select_geometry",
             "select.preview",

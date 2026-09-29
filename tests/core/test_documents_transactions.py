@@ -17,8 +17,8 @@ def test_each_tool_call_is_one_named_undo_step(doc: Any) -> None:
     set_params(doc, Box_Width=60)
 
     assert doc.UndoCount == before + 2
-    assert doc.UndoNames[0].startswith("Parameter setzen")
-    assert doc.UndoNames[1] == "Body anlegen: Box"
+    assert doc.UndoNames[0].startswith("Set parameters")
+    assert doc.UndoNames[1] == "Create body: Box"
 
 
 def test_failing_block_rolls_back_everything(doc: Any) -> None:

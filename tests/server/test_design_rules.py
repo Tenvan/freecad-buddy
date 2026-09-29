@@ -30,7 +30,7 @@ def test_instructions_are_compact_and_complete() -> None:
     assert len(instructions) <= design_rules.INSTRUCTIONS_BUDGET
     assert "get_design_rules" in names
     assert "get_design_rules(topic)" in instructions
-    assert "Wiederkehrend-komplex" in instructions  # AC-04: design-tool rule is a core rule
+    assert "Recurring-complex" in instructions  # AC-04: design-tool rule is a core rule
     for rule in (r for t in design_rules.TOPICS for r in t.rules if r.core and not r.requires):
         assert rule.text.format_map(design_rules.profile_values(None)) in instructions
 
@@ -69,8 +69,10 @@ def test_printing_numbers_follow_the_profile() -> None:
     default = design_rules.render_topic("printing")
     coarse = design_rules.render_topic("printing", {"nozzle": 0.6, "clearance_fit": 0.3})
 
-    assert "Düse 0.4 mm" in default and "tragende Wände ≥ 1.6 mm" in default and "M3 → 3.4 mm" in default
-    assert "Düse 0.6 mm" in coarse and "tragende Wände ≥ 2.4 mm" in coarse and "M3 → 3.6 mm" in coarse
+    assert (
+        "nozzle 0.4 mm" in default and "load-bearing walls ≥ 1.6 mm" in default and "M3 → 3.4 mm" in default
+    )
+    assert "nozzle 0.6 mm" in coarse and "load-bearing walls ≥ 2.4 mm" in coarse and "M3 → 3.6 mm" in coarse
 
 
 def test_topics_that_need_missing_tools_are_hidden() -> None:
@@ -80,8 +82,8 @@ def test_topics_that_need_missing_tools_are_hidden() -> None:
     assert "addons" not in keys
     with pytest.raises(KeyError):
         design_rules.render_topic("addons", None, names)
-    assert "hole_grid" not in design_rules.render_topic("design_tools", None, names)
-    assert "hole_grid" in design_rules.render_topic("design_tools", None, names | {"hole_grid"})
+    assert "fill_pattern" not in design_rules.render_topic("design_tools", None, names)
+    assert "fill_pattern" in design_rules.render_topic("design_tools", None, names | {"fill_pattern"})
 
 
 def test_tool_resource_and_prompt_over_mcp(bridge_home: tuple[Path, int]) -> None:
@@ -106,10 +108,10 @@ def test_tool_resource_and_prompt_over_mcp(bridge_home: tuple[Path, int]) -> Non
             templates = await session.list_resource_templates()
             assert any(t.uri_template == "buddy://design-rules/{topic}" for t in templates.resource_templates)
             read = await session.read_resource("buddy://design-rules/sketches")
-            assert "Symmetrie" in read.contents[0].text  # type: ignore[union-attr]
+            assert "Symmetry" in read.contents[0].text  # type: ignore[union-attr]
 
             prompt = await session.get_prompt("human_modeling_guide")
-            assert "## 3D-Druck (FDM) (printing)" in prompt.messages[0].content.text  # type: ignore[union-attr]
+            assert "## 3D printing (FDM) (printing)" in prompt.messages[0].content.text  # type: ignore[union-attr]
 
     asyncio.run(scenario())
 
@@ -126,8 +128,8 @@ def test_view_rule_is_first_core_rule_after_reading_the_tree() -> None:
     instructions, names = _registered()
 
     assert "set_view" in names
-    assert "Nach dem ersten Basis-Feature" in instructions and "letzter Schritt set_view" in instructions
-    assert instructions.index("get_model_tree lesen") < instructions.index("set_view")
+    assert "after the first base feature" in instructions and "set_view as the last step" in instructions
+    assert instructions.index("Read get_model_tree") < instructions.index("set_view")
 
 
 def test_references_topic_teaches_layout_sketch_and_binder() -> None:
@@ -139,3 +141,16 @@ def test_references_topic_teaches_layout_sketch_and_binder() -> None:
     assert "shape_binder" in text and "Construction geometry cannot be referenced" in text
     assert "shape_binder" not in design_rules.render_topic("references", None, names - {"shape_binder"})
     assert len(design_rules.build_instructions(None)) <= design_rules.INSTRUCTIONS_BUDGET
+
+
+def test_design_tool_rule_names_the_tool_steps_and_design_part_points_to_it() -> None:
+    """AC-04: criterion and order (design tool → addon → proposal) once the tools exist."""
+    _, names = _registered()
+    assert {"fill_pattern", "search_addons", "propose_design_tool"} <= names
+
+    text = design_rules.render_topic("design_tools", None, names)
+    order = [text.index(tool) for tool in ("fill_pattern", "search_addons", "propose_design_tool")]
+    assert order == sorted(order)
+    assert "Recurring-complex" in text and "≥ 5" in text
+    prompts = Path(design_rules.__file__).with_name("prompts.py").read_text(encoding="utf-8")
+    assert "rules under design_tools" in prompts  # design_part step 3

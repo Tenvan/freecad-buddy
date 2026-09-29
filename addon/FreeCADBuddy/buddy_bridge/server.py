@@ -45,7 +45,7 @@ class BridgeServer:
         log: LogFn = _no_log,
     ) -> None:
         if not _is_loopback(host):
-            raise ValueError(f"Die Bridge darf nur an eine Loopback-Adresse binden, nicht an '{host}'")
+            raise ValueError(f"The bridge may only bind to a loopback address, not to '{host}'")
         self._registry = registry
         self._dispatcher = dispatcher
         self._token = token
@@ -82,7 +82,7 @@ class BridgeServer:
             target=self._accept_loop, name="buddy-bridge-accept", daemon=True
         )
         self._accept_thread.start()
-        self._log("info", f"Bridge lauscht auf {self._host}:{self.port}")
+        self._log("info", f"Bridge lauscht auf {self._host}:{self.port}")  # ui-de
 
     def stop(self) -> None:
         if not self.running:
@@ -147,7 +147,9 @@ class BridgeServer:
         try:
             request = protocol.parse_request(protocol.decode(line))
             if request.method != "auth.hello" or not tokens_match(self._token, request.params.get("token")):
-                raise RpcError(UNAUTHORIZED, "Anmeldung fehlgeschlagen: erst 'auth.hello' mit gültigem Token")
+                raise RpcError(
+                    UNAUTHORIZED, "Authentication failed: send 'auth.hello' with a valid token first"
+                )
         except RpcError as error:
             now = time.monotonic()
             if now - self._last_reject_log > REJECT_LOG_INTERVAL:  # a retrying client must not flood the log
@@ -183,7 +185,7 @@ class BridgeServer:
             reason = (
                 error
                 if isinstance(error, RpcError)
-                else RpcError(INTERNAL_ERROR, f"Antwort nicht serialisierbar: {error}")
+                else RpcError(INTERNAL_ERROR, f"Response not serialisable: {error}")
             )
             return self._send(conn, protocol.error_message(request_id, reason))
 

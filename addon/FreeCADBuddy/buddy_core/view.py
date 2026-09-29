@@ -29,9 +29,9 @@ MAX_SIZE = 1600
 def set_view(view: str = "iso", fit: bool = True, document: str | None = None) -> dict[str, Any]:
     """Set the live 3D view of ``document`` (unlike ``screenshot``, the camera is not restored)."""
     if not FreeCAD.GuiUp:
-        raise CoreError(UNSUPPORTED, "Ansicht setzen ist nur mit laufender FreeCAD-GUI möglich")
+        raise CoreError(UNSUPPORTED, "Setting the view needs a running FreeCAD GUI")
     if view != "current" and view not in VIEWS:
-        raise validation(f"Unbekannte Ansicht '{view}' (erlaubt: current, {', '.join(VIEWS)})")
+        raise validation(f"Unknown view '{view}' (allowed: current, {', '.join(VIEWS)})")
 
     import FreeCADGui
 
@@ -39,7 +39,7 @@ def set_view(view: str = "iso", fit: bool = True, document: str | None = None) -
     FreeCADGui.setActiveDocument(doc.Name)
     active_view = FreeCADGui.getDocument(doc.Name).ActiveView
     if active_view is None or not hasattr(active_view, "fitAll"):
-        raise CoreError(UNSUPPORTED, "Keine 3D-Ansicht aktiv (z. B. Tabelle oder Zeichnung im Vordergrund)")
+        raise CoreError(UNSUPPORTED, "No 3D view active (e.g. a spreadsheet or drawing in front)")
     if view != "current":
         getattr(active_view, VIEWS[view])()
     if fit:
@@ -56,11 +56,11 @@ def screenshot(
     document: str | None = None,
 ) -> dict[str, Any]:
     if not FreeCAD.GuiUp:
-        raise CoreError(UNSUPPORTED, "Screenshots sind nur mit laufender FreeCAD-GUI möglich")
+        raise CoreError(UNSUPPORTED, "Screenshots need a running FreeCAD GUI")
     if view != "current" and view not in VIEWS:
-        raise validation(f"Unbekannte Ansicht '{view}' (erlaubt: current, {', '.join(VIEWS)})")
+        raise validation(f"Unknown view '{view}' (allowed: current, {', '.join(VIEWS)})")
     if not (16 <= width <= MAX_SIZE and 16 <= height <= MAX_SIZE):
-        raise validation(f"Bildgröße muss zwischen 16 und {MAX_SIZE} Pixeln liegen")
+        raise validation(f"Image size must be between 16 and {MAX_SIZE} pixels")
 
     import FreeCADGui
 
@@ -70,7 +70,7 @@ def screenshot(
     FreeCADGui.setActiveDocument(doc.Name)
     active_view = gui_doc.ActiveView
     if active_view is None or not hasattr(active_view, "saveImage") or not hasattr(active_view, "getCamera"):
-        raise CoreError(UNSUPPORTED, "Keine 3D-Ansicht aktiv (z. B. Tabelle oder Zeichnung im Vordergrund)")
+        raise CoreError(UNSUPPORTED, "No 3D view active (e.g. a spreadsheet or drawing in front)")
     camera = active_view.getCamera()
     hidden: list[Any] = []
     if isolate:

@@ -106,5 +106,5 @@ def test_hints_follow_findings_and_profile(doc: Any, tmp_path: Any) -> None:
     hints = design_hints([{"code": "thin_wall"}], PrinterProfile())
 
     assert any("0.8 mm" in hint for hint in hints)
-    assert any("Elefantenfuß" in hint for hint in hints)
-    assert not any("Überhänge" in hint for hint in hints)
+    assert any("elephant foot" in hint for hint in hints)
+    assert not any("Overhangs" in hint for hint in hints)

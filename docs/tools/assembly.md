@@ -20,7 +20,7 @@ add_to_assembly for each body, add_fastener for standard parts, explode_assembly
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `label` | string | nein | `"Assembly"` | Assembly label |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -37,7 +37,7 @@ Beispiel:
 | `part` | string | ja | `—` | Body or App::Part label |
 | `label` | string \| null | nein | `null` | Link label; empty = part label |
 | `offset` | array<number> \| null | nein | `null` | [x, y, z] from the modelled position; empty = in place |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -58,8 +58,8 @@ is one. Stack e.g. a washer on the plate and the nut on top of the washer.
 | `diameter` | string | ja | `—` | Size, e.g. 'M10' |
 | `positions` | array<array<number>> | ja | `—` | One [x, y, z] per fastener (bottom face) |
 | `thread` | boolean | nein | `false` | Model the real thread (slower) |
-| `purpose` | string \| null | nein | `null` | Zweck für das Label, z. B. 'Base' → 'Pad_Base' |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -86,7 +86,7 @@ saves the result. Switch back and forth with apply_configuration.
 |---|---|---|---|---|
 | `moves` | object | ja | `—` | Label -> [dx, dy, dz] from the assembled position |
 | `name` | string | nein | `"Exploded"` | Configuration name |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -109,7 +109,7 @@ Beispiel:
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `name` | string | ja | `—` | Configuration, e.g. 'Assembled' or 'Exploded' |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

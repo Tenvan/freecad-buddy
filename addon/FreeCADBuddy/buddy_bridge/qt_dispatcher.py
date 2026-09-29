@@ -31,7 +31,7 @@ def _wrap(error: BaseException) -> BaseException:
     """Keep ordinary exceptions; turn SystemExit & co. into an RpcError so no thread dies."""
     if isinstance(error, Exception):
         return error
-    return RpcError(INTERNAL_ERROR, f"Abbruch durch {type(error).__name__} – im Skript nicht erlaubt")
+    return RpcError(INTERNAL_ERROR, f"Aborted by {type(error).__name__} - not allowed in scripts")
 
 
 class _Invoker(QtCore.QObject):
@@ -66,7 +66,7 @@ class QtMainThreadDispatcher:
 
     def __init__(self, busy_check: BusyCheck | None = None) -> None:
         if QtCore.QCoreApplication.instance() is None:
-            raise RuntimeError("QtMainThreadDispatcher benötigt eine laufende Qt-Anwendung")
+            raise RuntimeError("QtMainThreadDispatcher needs a running Qt application")
         self._main_thread = threading.current_thread()
         self._invoker = _Invoker(busy_check)
 
@@ -81,13 +81,13 @@ class QtMainThreadDispatcher:
             if future.cancel():
                 raise RpcError(
                     GUI_TIMEOUT,
-                    f"FreeCAD hat nicht innerhalb von {timeout:.0f} s reagiert (blockierende Operation?). "
-                    "Die Anfrage wurde verworfen, am Modell hat sich nichts geändert.",
+                    f"FreeCAD did not respond within {timeout:.0f} s (blocking operation?). "
+                    "The request was discarded, the model is unchanged.",
                 ) from None
             raise RpcError(
                 GUI_TIMEOUT,
-                f"Die Operation läuft nach {timeout:.0f} s noch in FreeCAD und wird dort abgeschlossen. "
-                "Ergebnis mit get_model_tree prüfen, nicht einfach wiederholen.",
+                f"The operation is still running in FreeCAD after {timeout:.0f} s and will finish there. "
+                "Check the result with get_model_tree, do not simply repeat it.",
             ) from None
 
     def post(self, fn: Callable[[], object]) -> None:

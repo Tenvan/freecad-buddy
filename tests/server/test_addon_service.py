@@ -73,7 +73,7 @@ def test_offline_uses_cache_with_warning_and_fails_without_cache(tmp_path: Path)
     server.offline = True
 
     state = asyncio.run(AddonCatalogService(tmp_path / "a", server, max_age=0).ensure())
-    assert state.source == "cache" and "nicht aktualisierbar" in state.warning
+    assert state.source == "cache" and "could not be updated" in state.warning
 
     with pytest.raises(CatalogError) as info:
         asyncio.run(AddonCatalogService(tmp_path / "b", server).ensure())

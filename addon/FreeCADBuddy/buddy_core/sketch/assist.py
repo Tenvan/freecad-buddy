@@ -86,11 +86,11 @@ def fully_constrain_sketch(sketch: str, apply: bool = False, document: str | Non
             {"ref": format_ref(g, p), "at": [v.x, v.y]} for g, p, v in _free_points(sk)
         ]
         if report["dof"] == 0:
-            result.hints.append("Skizze ist bereits vollständig bestimmt.")
+            result.hints.append("The sketch is already fully constrained.")
         else:
             result.hints.append(
-                "Mit apply=true werden fehlende Koinzidenzen/H/V ergänzt und Restfreiheit über "
-                "benannte X/Y-Maße vom Ursprung gebunden. Besser: gezielte Maße mit add_constraints."
+                "With apply=true missing coincidences/H/V are added and the remaining freedom is bound by "
+                "named X/Y dimensions from the origin. Better: deliberate dimensions with add_constraints."
             )
         return result
 
@@ -109,6 +109,8 @@ def fully_constrain_sketch(sketch: str, apply: bool = False, document: str | Non
         result.data["added_relations"] = relations
         result.data["added_dimensions"] = dimensions
         if dimensions:
-            result.hints.append("Automatisch gesetzte Maße (Auto_*) prüfen und ggf. an Parameter binden.")
+            result.hints.append(
+                "Check the automatic dimensions (Auto_*) and bind them to parameters if needed."
+            )
 
-    return sketch_edit(sketch, document, "Skizze vollständig bestimmen", action)
+    return sketch_edit(sketch, document, "Fully constrain sketch", action)

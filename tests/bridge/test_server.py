@@ -94,7 +94,7 @@ def test_exception_in_method_becomes_internal_error() -> None:
 
 def test_only_loopback_binding_is_allowed(registry: MethodRegistry) -> None:
     for host in ("0.0.0.0", "192.168.1.10", "localhost"):
-        with pytest.raises(ValueError, match="Loopback"):
+        with pytest.raises(ValueError, match="loopback"):
             BridgeServer(registry, InlineDispatcher(), TOKEN, host=host)
 
 
@@ -138,5 +138,5 @@ def test_client_reports_unreachable_bridge() -> None:
         probe.bind(("127.0.0.1", 0))
         free_port = probe.getsockname()[1]
 
-    with pytest.raises(BridgeConnectionError, match="nicht erreichbar"):
+    with pytest.raises(BridgeConnectionError, match="not reachable"):
         BridgeClient(TOKEN, port=free_port, connect_timeout=1).connect()

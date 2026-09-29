@@ -7,8 +7,8 @@ Kategorie-Präfix: `[Appearance]` · 3 Tools
 | Tool | Zweck |
 |---|---|
 | [`set_material`](#set_material) | Assign a FreeCAD library material (density -> mass) and/or the display colour of a body. |
-| [`set_view`](#set_view) | Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten |
-| [`screenshot`](#screenshot) | Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI). |
+| [`set_view`](#set_view) | Set the live view in FreeCAD (it stays that way): default iso + fit everything. Call as the last |
+| [`screenshot`](#screenshot) | Image of the 3D view for a visual check (only with a running FreeCAD GUI). |
 
 ## set_material
 
@@ -19,7 +19,7 @@ Kategorie-Präfix: `[Appearance]` · 3 Tools
 | `target` | string | ja | `—` | Body, part or link label |
 | `material` | string \| null | nein | `null` | Library material: 'PLA', 'ABS', 'PETG', a full name or UUID |
 | `color` | string \| array<number> \| null | nein | `null` | Display colour: name (red, yellow, ...), '#RRGGBB' or [r,g,b] |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -33,14 +33,14 @@ Beispiel:
 
 ## set_view
 
-[Appearance] Live-Ansicht in FreeCAD setzen (bleibt so stehen): Standard iso + alles einpassen. Als letzten
-Schritt aufrufen; nach dem ersten Basis-Feature setzt der Server sie selbst (nur mit FreeCAD-GUI).
+[Appearance] Set the live view in FreeCAD (it stays that way): default iso + fit everything. Call as the last
+step; after the first base feature the server sets it itself (FreeCAD GUI only).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `view` | `iso` \| `dimetric` \| `trimetric` \| `front` \| `back` \| `top` \| `bottom` \| `left` \| `right` \| `current` | nein | `"iso"` |  |
-| `fit` | boolean | nein | `true` | Alles einpassen, damit das Bauteil komplett sichtbar ist |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `fit` | boolean | nein | `true` | Fit everything so the whole part is visible |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 
@@ -53,7 +53,7 @@ Beispiel:
 
 ## screenshot
 
-[Appearance] Bild der 3D-Ansicht zur visuellen Kontrolle (nur mit laufender FreeCAD-GUI).
+[Appearance] Image of the 3D view for a visual check (only with a running FreeCAD GUI).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
@@ -62,7 +62,7 @@ Beispiel:
 | `height` | integer | nein | `600` |  |
 | `fit` | boolean | nein | `true` |  |
 | `isolate` | string \| null | nein | `null` | Nur dieses Objekt zeigen |
-| `document` | string \| null | nein | `null` | Dokumentname oder -label; leer = aktives Dokument |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
 Beispiel:
 

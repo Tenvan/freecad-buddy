@@ -17,22 +17,22 @@ def register(reg: Registration) -> None:
 
     @tool
     async def get_printer_profile() -> dict[str, Any]:
-        """Aktives Druckerprofil (Bauraum, Düse, Mindestwand, Überhangwinkel, Passungsspiel)."""
+        """Active printer profile (build volume, nozzle, minimum wall, overhang angle, fit clearance)."""
         return await ctx.call("get_printer_profile", "print.get_profile")
 
     @tool
     async def set_printer_profile(
-        updates: Annotated[dict[str, Any], Field(description="Zu ändernde Profilwerte, z. B. {nozzle: 0.6}")],
+        updates: Annotated[dict[str, Any], Field(description="Profile values to change, e.g. {nozzle: 0.6}")],
     ) -> dict[str, Any]:
-        """Druckerprofil ändern (dauerhaft gespeichert)."""
+        """Change the printer profile (stored permanently)."""
         return await ctx.call("set_printer_profile", "print.set_profile", updates=updates)
 
     @tool
     async def check_printability(
-        target: Annotated[str | None, Field(description="Body/Objekt; leer = einziger Body")] = None,
+        target: Annotated[str | None, Field(description="Body/object; empty = the only body")] = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Druckbarkeit prüfen: gültiger Solid, Bauraum, Überhänge, Wandstärke, zu kleine Details."""
+        """Check printability: valid solid, build volume, overhangs, wall thickness, too small details."""
         return await ctx.call(
             "check_printability", "print.check", timeout=150, target=target, document=document
         )
@@ -40,15 +40,15 @@ def register(reg: Registration) -> None:
     @tool
     async def export_body(
         format: Literal["stl", "3mf", "step"] = "3mf",
-        target: Annotated[str | None, Field(description="Body/Objekt; leer = einziger Body")] = None,
+        target: Annotated[str | None, Field(description="Body/object; empty = the only body")] = None,
         path: Annotated[
-            str | None, Field(description="Datei oder Ordner; leer = <Dokumentordner>/export")
+            str | None, Field(description="File or folder; empty = <document folder>/export")
         ] = None,
         place_on_bed: bool = True,
-        overwrite: Annotated[bool, Field(description="Vorhandene Datei überschreiben")] = False,
+        overwrite: Annotated[bool, Field(description="Overwrite an existing file")] = False,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Bauteil exportieren (auf das Druckbett gelegt) und die Datei per Reimport prüfen."""
+        """Export the part (placed on the print bed) and verify the file by re-importing it."""
         return await ctx.call(
             "export_body", "print.export", timeout=150, format=format, target=target, path=path,
             place_on_bed=place_on_bed, overwrite=overwrite, document=document,
