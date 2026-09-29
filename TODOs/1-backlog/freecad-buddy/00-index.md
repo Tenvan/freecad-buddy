@@ -20,6 +20,7 @@ Domain-Backlog für den FreeCAD-MCP-Server. Tickets sind nach Priorität geliste
 
 | Status | Ticket | Pfad | Architektur-Impact | Kurzbeschreibung |
 |---|---|---|---|---|
+| 🔵 | PartDesign-Vollständigkeit: Loft, Helix, Primitive, Boolean, Draft, Datum | [`partdesign-vollstaendigkeit.md`](partdesign-vollstaendigkeit.md) | mehrere | 6 neue Tools plus Taper in `pad`/`pocket` und `model_thread` in `hole`; jedes Standard-Werkzeug der PartDesign-Leiste abgedeckt (51 → 57 Tools) |
 | 🟡 | Druckprüfung: Überhänge an gekrümmten Flächen und freie Brücken | [`druckpruefung-ueberhang-kruemmung.md`](druckpruefung-ueberhang-kruemmung.md) | core | Griff-Test: Überhang am runden Stab nicht erkannt (eine Normale pro Fläche) |
 | ✅ | Design-Regelwerk und Design-Tool-Regel | [`design-regelwerk.md`](design-regelwerk.md) | server | Umgesetzt im Sprint `freecad-buddy-design-regelwerk` |
 | ✅ | Addon-Manager-Integration (Suche, Installation) | [`addon-manager-integration.md`](addon-manager-integration.md) | mehrere | Umgesetzt im Sprint `freecad-buddy-design-regelwerk` |
