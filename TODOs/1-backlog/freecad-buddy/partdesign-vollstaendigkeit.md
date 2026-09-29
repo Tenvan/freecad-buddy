@@ -1,10 +1,10 @@
 # PartDesign-Vollständigkeit: Loft, Helix, Primitive, Boolean, Draft, Datum
 
-> Erstellt: 2026-09-29 │ Status: 🔵 Backlog │ Priorität: hoch │ Architektur-Impact: mehrere
+> Erstellt: 2026-09-29 │ Status: 🔵 In Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) │ Priorität: hoch │ Architektur-Impact: mehrere
 
 ## Spezifikation
 
-> Spec-Stand: 1 │ Spec-Status: Entwurf │ Freigabe: ausstehend
+> Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: Ralf im Chat, 2026-09-29 („starte sprint“), inklusive der Annahmen OF-01 bis OF-04 als Entscheidungen; Umsetzung und Nachweise im Sprint
 
 ## Ausgangslage
 

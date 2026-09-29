@@ -7,13 +7,13 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| — | — | — | Kein aktiver Sprint |
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 0/16 Aufgaben, Spec-Stand 1 freigegeben; `loft`, `helix`, `primitive`, `boolean`, `draft`, `datum`, Taper, `model_thread`; nächste Session S1 (Spikes + `loft`) |
 
 ## Backlog (nach Domain)
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 3 offene Tickets: 🔵 PartDesign-Vollständigkeit (Loft, Helix, Primitive, Boolean, Draft, Datum), 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 4 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 2 offene Tickets: 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 1 Ticket im aktiven Sprint (PartDesign-Vollständigkeit); 4 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
 
 ## Konzepte
 
