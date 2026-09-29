@@ -29,7 +29,7 @@ Num = Annotated[
 Purpose = Annotated[str | None, Field(description="Purpose for the label, e.g. 'Base' → 'Pad_Base'")]
 
 SELECTOR_HELP = (
-    "Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, "
+    "Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, "
     "edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits."
 )
 

@@ -5,6 +5,46 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 4 — 2026-09-29 (`boolean`, `draft`)
+
+**Ziel:** #4.1 und #4.2.
+
+**Erledigt:**
+- Spike (Scratchpad): Draft-Properties (`Base`, `Angle`, `NeutralPlane`, `PullDirection`, `Reversed`); ohne Neutral Plane instabil, mit Ursprungsebene XY reproduzierbar (10° → 3336 mm³ Narrowing, `Reversed` → 4747 mm³ Widening); Pull Direction ändert nichts.
+- #4.1 `boolean` (Core, Bridge, Server, Beispiel) nach Spike-Entscheidung OF-02.
+- #4.2 `draft` über `_dress_up`; Face-Selektor `faces:vertical`; `SELECTOR_HELP` ergänzt.
+- `docs/tools.md` regeneriert: 57 Tools (Planziel erreicht).
+
+**Release-Änderungen:**
+- `[feature][core]` `boolean`: fuse, cut, common zwischen Bodies desselben Bauteils; Werkzeug-Bodies bleiben editierbar.
+- `[feature][core]` `draft`: Flächen mit Selektor um eine Neutral Plane neigen, parametrisch, Selektor wird nachgeführt.
+- `[feature][core]` Selektor `faces:vertical`.
+- `[feature][server]` Tools `boolean` und `draft` im Katalog (Features).
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- `PartDesign::Draft` braucht eine Neutral Plane für ein deterministisches Ergebnis; Pull Direction ist bei planaren Seitenwänden überflüssig.
+- `getParentGroup()` reicht, um Bodies in der Assembly-`Parts`-Gruppe zu erkennen.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: Boolean-Regel bestätigt, `faces:vertical` in der Selektor-Grammatik (98).
+- Nicht übernehmen: Spike-Zahlen.
+
+**Validierung:**
+- `run-core-tests -k "draft or boolean or selectors"`: 4 passed; `pytest tests/tools tests/server/test_language.py`: 98 passed.
+- `uv run poe check`: ruff ✅, ruff format ✅, pyright 0 Fehler ✅, 183 Projekt-Python-Tests ✅, 249 FreeCAD-Python-Tests ✅.
+- Browser-/manuelle Abnahme: keine in S4.
+
+**Nächste Session:**
+- S5: #5.1 Regelwerk (`features`, `references`), #5.2 `docs/architecture.md` aus 98, README, CHANGELOG, Version (OF-05), #5.3 Gesamtcheck, #5.4 GUI-Abnahme AC-11 nur nach Freigabe durch Ralf.
+- Dateien: `src/buddy_server/design_rules.py`, `docs/architecture.md`, `README.md`, `CHANGELOG.md`, `pyproject.toml`.
+- Architektur-Deltas: alle sieben aus 98 übernehmen.
+
+---
+
 ## Session 3 — 2026-09-29 (`datum`, Achsen, Taper, `model_thread`)
 
 **Ziel:** #3.1 bis #3.4.

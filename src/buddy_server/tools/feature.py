@@ -278,6 +278,30 @@ def register(reg: Registration) -> None:
         )  # fmt: skip
 
     @tool
+    async def draft(
+        selector: Annotated[str, Field(description=SELECTOR_HELP)] = "faces:vertical",
+        angle: Annotated[Num, Field(description="Draft angle in degrees")] = 3,
+        neutral_plane: Annotated[
+            str,
+            Field(
+                description="Plane the faces pivot on: XY, XZ, YZ or a datum plane label (usually the bed)"
+            ),
+        ] = "XY",
+        reversed: Annotated[
+            bool, Field(description="false = faces lean inward above the plane, true = outward")
+        ] = False,
+        body: Annotated[str | None, Field(description="Body label")] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Tilt faces (PartDesign Draft): side walls for demoulding, a slight taper so parts stack or
+        plug in. The selector is stored and resolved again after parameter changes."""
+        return await ctx.call(
+            "draft", "feature.draft", selector=selector, angle=angle, neutral_plane=neutral_plane,
+            reversed=reversed, body=body, purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
     async def pattern(
         features: Annotated[list[str], Field(description="Labels of the features to repeat")],
         kind: Annotated[
@@ -305,6 +329,24 @@ def register(reg: Registration) -> None:
             "pattern", "feature.pattern", features=features, kind=kind, plane=plane, direction=direction,
             axis=axis, length=length, angle=angle, count=count, direction2=direction2, length2=length2,
             count2=count2, purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
+    async def boolean(
+        op: Literal["fuse", "cut", "common"],
+        bodies: Annotated[list[str], Field(description="Tool bodies (labels) of the same printable part")],
+        body: Annotated[
+            str | None, Field(description="Target body label; empty = the active/only body")
+        ] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Fuse, cut or intersect other bodies into this body (PartDesign Boolean). The tool bodies
+        move into the boolean and stay editable. Only for bodies of the same printable part; for
+        clearances between separate parts use shape_binder plus pocket."""
+        return await ctx.call(
+            "boolean", "feature.boolean", op=op, bodies=bodies, body=body, purpose=purpose,
+            document=document,
         )  # fmt: skip
 
     @tool

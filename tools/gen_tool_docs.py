@@ -131,6 +131,8 @@ EXAMPLES: dict[str, dict[str, Any]] = {
         "purpose": "Knob",
     },
     "datum": {"kind": "line", "base": "XY", "offset": ["Hinge_X", 0, 0], "purpose": "HingeAxis"},
+    "draft": {"selector": "faces:vertical", "angle": "Draft_Angle", "purpose": "Walls"},
+    "boolean": {"op": "fuse", "bodies": ["Rib_Insert"], "body": "Shell_Top", "purpose": "Ribs"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
 

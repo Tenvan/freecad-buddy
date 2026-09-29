@@ -140,6 +140,8 @@ def _face_filter(shape: Any, token: str, doc: Any | None) -> set[int]:
     everything = set(range(len(faces)))
     if token == "all":
         return everything
+    if token == "vertical":  # side walls: planar faces with a horizontal normal
+        return {i for i, f in enumerate(faces) if _is_planar(f) and abs(face_normal(f).z) < 1e-6}
     if token in _DIRECTIONS:
         return set(_extreme_faces(shape, _DIRECTIONS[token]))
     if token.startswith("normal="):

@@ -129,6 +129,8 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.pattern": (features.pattern, {}),
     "feature.datum_plane": (features.datum_plane, {}),
     "feature.datum": (features.datum, {}),
+    "feature.draft": (features.draft, {}),
+    "feature.boolean": (features.boolean, {}),
     "feature.shape_binder": (binder.shape_binder, {}),
     "feature.thread": (thread.thread, {"timeout": 120.0}),
     "feature.gear": (gears.add_gear, {"timeout": 120.0}),

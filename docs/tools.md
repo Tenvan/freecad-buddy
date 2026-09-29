@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-55 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+57 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
@@ -10,7 +10,7 @@
 | [Modell & Parameter](tools/model.md) | `[Model]` | 6 |
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
 | [Referenzen](tools/reference.md) | `[Reference]` | 4 |
-| [Features](tools/feature.md) | `[Feature]` | 14 |
+| [Features](tools/feature.md) | `[Feature]` | 16 |
 | [Design-Tools](tools/design.md) | `[Design tools]` | 3 |
 | [Baugruppe](tools/assembly.md) | `[Assembly]` | 7 |
 | [Material & Ansicht](tools/appearance.md) | `[Appearance]` | 3 |
@@ -72,7 +72,9 @@
 | [`fillet`](tools/feature.md#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
 | [`chamfer`](tools/feature.md#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |
 | [`shell`](tools/feature.md#shell) | Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings. |
+| [`draft`](tools/feature.md#draft) | Tilt faces (PartDesign Draft): side walls for demoulding, a slight taper so parts stack or |
 | [`pattern`](tools/feature.md#pattern) | Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times). |
+| [`boolean`](tools/feature.md#boolean) | Fuse, cut or intersect other bodies into this body (PartDesign Boolean). The tool bodies |
 | [`thread`](tools/feature.md#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
 | [`add_gear`](tools/feature.md#add_gear) | Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per |
 

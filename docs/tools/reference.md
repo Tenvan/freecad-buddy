@@ -97,7 +97,7 @@ Beispiel:
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `selector` | string | ja | `—` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
+| `selector` | string | ja | `—` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
 | `target` | string \| null | nein | `null` | Feature label; empty = tip of the body |
 | `body` | string \| null | nein | `null` | Body-Label |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |

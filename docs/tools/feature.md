@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Feature]` · 14 Tools
+Kategorie-Präfix: `[Feature]` · 16 Tools
 
 | Tool | Zweck |
 |---|---|
@@ -17,7 +17,9 @@ Kategorie-Präfix: `[Feature]` · 14 Tools
 | [`fillet`](#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
 | [`chamfer`](#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |
 | [`shell`](#shell) | Hollow the solid (Thickness) with a wall thickness; the selected faces become the openings. |
+| [`draft`](#draft) | Tilt faces (PartDesign Draft): side walls for demoulding, a slight taper so parts stack or |
 | [`pattern`](#pattern) | Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times). |
+| [`boolean`](#boolean) | Fuse, cut or intersect other bodies into this body (PartDesign Boolean). The tool bodies |
 | [`thread`](#thread) | Cut a real external metric thread (ISO 60° profile, native SubtractiveHelix) into an existing |
 | [`add_gear`](#add_gear) | Parametric gear from the freecad.gears workbench (needs the addon) as feature of a body; one gear per |
 
@@ -241,7 +243,7 @@ Beispiel:
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `selector` | string | nein | `"edges:top"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
+| `selector` | string | nein | `"edges:top"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
 | `radius` | number \| string | nein | `1` | Number in mm/degrees or the name of a parameter (bound by expression) |
 | `body` | string \| null | nein | `null` | Body-Label |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
@@ -262,7 +264,7 @@ Beispiel:
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `selector` | string | nein | `"edges:bottom"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
+| `selector` | string | nein | `"edges:bottom"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
 | `size` | number \| string | nein | `0.5` | Number in mm/degrees or the name of a parameter (bound by expression) |
 | `body` | string \| null | nein | `null` | Body-Label |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
@@ -299,6 +301,31 @@ Beispiel:
 }
 ```
 
+## draft
+
+[Feature] Tilt faces (PartDesign Draft): side walls for demoulding, a slight taper so parts stack or
+plug in. The selector is stored and resolved again after parameter changes.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `selector` | string | nein | `"faces:vertical"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
+| `angle` | number \| string | nein | `3` | Draft angle in degrees |
+| `neutral_plane` | string | nein | `"XY"` | Plane the faces pivot on: XY, XZ, YZ or a datum plane label (usually the bed) |
+| `reversed` | boolean | nein | `false` | false = faces lean inward above the plane, true = outward |
+| `body` | string \| null | nein | `null` | Body label |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "selector": "faces:vertical",
+  "angle": "Draft_Angle",
+  "purpose": "Walls"
+}
+```
+
 ## pattern
 
 [Feature] Mirror features or repeat them linearly/polar/as a raster (instead of drawing geometry several times).
@@ -331,6 +358,33 @@ Beispiel:
   "count": "Sieve_Count_X",
   "length2": "(Sieve_Count_Y - 1) * Sieve_Pitch",
   "count2": "Sieve_Count_Y"
+}
+```
+
+## boolean
+
+[Feature] Fuse, cut or intersect other bodies into this body (PartDesign Boolean). The tool bodies
+move into the boolean and stay editable. Only for bodies of the same printable part; for
+clearances between separate parts use shape_binder plus pocket.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `op` | `fuse` \| `cut` \| `common` | ja | `—` |  |
+| `bodies` | array<string> | ja | `—` | Tool bodies (labels) of the same printable part |
+| `body` | string \| null | nein | `null` | Target body label; empty = the active/only body |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "op": "fuse",
+  "bodies": [
+    "Rib_Insert"
+  ],
+  "body": "Shell_Top",
+  "purpose": "Ribs"
 }
 ```
 

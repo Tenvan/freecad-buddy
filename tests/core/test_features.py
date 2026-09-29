@@ -562,3 +562,81 @@ def test_hole_model_thread_cuts_real_thread_geometry(doc: Any, part: Any) -> Non
     assert modelled["created"][0]["label"] == "Hole_Tapped" and len(part.Tip.Shape.Faces) > 20
     with pytest.raises(CoreError, match="threaded=true"):
         features.hole(tapped.Name, size="M6", model_thread=True, document=doc.Name)
+
+
+def test_draft_tilts_the_side_walls_and_follows_its_parameter(doc: Any, part: Any) -> None:
+    import math
+
+    base = sketch_on(doc)
+    profile(doc, base, "rectangle", width=20, height=20)
+    features.pad(base.Name, length=10, purpose="Base", document=doc.Name)
+    set_params(doc, Draft_Angle=10)
+
+    def narrowing(degrees: float) -> float:  # neutral plane at the bottom, walls lean inward
+        shrink = 2 * math.tan(math.radians(degrees))
+        return (20**3 - (20 - shrink * 10) ** 3) / (3 * shrink)
+
+    result = features.draft(
+        "faces:vertical", angle="Draft_Angle", purpose="Walls", document=doc.Name
+    ).to_dict()
+    assert result["created"][0]["label"] == "Draft_Walls" and len(result["selected"]) == 4
+    assert result["volume"] == pytest.approx(narrowing(10), rel=0.01)
+    assert doc.getObject(result["feature"]["name"]).BuddySelector == "faces:vertical"
+
+    set_params(doc, Draft_Angle=5)  # the draft follows its parameter
+    doc.recompute()
+    assert part.Tip.Shape.Volume == pytest.approx(narrowing(5), rel=0.01)
+
+    documents.undo(document=doc.Name)
+    documents.undo(document=doc.Name)
+    outward = features.draft("faces:vertical", angle=10, reversed=True, document=doc.Name).to_dict()
+    assert outward["volume"] == pytest.approx(_taper_volume(20, 10, 10), rel=0.01)
+
+
+def test_boolean_cut_fuse_and_common_between_bodies(doc: Any, part: Any) -> None:
+    import math
+
+    from buddy_core import body as bodies
+
+    _box(doc)  # 'Part': 60 x 40 x 20
+    bodies.create_body("Tool", document=doc.Name)
+    features.primitive(
+        "cylinder", {"diameter": 20, "height": 40}, offset=-10, body="Tool", document=doc.Name
+    )  # z -10 .. 30: half of it inside the box
+    tool = doc.getObjectsByLabel("Tool")[0]
+    inside = math.pi * 100 * 20
+
+    cut = features.boolean("cut", ["Tool"], body="Part", purpose="Bore", document=doc.Name).to_dict()
+    assert cut["created"][0]["label"] == "Boolean_Bore" and cut["bodies"] == ["Tool"]
+    assert cut["volume"] == pytest.approx(48000 - inside, rel=0.01)
+    assert tool not in doc.RootObjects and part.Tip.Label == "Boolean_Bore"
+
+    documents.undo(document=doc.Name)
+    assert tool in doc.RootObjects and part.Tip.Shape.Volume == pytest.approx(48000)
+    fused = features.boolean("fuse", ["Tool"], body="Part", purpose="Post", document=doc.Name).to_dict()
+    assert fused["volume"] == pytest.approx(48000 + inside, rel=0.01)
+
+    documents.undo(document=doc.Name)
+    common = features.boolean("common", ["Tool"], body="Part", document=doc.Name).to_dict()
+    assert common["volume"] == pytest.approx(inside, rel=0.01)
+
+
+def test_boolean_rejects_itself_empty_bodies_and_assembly_parts(doc: Any, part: Any) -> None:
+    from buddy_core import assembly
+    from buddy_core import body as bodies
+
+    _box(doc)
+    bodies.create_body("Empty", document=doc.Name)
+    with pytest.raises(CoreError, match="itself"):
+        features.boolean("fuse", ["Part"], body="Part", document=doc.Name)
+    with pytest.raises(CoreError, match="no geometry"):
+        features.boolean("fuse", ["Empty"], body="Part", document=doc.Name)
+    with pytest.raises(CoreError, match="op must be"):
+        features.boolean("xor", ["Empty"], body="Part", document=doc.Name)
+
+    bodies.create_body("Tool", document=doc.Name)
+    features.primitive("sphere", {"diameter": 10}, body="Tool", document=doc.Name)
+    assembly.create_assembly(document=doc.Name)  # moves the root bodies into 'Parts'
+    with pytest.raises(CoreError, match="assembly part"):
+        features.boolean("fuse", ["Tool"], body="Part", document=doc.Name)
+    assert part.Tip.Label == "Pad_Base"

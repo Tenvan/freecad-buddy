@@ -7,7 +7,7 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 10/16 Aufgaben (S1: Spikes, `REQUIRED_TYPES`, `loft`; S2: `helix`, `primitive`; S3: `datum`, Taper, `model_thread`), Spec-Stand 1 freigegeben; offen: `boolean`, `draft`, Regelwerk, Doku, GUI-Abnahme; nächste Session S4 |
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 12/16 Aufgaben (S1–S4: alle 6 Tools, Taper, `model_thread`, 57 Tools), Spec-Stand 1 freigegeben; offen: Regelwerk, Doku/Version, Gesamtcheck, GUI-Abnahme AC-11 (Freigabe Ralf); nächste Session S5 |
 
 ## Backlog (nach Domain)
 

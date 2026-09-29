@@ -755,6 +755,29 @@ def shell(
     return _dress_up("PartDesign::Thickness", "Shell", selector, body, purpose, document, configure)
 
 
+def draft(
+    selector: str = "faces:vertical",
+    angle: values.ValueSpec = 3,
+    neutral_plane: str = "XY",
+    reversed: bool = False,
+    body: str | None = None,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Tilt faces (Draft) by ``angle`` degrees, pivoting on ``neutral_plane`` (origin or datum
+    plane, usually the print bed). Faces lean inward above the plane, ``reversed`` leans them
+    outward. The selector is stored and resolved again after parameter changes.
+    """
+
+    def configure(doc: Any, feature: Any) -> None:
+        plane, _sub = plane_support(doc, body_of(feature), neutral_plane, allow_face=False)[0]
+        feature.NeutralPlane = (plane, [""])
+        values.apply(feature, "Angle", values.resolve(doc, angle, "angle"), unit="deg")
+        feature.Reversed = reversed
+
+    return _dress_up("PartDesign::Draft", "Draft", selector, body, purpose, document, configure)
+
+
 def _occurrences(doc: Any, feature: Any, count: values.ValueSpec, what: str = "count") -> None:
     occurrences = values.resolve(doc, count, what)
     if occurrences.number < 2 or occurrences.number != int(occurrences.number):
@@ -951,4 +974,52 @@ def datum(
         "lcs": f"create_sketch(plane='{feature.Label}') puts a sketch on its XY plane.",
     }
     result.hints.append(hints[key])
+    return result
+
+
+def boolean(
+    op: str,
+    bodies: list[str],
+    body: str | None = None,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Fuse, cut or intersect other bodies into this body (PartDesign Boolean).
+
+    The tool bodies move into the boolean of the target body and stay editable there with
+    their own features. Use it only for bodies that belong to the same printable part.
+    """
+    ops = {"fuse": "Fuse", "cut": "Cut", "common": "Common"}
+    if op not in ops:
+        raise validation("op must be fuse, cut or common")
+    if not bodies:
+        raise validation("bodies must not be empty")
+    doc = resolve_document(document)
+    target = resolve_body(doc, body)
+    if not _has_solid(target):
+        raise validation("The target body has no geometry yet")
+    tools = [resolve_body(doc, ref) for ref in bodies]
+    for tool in tools:
+        if tool is target:
+            raise validation("A body cannot be combined with itself")
+        if not _has_solid(tool):
+            raise validation(f"'{tool.Label}' has no geometry")
+        group = tool.getParentGroup()
+        if group is not None and group.Name == "Parts":
+            raise validation(
+                f"'{tool.Label}' is an assembly part; boolean only combines bodies of the same printable part"
+            )
+        if any(parent.TypeId == "PartDesign::Boolean" for parent in tool.InList):
+            raise validation(f"'{tool.Label}' is already used by a boolean")
+    labels = ", ".join(tool.Label for tool in tools)
+    result = ToolResult()
+    with transaction(doc, f"Boolean {op}: {purpose or labels}"):
+        feature = _new(target, "PartDesign::Boolean", "Boolean", purpose, f"{op}_{labels.replace(', ', '_')}")
+        feature.Type = ops[op]
+        feature.addObjects(tools)
+        _finish(doc, feature, result)
+    result.data["bodies"] = [tool.Label for tool in tools]
+    result.hints.append(
+        f"{labels} now live inside '{feature.Label}' of '{target.Label}' and stay editable there."
+    )
     return result

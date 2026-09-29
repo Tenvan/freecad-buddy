@@ -22,14 +22,14 @@ Enthaltene Aufgaben: #4.1, #4.2
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #4.1 | `features.boolean(body, op=fuse\|cut\|common, bodies[], name)` → `PartDesign::Boolean` (`Type`, `Group`); Ablehnung: Body aus Assembly-`Parts`, Body = Ziel, unbekannter Body; `get_model_tree` zeigt das Ergebnis lesbar; Bridge `feature.boolean`; Server-Tool `boolean`; Tests: fuse/cut/common mit Volumenprüfung, Ablehnungen, Undo ein Schritt | Geplant | `core`, `bridge`, `server` | #1.1 | — | AC-04 |
-| #4.2 | `features.draft(body, selector, angle, neutral_plane, pull_direction, reversed, name)` → `PartDesign::Draft` über `_dress_up` mit gespeichertem Selektor; Bridge `feature.draft`; Server-Tool `draft`; Tests: Winkel als Parameter, Re-Resolve nach Parameteränderung, Selektor ohne Treffer → Fehler mit Vorschau | Geplant | `core`, `bridge`, `server` | — | — | AC-05 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #4.1 | `features.boolean(op, bodies, body, purpose)` → `PartDesign::Boolean` mit `Type` und `addObjects`; Ablehnungen: unbekannter `op`, leere Liste, Ziel ohne Geometrie, Body = Ziel, Body ohne Geometrie, Body in Assembly-`Parts`, bereits verbrauchter Body; Ergebnis nennt die Bodies und einen Hinweis, wo sie jetzt liegen; Bridge `feature.boolean`; Server-Tool `boolean`; Beispiel; Tests: cut/fuse/common mit Volumen, Undo stellt den Werkzeug-Body als Root wieder her, Ablehnungen inkl. Assembly | Boolean-Regel in 98 bestätigt | 2026-09-29 |
+| #4.2 | `features.draft(selector, angle, neutral_plane, reversed, body, purpose)` über `_dress_up` (Selektor gespeichert, Re-Resolve über `refresh_references`); Neutral Plane über `plane_support` (Standard XY); `pull_direction` weggelassen, weil die Neutral Plane die Richtung bereits eindeutig macht (Spike); neuer Face-Selektor `faces:vertical` in `select.py` und `SELECTOR_HELP`; Bridge `feature.draft`; Server-Tool `draft`; Beispiel; Test: Narrowing-Formel ±1 %, Parameteränderung folgt, `reversed` = Widening | `faces:vertical` als Selektor (98) | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -43,8 +43,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 2
-> - Nächste Session: S4
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py`, `addon/FreeCADBuddy/buddy_core/select.py`
-> - Architektur-Deltas: Boolean-Regel in `98-architecture-update.md`
-> - Startpunkt: #4.1
+> - Offene Aufgaben: 0
+> - Nächste Session: S5 (Phase 5, #5.1)
+> - Relevante Dateien: `src/buddy_server/design_rules.py`, `docs/architecture.md`, `CHANGELOG.md`
+> - Architektur-Deltas: Boolean-Regel und `faces:vertical` in `98-architecture-update.md` eingetragen
+> - Startpunkt: #5.1
