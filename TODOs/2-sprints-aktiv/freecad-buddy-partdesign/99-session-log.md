@@ -5,6 +5,47 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2 — 2026-09-29 (`helix`, `primitive`)
+
+**Ziel:** #2.2 und #2.3.
+
+**Erledigt:**
+- Spike (Scratchpad): Property-Namen und Enumerationen aller Additive*-Typen und der Helix, Standardlage der Primitive (Box ab Ecke, Zylinder/Kegel/Prisma um die Achse ab 0, Kugel/Ellipsoid/Torus zentriert), `AttachmentOffset`-Expression an VarSet-Parameter folgt Änderungen.
+- #2.2 `make_helix` + `helix` (Core, Bridge, Server, Beispiel), `thread` auf `make_helix` umgestellt (`display`-Import in `thread.py` entfällt).
+- #2.3 `primitive` mit `_PRIMITIVES`, `_primitive_props`, `_attach`, `_ensure_primitive_cuts`; `sketch/model.py`: `_support` → `plane_support` (jetzt von `features` mitgenutzt).
+- `docs/tools.md` regeneriert: 54 Tools.
+
+**Release-Änderungen:**
+- `[feature][core]` `helix`: additive und subtraktive Helix mit `pitch` und `height` oder `turns`, Achse wie bei `revolve`, Kegelwinkel, Linksgewinde.
+- `[feature][core]` `primitive`: acht Primitive additiv/subtraktiv, Lage über Ebene, `center` und `offset`, Maße als Durchmesser/Ausdehnungen und Parameter.
+- `[feature][server]` Tools `helix` und `primitive` im Katalog (Features).
+- `[skip][core]` `thread` intern über `make_helix`, Verhalten unverändert.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- Screw-Volumen einer Helix ist unabhängig von der Steigung (Fläche × Schwerpunktbahn × Windungen); damit ist der Federtest exakt prüfbar.
+- Subtraktive Primitive haben kein `Reversed`; `_ensure_cuts` passt nicht, deshalb eigener Check ohne Umkehr.
+- OCC-Bounding-Boxen sind bei Torus/Ellipsoid zu groß; Lageprüfungen über `CenterOfMass`.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: Primitive-Regel (Referenzpunkt, Ebene, Offset) in 98 bestätigt; `plane_support` als gemeinsamer Ebenen-Resolver für Skizzen und Primitive.
+- Nicht übernehmen: Property-Tabellen aus dem Spike.
+
+**Validierung:**
+- `run-core-tests -k "helix or primitive or thread or loft"`: 31 passed.
+- `uv run poe check`: ruff ✅, ruff format ✅, pyright 0 Fehler ✅, 183 Projekt-Python-Tests ✅, 241 FreeCAD-Python-Tests ✅.
+- Browser-/manuelle Abnahme: keine in S2; GUI-Anteil gesammelt in AC-11 (S5).
+
+**Nächste Session:**
+- S3: #3.1 `datum` (point/line/lcs), #3.2 Achsen über Datum Line + `create_sketch` auf LCS, #3.3 Taper/`up_to_first`, #3.4 `model_thread`.
+- Dateien: `features.py` (`datum_plane`, `_attach`, `_revolve_axis`, `pad`, `pocket`, `hole`), `sketch/model.py` (`plane_support`), `sketch/external.py` (`DATUM_TYPES`), `src/buddy_server/tools/reference.py`.
+- Architektur-Deltas: Datum-Referenzregel in 98 konkretisieren.
+
+---
+
 ## Session 1 — 2026-09-29 (Spikes, Fundament, `loft`)
 
 **Ziel:** #1.1, #1.2, #1.3 und #2.1.

@@ -13,7 +13,7 @@ from typing import Any
 
 import FreeCAD
 
-from buddy_core import display, naming, values
+from buddy_core import features, naming, values
 from buddy_core.body import origin_feature, resolve_body
 from buddy_core.documents import resolve_document
 from buddy_core.errors import validation
@@ -114,16 +114,10 @@ def thread(
         b.dim("DistanceY", flank, START, upper, END, value=half_width, what="HalfWidth")
         b.dim("Distance", flank, value=width, what="Width")
         sketch.Visibility = False
-        helix = target.newObject("PartDesign::SubtractiveHelix", "Thread")
-        helix.Label = naming.make_label(doc, "Thread", label)
-        helix.Profile = sketch
-        helix.ReferenceAxis = (sketch, ["Axis0"])
-        helix.Mode = 0  # pitch - height - angle
-        values.apply(helix, "Pitch", p)
-        values.apply(helix, "Height", height)
-        helix.Angle = 0
-        helix.LeftHanded = left_handed
-        display.apply_selection_style(helix)
+        helix = features.make_helix(
+            target, sketch, (sketch, ["Axis0"]), p, height, None, values.Value(0.0), left_handed,
+            subtractive=True, prefix="Thread", purpose=label, fallback=label,
+        )  # fmt: skip
         target.Tip = helix
         doc.recompute()
         report = analyze(sketch)

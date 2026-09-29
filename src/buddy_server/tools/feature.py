@@ -111,6 +111,71 @@ def register(reg: Registration) -> None:
         )  # fmt: skip
 
     @tool
+    async def helix(
+        sketch: Annotated[
+            str,
+            Field(
+                description="Profile sketch beside the axis, in a plane that contains the axis "
+                "(e.g. a circle at x = Spring_Radius on XZ for a spring around Z)"
+            ),
+        ],
+        pitch: Annotated[Num, Field(description="Axial distance per turn")],
+        height: Annotated[Num | None, Field(description="Length along the axis (or give turns)")] = None,
+        turns: Annotated[Num | None, Field(description="Number of turns (or give height)")] = None,
+        axis: Annotated[
+            str, Field(description="V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis)")
+        ] = "V_Axis",
+        angle: Annotated[Num, Field(description="Taper angle in degrees, 0 = cylindrical")] = 0,
+        left_handed: bool = False,
+        subtractive: Annotated[bool, Field(description="true = cut a helical groove")] = False,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Sweep a profile along a helix (PartDesign AdditiveHelix/SubtractiveHelix): springs, cable
+        guides, custom grooves and threads. For ISO external threads on a cylinder use thread."""
+        return await ctx.call(
+            "helix", "feature.helix", sketch=sketch, pitch=pitch, height=height, turns=turns, axis=axis,
+            angle=angle, left_handed=left_handed, subtractive=subtractive, purpose=purpose,
+            document=document,
+        )  # fmt: skip
+
+    @tool
+    async def primitive(
+        kind: Literal["box", "cylinder", "sphere", "cone", "ellipsoid", "torus", "prism", "wedge"],
+        dims: Annotated[
+            dict[str, float | str],
+            Field(
+                description="box: length, width, height; cylinder: diameter, height; sphere: diameter; "
+                "cone: diameter, top_diameter, height; ellipsoid: length, width, height; "
+                "torus: diameter (centre line), tube_diameter; prism: sides, diameter (circumscribed), "
+                "height; wedge: length, width, height, top_length, top_width. Numbers or parameter names"
+            ),
+        ],
+        plane: Annotated[str, Field(description="XY, XZ, YZ or a datum plane label")] = "XY",
+        center: Annotated[
+            list[float | str] | None,
+            Field(
+                description="[x, y] of the reference point on the plane (default [0, 0]): footprint centre "
+                "of box/wedge, base centre of cylinder/cone/prism, centre of sphere/ellipsoid/torus"
+            ),
+        ] = None,
+        offset: Annotated[
+            Num, Field(description="Distance of the reference point along the plane normal")
+        ] = 0,
+        subtractive: Annotated[bool, Field(description="true = remove the primitive's volume")] = False,
+        purpose: Purpose = None,
+        body: Annotated[str | None, Field(description="Body label; empty = the active/only body")] = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Additive or subtractive primitive (PartDesign Additive*/Subtractive*) placed on an origin or
+        datum plane with parametric sizes. Use it for spheres, tori, ellipsoids, wedges and quick helper
+        volumes; boxes, cylinders and prisms are usually better as a sketch plus pad (editable profile)."""
+        return await ctx.call(
+            "primitive", "feature.primitive", kind=kind, dims=dims, plane=plane, center=center, offset=offset,
+            subtractive=subtractive, purpose=purpose, body=body, document=document,
+        )  # fmt: skip
+
+    @tool
     async def hole(
         sketch: Annotated[
             str, Field(description="Sketch with circles at the hole positions (e.g. hole_rect)")

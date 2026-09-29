@@ -2,7 +2,7 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Feature]` · 12 Tools
+Kategorie-Präfix: `[Feature]` · 14 Tools
 
 | Tool | Zweck |
 |---|---|
@@ -11,6 +11,8 @@ Kategorie-Präfix: `[Feature]` · 12 Tools
 | [`revolve`](#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
 | [`sweep`](#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
 | [`loft`](#loft) | Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels, |
+| [`helix`](#helix) | Sweep a profile along a helix (PartDesign AdditiveHelix/SubtractiveHelix): springs, cable |
+| [`primitive`](#primitive) | Additive or subtractive primitive (PartDesign Additive*/Subtractive*) placed on an origin or |
 | [`hole`](#hole) | Holes (Hole feature) at every circle centre of the sketch. Cuts without cut_* use ISO defaults; |
 | [`fillet`](#fillet) | Round edges. The selector is stored and resolved again after parameter changes. |
 | [`chamfer`](#chamfer) | Chamfer edges (on the bed side better than a fillet - against elephant foot). |
@@ -137,6 +139,66 @@ Beispiel:
     "Sketch_FunnelTop"
   ],
   "purpose": "Funnel"
+}
+```
+
+## helix
+
+[Feature] Sweep a profile along a helix (PartDesign AdditiveHelix/SubtractiveHelix): springs, cable
+guides, custom grooves and threads. For ISO external threads on a cylinder use thread.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `sketch` | string | ja | `—` | Profile sketch beside the axis, in a plane that contains the axis (e.g. a circle at x = Spring_Radius on XZ for a spring around Z) |
+| `pitch` | number \| string | ja | `—` | Axial distance per turn |
+| `height` | number \| string \| null | nein | `null` | Length along the axis (or give turns) |
+| `turns` | number \| string \| null | nein | `null` | Number of turns (or give height) |
+| `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis) |
+| `angle` | number \| string | nein | `0` | Taper angle in degrees, 0 = cylindrical |
+| `left_handed` | boolean | nein | `false` |  |
+| `subtractive` | boolean | nein | `false` | true = cut a helical groove |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "sketch": "Sketch_SpringWire",
+  "pitch": "Spring_Pitch",
+  "height": "Spring_Height",
+  "purpose": "Spring"
+}
+```
+
+## primitive
+
+[Feature] Additive or subtractive primitive (PartDesign Additive*/Subtractive*) placed on an origin or
+datum plane with parametric sizes. Use it for spheres, tori, ellipsoids, wedges and quick helper
+volumes; boxes, cylinders and prisms are usually better as a sketch plus pad (editable profile).
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `kind` | `box` \| `cylinder` \| `sphere` \| `cone` \| `ellipsoid` \| `torus` \| `prism` \| `wedge` | ja | `—` |  |
+| `dims` | object | ja | `—` | box: length, width, height; cylinder: diameter, height; sphere: diameter; cone: diameter, top_diameter, height; ellipsoid: length, width, height; torus: diameter (centre line), tube_diameter; prism: sides, diameter (circumscribed), height; wedge: length, width, height, top_length, top_width. Numbers or parameter names |
+| `plane` | string | nein | `"XY"` | XY, XZ, YZ or a datum plane label |
+| `center` | array<number \| string> \| null | nein | `null` | [x, y] of the reference point on the plane (default [0, 0]): footprint centre of box/wedge, base centre of cylinder/cone/prism, centre of sphere/ellipsoid/torus |
+| `offset` | number \| string | nein | `0` | Distance of the reference point along the plane normal |
+| `subtractive` | boolean | nein | `false` | true = remove the primitive's volume |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `body` | string \| null | nein | `null` | Body label; empty = the active/only body |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "kind": "sphere",
+  "dims": {
+    "diameter": "Knob_Diameter"
+  },
+  "offset": "Knob_Height",
+  "purpose": "Knob"
 }
 ```
 

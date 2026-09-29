@@ -118,6 +118,18 @@ EXAMPLES: dict[str, dict[str, Any]] = {
     "install_addon": {"addon_id": "lattice2"},
     "sweep": {"profile": "Sketch_HandleSection", "path": "Sketch_HandlePath", "purpose": "Handle"},
     "loft": {"sketches": ["Sketch_FunnelBottom", "Sketch_FunnelTop"], "purpose": "Funnel"},
+    "helix": {
+        "sketch": "Sketch_SpringWire",
+        "pitch": "Spring_Pitch",
+        "height": "Spring_Height",
+        "purpose": "Spring",
+    },
+    "primitive": {
+        "kind": "sphere",
+        "dims": {"diameter": "Knob_Diameter"},
+        "offset": "Knob_Height",
+        "purpose": "Knob",
+    },
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
 

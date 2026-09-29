@@ -16,7 +16,7 @@ from buddy_core.body import body_of, origin_feature, resolve_body
 from buddy_core.documents import resolve_document, resolve_object
 from buddy_core.errors import RECOMPUTE_FAILED, CoreError, validation
 from buddy_core.result import ToolResult, describe
-from buddy_core.sketch.model import resolve_sketch
+from buddy_core.sketch.model import plane_support, resolve_sketch
 from buddy_core.transaction import transaction
 
 _VOLUME_TOL = 1e-6
@@ -294,6 +294,241 @@ def loft(
             _ensure_cuts(doc, feature, before, result)
         _finish(doc, feature, result)
     if first_solid:
+        _show_first_base_feature(doc, feature, result)
+    return result
+
+
+def make_helix(
+    body: Any,
+    profile: Any,
+    reference_axis: Any,
+    pitch: values.Value,
+    height: values.Value | None,
+    turns: values.Value | None,
+    angle: values.Value,
+    left_handed: bool,
+    subtractive: bool,
+    prefix: str,
+    purpose: str | None,
+    fallback: str,
+) -> Any:
+    """The one helix feature of the core (used by ``helix`` and ``thread``); no recompute here."""
+    type_id = "PartDesign::SubtractiveHelix" if subtractive else "PartDesign::AdditiveHelix"
+    feature = _new(body, type_id, prefix, purpose, fallback)
+    feature.Profile = profile
+    feature.ReferenceAxis = reference_axis
+    feature.Mode = "pitch-height-angle" if height is not None else "pitch-turns-angle"
+    values.apply(feature, "Pitch", pitch)
+    if height is not None:
+        values.apply(feature, "Height", height)
+    if turns is not None:
+        values.apply(feature, "Turns", turns, unit="")
+    values.apply(feature, "Angle", angle, unit="deg")
+    feature.LeftHanded = left_handed
+    return feature
+
+
+def helix(
+    sketch: str,
+    pitch: values.ValueSpec,
+    height: values.ValueSpec | None = None,
+    turns: values.ValueSpec | None = None,
+    axis: str = "V_Axis",
+    angle: values.ValueSpec = 0,
+    left_handed: bool = False,
+    subtractive: bool = False,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Sweep a profile along a helix (AdditiveHelix, or SubtractiveHelix for a groove): springs,
+    cable guides, custom threads. ``height`` or ``turns`` sets the length, ``angle`` tapers it.
+
+    The profile sits beside the axis in a plane that contains the axis (e.g. a circle at x = radius
+    on XZ for a spring around Z) - that is how a person draws a spring section.
+    """
+    doc = resolve_document(document)
+    profile, body = _profile(doc, sketch)
+    if (height is None) == (turns is None):
+        raise validation("Give either height or turns")
+    pitch_value = values.resolve(doc, pitch, "pitch")
+    if pitch_value.number <= 0:
+        raise validation("pitch must be positive")
+    height_value = values.resolve(doc, height, "height") if height is not None else None
+    turns_value = values.resolve(doc, turns, "turns") if turns is not None else None
+    if (height_value or turns_value or values.Value(1.0)).number <= 0:
+        raise validation("height and turns must be positive")
+    reference = _revolve_axis(profile, body, axis)
+    prefix = "HelixCut" if subtractive else "Helix"
+    result = ToolResult()
+    first = not subtractive and not _has_solid(body)
+    with transaction(doc, f"{prefix}: {purpose or profile.Label}"):
+        before = _volume(body.Tip) if body.Tip else 0.0
+        feature = make_helix(
+            body, profile, reference, pitch_value, height_value, turns_value,
+            values.resolve(doc, angle, "angle"), left_handed, subtractive, prefix, purpose,
+            profile.Label.removeprefix("Sketch_"),
+        )  # fmt: skip
+        profile.Visibility = False
+        if subtractive:
+            _ensure_cuts(doc, feature, before, result)
+        _finish(doc, feature, result)
+    if first:
+        _show_first_base_feature(doc, feature, result)
+    return result
+
+
+# kind -> (PartDesign type suffix, required dims); sizes are diameters/extents like a person thinks
+_PRIMITIVES: dict[str, tuple[str, tuple[str, ...]]] = {
+    "box": ("Box", ("length", "width", "height")),
+    "cylinder": ("Cylinder", ("diameter", "height")),
+    "sphere": ("Sphere", ("diameter",)),
+    "cone": ("Cone", ("diameter", "top_diameter", "height")),
+    "ellipsoid": ("Ellipsoid", ("length", "width", "height")),
+    "torus": ("Torus", ("diameter", "tube_diameter")),
+    "prism": ("Prism", ("sides", "diameter", "height")),
+    "wedge": ("Wedge", ("length", "width", "height", "top_length", "top_width")),
+}
+
+
+def _primitive_props(
+    doc: Any, kind: str, dims: dict[str, values.ValueSpec]
+) -> list[tuple[str, values.Value, str]]:
+    """(property, value, unit) per kind. Unit '' = plain number, 'int' = integer property."""
+
+    def full(key: str) -> values.Value:
+        return values.resolve(doc, dims[key], key)
+
+    def half(key: str) -> values.Value:
+        return values.resolve(doc, f"({dims[key]}) / 2", key)
+
+    def neg_half(key: str) -> values.Value:
+        return values.resolve(doc, f"-({dims[key]}) / 2", key)
+
+    mm = "mm"
+    if kind == "box":
+        return [("Length", full("length"), mm), ("Width", full("width"), mm), ("Height", full("height"), mm)]
+    if kind == "cylinder":
+        return [("Radius", half("diameter"), mm), ("Height", full("height"), mm)]
+    if kind == "sphere":
+        return [("Radius", half("diameter"), mm)]
+    if kind == "cone":
+        return [
+            ("Radius1", half("diameter"), mm),
+            ("Radius2", half("top_diameter"), mm),
+            ("Height", full("height"), mm),
+        ]
+    if kind == "ellipsoid":  # Radius1 = Z, Radius2 = X, Radius3 = Y
+        return [
+            ("Radius1", half("height"), mm),
+            ("Radius2", half("length"), mm),
+            ("Radius3", half("width"), mm),
+        ]
+    if kind == "torus":
+        return [("Radius1", half("diameter"), mm), ("Radius2", half("tube_diameter"), mm)]
+    if kind == "prism":
+        return [
+            ("Polygon", full("sides"), "int"),
+            ("Circumradius", half("diameter"), mm),
+            ("Height", full("height"), mm),
+        ]
+    # wedge: X = length, Z = width, Y = height; the attachment turns Y onto the plane normal
+    return [
+        ("Xmin", neg_half("length"), mm), ("Xmax", half("length"), mm),
+        ("Zmin", neg_half("width"), mm), ("Zmax", half("width"), mm),
+        ("Ymin", values.Value(0.0), mm), ("Ymax", full("height"), mm),
+        ("X2min", neg_half("top_length"), mm), ("X2max", half("top_length"), mm),
+        ("Z2min", neg_half("top_width"), mm), ("Z2max", half("top_width"), mm),
+    ]  # fmt: skip
+
+
+def _attach(
+    doc: Any,
+    feature: Any,
+    body: Any,
+    plane: str,
+    x: values.ValueSpec,
+    y: values.ValueSpec,
+    z: values.ValueSpec,
+    rotation: Any,
+) -> None:
+    """Attach a feature to an origin/datum plane with a parametric offset (like datum_plane)."""
+    support, _warning = plane_support(doc, body, plane, allow_face=False)
+    feature.AttachmentSupport = [support]
+    feature.MapMode = "FlatFace"
+    offsets = [
+        values.resolve(doc, spec, what) for spec, what in ((x, "center x"), (y, "center y"), (z, "offset"))
+    ]
+    feature.AttachmentOffset = FreeCAD.Placement(FreeCAD.Vector(*(v.number for v in offsets)), rotation)
+    for axis_name, value in zip("xyz", offsets, strict=True):
+        if value.expression:
+            feature.setExpression(f".AttachmentOffset.Base.{axis_name}", value.expression)
+
+
+def _ensure_primitive_cuts(doc: Any, feature: Any, volume_before: float) -> None:
+    doc.recompute()
+    if feature.isValid() and volume_before - _volume(feature) > _VOLUME_TOL:
+        return
+    raise CoreError(
+        RECOMPUTE_FAILED,
+        f"'{feature.Label}' removes no material",
+        {"hints": ["Move the primitive into the solid: check plane, center and offset."]},
+    )
+
+
+def primitive(
+    kind: str,
+    dims: dict[str, values.ValueSpec],
+    plane: str = "XY",
+    center: list[values.ValueSpec] | None = None,
+    offset: values.ValueSpec = 0,
+    subtractive: bool = False,
+    purpose: str | None = None,
+    body: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Additive or subtractive primitive (box, cylinder, sphere, cone, ellipsoid, torus, prism,
+    wedge) on an origin or datum plane. ``center`` [x, y] places its reference point on the plane
+    (box, wedge: footprint centre; cylinder, cone, prism: base centre; sphere, ellipsoid, torus:
+    centre), ``offset`` moves it along the plane normal. Sizes are diameters and extents, numbers
+    or parameters, so the primitive stays editable.
+    """
+    key = kind.lower()
+    if key not in _PRIMITIVES:
+        raise validation(f"kind must be one of {', '.join(_PRIMITIVES)}")
+    type_name, required = _PRIMITIVES[key]
+    missing = [name for name in required if name not in dims]
+    if missing:
+        raise validation(f"{key} needs dims {', '.join(required)} (missing: {', '.join(missing)})")
+    position = center if center is not None else [0, 0]
+    if len(position) != 2:
+        raise validation("center needs [x, y] on the plane")
+    doc = resolve_document(document)
+    target = resolve_body(doc, body)
+    props = _primitive_props(doc, key, dims)
+    x, y = position
+    if key == "box":  # FreeCAD's box starts at its corner; place it by the footprint centre
+        x, y = f"({x}) - ({dims['length']}) / 2", f"({y}) - ({dims['width']}) / 2"
+    rotation = FreeCAD.Rotation(FreeCAD.Vector(1, 0, 0), 90) if key == "wedge" else FreeCAD.Rotation()
+    type_id = f"PartDesign::{'Subtractive' if subtractive else 'Additive'}{type_name}"
+    prefix = f"{type_name}Cut" if subtractive else type_name
+    first = not subtractive and not _has_solid(target)
+    result = ToolResult()
+    with transaction(doc, f"{prefix}: {purpose or key}"):
+        before = _volume(target.Tip) if target.Tip else 0.0
+        feature = _new(
+            target, type_id, prefix, purpose, "Base" if first else ("Cut" if subtractive else "Add")
+        )
+        for prop, value, unit in props:
+            if unit == "int" and not value.expression:
+                feature.setExpression(prop, None)
+                setattr(feature, prop, int(value.number))
+            else:
+                values.apply(feature, prop, value, unit="" if unit == "int" else unit)
+        _attach(doc, feature, target, plane, x, y, offset, rotation)
+        if subtractive:
+            _ensure_primitive_cuts(doc, feature, before)
+        _finish(doc, feature, result)
+    if first:
         _show_first_base_feature(doc, feature, result)
     return result
 

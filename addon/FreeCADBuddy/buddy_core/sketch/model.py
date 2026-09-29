@@ -43,7 +43,7 @@ def create_sketch(
     with transaction(doc, f"Create sketch: {purpose or plane}"):
         sketch = target_body.newObject("Sketcher::SketchObject", "Sketch")
         sketch.Label = naming.make_label(doc, "Sketch", purpose or plane)
-        support, face_warning = _support(doc, target_body, plane, allow_face_attachment)
+        support, face_warning = plane_support(doc, target_body, plane, allow_face_attachment)
         sketch.AttachmentSupport = [support]
         sketch.MapMode = "FlatFace"
         sketch.MapReversed = reversed
@@ -61,7 +61,7 @@ def create_sketch(
     return result
 
 
-def _support(doc: Any, body: Any, plane: str, allow_face: bool) -> tuple[tuple[Any, str], str | None]:
+def plane_support(doc: Any, body: Any, plane: str, allow_face: bool) -> tuple[tuple[Any, str], str | None]:
     if plane.upper() in ORIGIN_PLANES:
         return (origin_feature(body, plane.upper()), ""), None
     if plane.lower().startswith("face:"):

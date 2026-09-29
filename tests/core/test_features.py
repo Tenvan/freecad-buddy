@@ -328,3 +328,124 @@ def test_loft_rejects_one_sketch_and_sketches_on_the_same_plane(doc: Any, part: 
     with pytest.raises(CoreError, match="same plane"):
         features.loft([first.Name, second.Name], document=doc.Name)
     assert part.Tip is None
+
+
+def test_helix_makes_a_spring_whose_volume_follows_the_pitch(doc: Any, part: Any) -> None:
+    import math
+
+    set_params(doc, Spring_Pitch=4, Spring_Height=30, Wire_Diameter=2, Spring_Radius=10)
+    wire = sketch_on(doc, plane="XZ", purpose="SpringWire")
+    profile(doc, wire, "circle", diameter="Wire_Diameter", center=["Spring_Radius", 0])
+
+    result = features.helix(
+        wire.Name, pitch="Spring_Pitch", height="Spring_Height", purpose="Spring", document=doc.Name
+    ).to_dict()
+
+    def screw_volume(turns: float) -> float:  # area x centroid path (Pappus), independent of pitch
+        return math.pi * 1**2 * 2 * math.pi * 10 * turns
+
+    helix = doc.getObject(result["feature"]["name"])
+    assert result["created"][0]["label"] == "Helix_Spring" and helix.Mode == "pitch-height-angle"
+    assert result["volume"] == pytest.approx(screw_volume(30 / 4), rel=0.02)
+
+    set_params(doc, Spring_Pitch=5)  # fewer turns on the same height
+    doc.recompute()
+    assert part.Tip.Shape.Volume == pytest.approx(screw_volume(30 / 5), rel=0.02)
+
+
+def test_subtractive_helix_cuts_a_groove_by_turns(doc: Any, part: Any) -> None:
+    pin = sketch_on(doc, purpose="Pin")
+    profile(doc, pin, "circle", diameter=20)
+    features.pad(pin.Name, length=30, purpose="Pin", document=doc.Name)
+    before = part.Tip.Shape.Volume
+    groove = sketch_on(doc, plane="XZ", purpose="Groove")
+    profile(doc, groove, "rectangle", width=2, height=2, center=[10, 3])
+
+    result = features.helix(
+        groove.Name, pitch=5, turns=4, subtractive=True, purpose="Groove", document=doc.Name
+    ).to_dict()
+
+    assert result["created"][0]["label"] == "HelixCut_Groove"
+    assert 0 < before - result["volume"] < before * 0.2
+    assert doc.getObject(result["feature"]["name"]).Mode == "pitch-turns-angle"
+
+
+def test_helix_rejects_bad_pitch_and_missing_length(doc: Any, part: Any) -> None:
+    wire = sketch_on(doc, plane="XZ", purpose="Wire")
+    profile(doc, wire, "circle", diameter=2, center=[10, 0])
+
+    with pytest.raises(CoreError, match="either height or turns"):
+        features.helix(wire.Name, pitch=4, document=doc.Name)
+    with pytest.raises(CoreError, match="either height or turns"):
+        features.helix(wire.Name, pitch=4, height=10, turns=2, document=doc.Name)
+    with pytest.raises(CoreError, match="pitch must be positive"):
+        features.helix(wire.Name, pitch=0, height=10, document=doc.Name)
+    assert part.Tip is None
+
+
+_PRIMITIVE_CASES = {
+    "box": ({"length": 20, "width": 10, "height": 5}, 20 * 10 * 5),
+    "cylinder": ({"diameter": 10, "height": 8}, 3.141592653589793 * 25 * 8),
+    "sphere": ({"diameter": 10}, 4 / 3 * 3.141592653589793 * 125),
+    "cone": ({"diameter": 10, "top_diameter": 4, "height": 9}, 3.141592653589793 * 3 * (25 + 10 + 4)),
+    "ellipsoid": ({"length": 20, "width": 10, "height": 6}, 4 / 3 * 3.141592653589793 * 10 * 5 * 3),
+    "torus": ({"diameter": 20, "tube_diameter": 4}, 2 * 3.141592653589793**2 * 10 * 4),
+    "prism": ({"sides": 6, "diameter": 10, "height": 7}, 3 * 25 * 0.8660254037844386 * 7),
+    "wedge": ({"length": 20, "width": 10, "height": 6, "top_length": 10, "top_width": 10}, 900.0),
+}
+
+
+@pytest.mark.parametrize(("kind", "dims", "expected"), [(k, *v) for k, v in _PRIMITIVE_CASES.items()])
+def test_primitives_have_the_textbook_volume(
+    doc: Any, part: Any, kind: str, dims: dict[str, Any], expected: float
+) -> None:
+    result = features.primitive(kind, dims, purpose="Test", document=doc.Name).to_dict()
+
+    assert result["volume"] == pytest.approx(expected, rel=0.01)
+    assert result["created"][0]["label"].endswith("_Test") and part.Tip.Shape.isValid()
+
+
+def test_subtractive_primitive_cuts_and_follows_its_parameter(doc: Any, part: Any) -> None:
+    import math
+
+    _box(doc)  # 60 x 40 x 20, symmetric about the origin
+    set_params(doc, Bore_Diameter=10)
+
+    result = features.primitive(
+        "cylinder", {"diameter": "Bore_Diameter", "height": 20}, subtractive=True, purpose="Bore",
+        document=doc.Name,
+    ).to_dict()  # fmt: skip
+
+    assert result["created"][0]["label"] == "CylinderCut_Bore"
+    assert result["volume"] == pytest.approx(48000 - math.pi * 25 * 20, rel=0.01)
+    set_params(doc, Bore_Diameter=20)
+    doc.recompute()
+    assert part.Tip.Shape.Volume == pytest.approx(48000 - math.pi * 100 * 20, rel=0.01)
+
+
+def test_primitive_center_and_datum_plane_offset_are_parametric(doc: Any, part: Any) -> None:
+    set_params(doc, Knob_Diameter=12, Knob_Height=25)
+    plane = features.datum_plane(offset="Knob_Height", purpose="KnobTop", document=doc.Name).to_dict()
+
+    result = features.primitive(
+        "sphere", {"diameter": "Knob_Diameter"}, plane=plane["plane"]["label"], center=[5, -3],
+        purpose="Knob", document=doc.Name,
+    ).to_dict()  # fmt: skip
+
+    sphere = doc.getObject(result["feature"]["name"])
+    centre = sphere.Shape.Solids[0].CenterOfMass
+    assert (centre.x, centre.y, centre.z) == pytest.approx((5, -3, 25), abs=1e-3)
+    set_params(doc, Knob_Height=40)
+    doc.recompute()
+    assert sphere.Shape.Solids[0].CenterOfMass.z == pytest.approx(40, abs=1e-3)
+
+
+def test_primitive_rejects_unknown_kind_missing_dims_and_empty_cut(doc: Any, part: Any) -> None:
+    with pytest.raises(CoreError, match="kind must be"):
+        features.primitive("pyramid", {}, document=doc.Name)
+    with pytest.raises(CoreError, match="missing"):
+        features.primitive("box", {"length": 1}, document=doc.Name)
+    _box(doc)
+    with pytest.raises(CoreError, match="removes no material"):
+        features.primitive("sphere", {"diameter": 5}, offset=100, subtractive=True, document=doc.Name)
+    assert part.Tip.Label == "Pad_Base"

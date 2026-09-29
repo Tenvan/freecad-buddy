@@ -73,14 +73,14 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 | Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
 |---|---|---|---|---|
 | AC-01 | Trichter per `loft`, Höhe folgt Parameter, subtraktiv schneidet | #2.1 / P2 | Headless-Core-Test | **erfüllt** (S1: `test_loft_makes_a_funnel_that_follows_its_parameters`, `test_subtractive_loft_cuts_a_tapered_pocket`, `test_loft_rejects_one_sketch_and_sketches_on_the_same_plane`) |
-| AC-02 | Feder und Nut per `helix`, `thread` unverändert | #2.2 / P2 | Headless-Core-Test + bestehende `thread`-Tests | offen |
-| AC-03 | 8 Primitive additiv und subtraktiv, Volumen nach Formel ±1 % | #2.3 / P2 | Headless-Core-Test | offen |
+| AC-02 | Feder und Nut per `helix`, `thread` unverändert | #2.2 / P2 | Headless-Core-Test + bestehende `thread`-Tests | **erfüllt** (S2: `test_helix_makes_a_spring_whose_volume_follows_the_pitch`, `test_subtractive_helix_cuts_a_groove_by_turns`, `test_helix_rejects_bad_pitch_and_missing_length`; `thread`-Tests grün über `make_helix`) |
+| AC-03 | 8 Primitive additiv und subtraktiv, Volumen nach Formel ±1 % | #2.3 / P2 | Headless-Core-Test | **erfüllt** (S2: `test_primitives_have_the_textbook_volume` × 8, `test_subtractive_primitive_cuts_and_follows_its_parameter`, `test_primitive_center_and_datum_plane_offset_are_parametric`, `test_primitive_rejects_unknown_kind_missing_dims_and_empty_cut`) |
 | AC-04 | `boolean` fuse/cut/common, Ablehnungen | #1.1, #4.1 / P1, P4 | Spike + Headless-Core-Test | Spike erfüllt (S1, OF-02); Umsetzung #4.1 offen |
 | AC-05 | `draft` mit Selektor und Re-Resolve | #4.2 / P4 | Headless-Core-Test | offen |
 | AC-06 | `datum` point/line/lcs; Revolve und Polar um Datum Line | #3.1, #3.2 / P3 | Headless-Core-Test Achsvergleich | offen |
 | AC-07 | Taper und `up_to_first` in `pad`/`pocket` | #3.3 / P3 | Headless-Core-Test Volumen | offen |
 | AC-08 | `hole` mit `model_thread`, `unsupported` ohne Eigenschaft | #1.2, #3.4 / P1, P3 | Spike + Headless-Core-Test | Spike erfüllt (S1, OF-03); Umsetzung #3.4 offen |
-| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | teilweise: `REQUIRED_TYPES` um 25 Typen erweitert, `test_all_required_types_are_available` grün, `docs/tools.md` mit 52 Tools regeneriert (S1); Regelwerk #5.1 offen |
+| AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | teilweise: `REQUIRED_TYPES` um 25 Typen erweitert, `test_all_required_types_are_available` grün, `docs/tools.md` regeneriert (54 Tools nach S2); Regelwerk #5.1 offen |
 | AC-10 | Undo-Schritt, Labels, Sprache, `poe check` grün | #5.3 / P5 | `uv run poe check` | offen |
 | AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | offen |
 
@@ -96,10 +96,12 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2026-09-29 | `boolean` mit fuse/cut/common; die Werkzeug-Bodies wandern in die Boolean-Gruppe des Ziel-Bodys, Bodies aus Assembly-`Parts` werden abgelehnt (Spike S1, OF-02) | FreeCAD-Verhalten ist stabil, Undo/Rollback sauber; `get_model_tree` zeigt die Bodies weiter | core, server |
 | 2026-09-29 | `model_thread` wird umgesetzt, das Regelwerk beschränkt es auf einzelne Gewinde (Spike S1, OF-03) | ≈ 1,5 s und 60–90 Flächen je Loch; in Rastern zu teuer | core, server |
 | 2026-09-29 | `loft` verlangt eigene Ebenen je Skizze und prüft das vor der Transaktion (`validation`, kein Recompute-Fehler) | Verständlicher Fehler statt OCC-Meldung | core |
+| 2026-09-29 | Primitive werden über ihren Referenzpunkt (Fußabdruck-Mitte bei Box/Wedge, Basis-Mitte bei Zylinder/Kegel/Prisma, Mittelpunkt bei Kugel/Ellipsoid/Torus) auf einer Ursprungs- oder Datum-Ebene plus `offset` gesetzt; Maße als Durchmesser/Ausdehnungen; Wedge-Höhe zeigt in die Ebenennormale (Attachment um 90° gedreht) | So denkt ein Mensch; `AttachmentOffset` per Expression hält alles parametrisch | core |
+| 2026-09-29 | `thread` erzeugt seine SubtractiveHelix über `features.make_helix` | Genau eine Helix-Implementierung (Entscheidung aus der Planung umgesetzt) | core |
 
 ## Gesamtfortschritt
 
-[███░░░░░░░] 25% — 4 von 16 Aufgaben erledigt
+[████░░░░░░] 38% — 6 von 16 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
@@ -110,7 +112,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | Phase | Datei | Architektur-Relevanz | Offen | Erledigt | Fortschritt |
 |---|---|---|---|---|---|
 | 1 — Spikes & Fundament | [01-spikes-fundament.md](01-spikes-fundament.md) | `core` | 0 | 3 | [██████████] 100% |
-| 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 2 | 1 | [███░░░░░░░] 33% |
+| 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 0 | 3 | [██████████] 100% |
 | 3 — Datum & Bestandserweiterungen | [03-referenzen-bestand.md](03-referenzen-bestand.md) | `mehrere` | 4 | 0 | [░░░░░░░░░░] 0% |
 | 4 — Boolean & Draft | [04-boolean-draft.md](04-boolean-draft.md) | `mehrere` | 2 | 0 | [░░░░░░░░░░] 0% |
 | 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 4 | 0 | [░░░░░░░░░░] 0% |
@@ -120,8 +122,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
 | S1 | Phase 1 + #2.1 | Spikes OF-02/OF-03, `REQUIRED_TYPES`, `loft` | ✅ Erledigt (2026-09-29) |
-| **→ S2** | Phase 2 | `helix` mit `thread`-Umstellung, `primitive` (inkl. Volumenhelfer aus #1.3) | **Nächste** |
-| S3 | Phase 3 | `datum`, Achsen über Datum Line, Taper/`up_to_first`, `model_thread` | Geplant |
+| S2 | Phase 2 | `helix` mit `thread`-Umstellung, `primitive` | ✅ Erledigt (2026-09-29) |
+| **→ S3** | Phase 3 | `datum`, Achsen über Datum Line, Taper/`up_to_first`, `model_thread` | **Nächste** |
 | S4 | Phase 4 | `boolean`, `draft` | Geplant |
 | S5 | Phase 5 | Regelwerk, Doku, Version, `poe check`, GUI-Abnahme AC-11 | Geplant |
 

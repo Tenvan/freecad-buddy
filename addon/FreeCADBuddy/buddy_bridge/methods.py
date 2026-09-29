@@ -120,6 +120,8 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.revolve": (features.revolve, {}),
     "feature.sweep": (features.sweep, {}),
     "feature.loft": (features.loft, {}),
+    "feature.helix": (features.helix, {}),
+    "feature.primitive": (features.primitive, {}),
     "feature.hole": (features.hole, {}),
     "feature.fillet": (features.fillet, {}),
     "feature.chamfer": (features.chamfer, {}),

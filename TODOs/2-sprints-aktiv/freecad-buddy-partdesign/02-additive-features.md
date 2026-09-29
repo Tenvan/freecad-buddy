@@ -32,13 +32,14 @@ Enthaltene Aufgaben: #2.2, #2.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #2.2 | `features.helix(body, sketch, axis, pitch, height\|turns, angle, left_handed, subtractive, name)` → `PartDesign::AdditiveHelix`/`SubtractiveHelix`; `thread.py` ruft den gemeinsamen Kern; Bridge `feature.helix`; Server-Tool `helix`; Tests: Feder (Windungen aus pitch/height), Nut, Achse als Datum Line (nach #3.1 nachziehen), Ablehnung pitch ≤ 0, bestehende `thread`-Tests | Geplant | `core`, `bridge`, `server` | #1.3 | — | AC-02 |
-| #2.3 | `features.primitive(body, kind, dims{}, plane, center, offset, subtractive, name)` mit Tabelle `kind → (Additive*, Subtractive*)` für box, cylinder, sphere, cone, torus, ellipsoid, prism, wedge; Maße als Parameter/Ausdruck; Lage per Attachment an Ursprungs-/Datum-Ebene; Bridge `feature.primitive`; Server-Tool `primitive`; Tests: 8 × additiv mit Volumenformel ±1 %, 8 × subtraktiv aus einem Pad, Warnung wenn nichts geschnitten | Geplant | `core`, `bridge`, `server` | #1.3 | — | AC-03 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
+| #2.2 | `features.make_helix` (gemeinsamer Kern) und `features.helix(sketch, pitch, height\|turns, axis, angle, left_handed, subtractive)` → `AdditiveHelix`/`SubtractiveHelix`, Modus `pitch-height-angle` bzw. `pitch-turns-angle`, Achse wie `revolve` (Skizzen- oder Body-Achse; Datum Line folgt in #3.2); `thread.py` nutzt `make_helix`; Bridge `feature.helix`; Server-Tool `helix`; Tests: Feder (Volumen nach Pappus, folgt `Spring_Pitch`), Nut über `turns`, Ablehnungen; `thread`-Tests unverändert grün | keins | 2026-09-29 |
+| #2.3 | `features.primitive(kind, dims, plane, center, offset, subtractive, body)` mit Tabelle `_PRIMITIVES` (8 Arten, Additive*/Subtractive*), Maße als Durchmesser/Ausdehnungen über `values.resolve` (Radius = Durchmesser/2 als Expression), Lage per `_attach` an Ursprungs-/Datum-Ebene mit `AttachmentOffset`-Expressions, Box um die Fußabdruck-Mitte, Wedge um 90° gedreht; `_ensure_primitive_cuts` (Primitive haben kein `Reversed`); Bridge `feature.primitive`; Server-Tool `primitive`; `plane_support` aus `sketch/model.py` (vorher privat) wiederverwendet; Tests: 8 Volumenformeln ±1 %, subtraktiver Zylinder folgt Parameter, Kugel auf Datum-Ebene mit `center`/`offset` parametrisch, Ablehnungen. Volumenhelfer liegen als `_PRIMITIVE_CASES` im Testmodul (statt conftest, nur dort gebraucht) | Primitive-Regel in 98 | 2026-09-29 |
 | #2.1 | `features.loft(sketches, subtractive, ruled, closed, purpose)` → `AdditiveLoft`/`SubtractiveLoft` mit `Profile` + `Sections`; Vorprüfung: ≥ 2 Skizzen, gleicher Body, geschlossene Profile, keine zwei Skizzen auf derselben Ebene (`validation` mit Hinweis auf `datum_plane`); Bridge `feature.loft`; Server-Tool `loft`; Beispiel in `gen_tool_docs`, `docs/tools.md` regeneriert (52 Tools). Tests: Trichter (Kegelstumpf-Volumen ±1 %, folgt `Funnel_Height`), subtraktiver Kegelstumpf aus dem Quader, Ablehnungen | keins | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
@@ -53,8 +54,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 2
-> - Nächste Session: S2
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/thread.py`, `addon/FreeCADBuddy/buddy_core/features.py` (`loft` als frisches Muster), `src/buddy_server/tools/feature.py`, `tools/gen_tool_docs.py` (Beispiele)
-> - Architektur-Deltas: Primitive-Regel in `98-architecture-update.md`
-> - Startpunkt: #2.2
+> - Offene Aufgaben: 0
+> - Nächste Session: S3 (Phase 3, #3.1)
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py` (`datum_plane`, `_attach`, `_revolve_axis`), `src/buddy_server/tools/reference.py`
+> - Architektur-Deltas: Primitive-Regel in `98-architecture-update.md` (Status offen bis #5.2)
+> - Startpunkt: #3.1
