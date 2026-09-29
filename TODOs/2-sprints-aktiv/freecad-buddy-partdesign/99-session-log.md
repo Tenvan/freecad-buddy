@@ -5,6 +5,49 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 3 — 2026-09-29 (`datum`, Achsen, Taper, `model_thread`)
+
+**Ziel:** #3.1 bis #3.4.
+
+**Erledigt:**
+- Spike (Scratchpad): Attachment-Modi für Point (`ObjectOrigin`), Line (`ObjectZ` = Ebenennormale), LCS (`ObjectXY`); Skizze auf LCS; Revolution, PolarPattern und Helix akzeptieren `(DatumLine, [""])`; Pad/Pocket-Typen `UpToFirst` und `TaperAngle`/`TaperAngle2`; LCS hat in 26.3 keine Kind-Ebenen.
+- #3.1 `datum` (Core, Bridge, Server, Beispiel); #3.2 `_axis_reference`, `plane_support` mit Map-Mode und LCS; #3.3 Taper und `up_to_first`; #3.4 `model_thread`.
+- `docs/tools.md` regeneriert: 55 Tools. Deutsche Beschreibung im `pattern`-Tool korrigiert.
+- Nebenbei (kein Sprint-Umfang): Backlog-Ticket [`design-stream-storepoints.md`](../../1-backlog/freecad-buddy/design-stream-storepoints.md) aus Ralfs Idee im Chat angelegt.
+
+**Release-Änderungen:**
+- `[feature][core]` `datum`: Datum Point, Datum Line und LCS parametrisch; Datum Line als Achse für `revolve`, `helix`, `pattern(polar)`; LCS als Skizzenebene.
+- `[feature][core]` `pad`/`pocket`: `taper` und Modus `up_to_first`.
+- `[feature][core]` `hole`: `model_thread` schneidet echte Gewindegeometrie.
+- `[feature][server]` Tool `datum` (Referenzen); neue Parameter in `pad`, `pocket`, `hole`.
+- `[bugfix][server]` `pattern`: Beschreibung `polar: Gesamtwinkel` war deutsch.
+- `[skip][todos]` Backlog-Ticket Design-Stream.
+
+**Blocker:**
+- keine
+
+**Erkenntnisse:**
+- `PartDesign::Point` kennt `ObjectXY` nicht (Recompute-Fehler „not implemented“), `ObjectOrigin` funktioniert; die `MapMode`-Enumeration ist je Datum-Typ verschieden.
+- Positiver `TaperAngle` macht das Pad zum Ende hin weiter; die Pyramidenstumpf-Formel mit Wachstum passt auf < 1 %.
+- Ein Loft/Helix/Torus in Tests am besten über exakte Volumenformeln prüfen, OCC-Bounding-Boxen sind zu grob.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: Datum-Referenzregel und `plane_support` als einziger Ebenen-Resolver in 98.
+- Nicht übernehmen: Attachment-Modus-Tabellen.
+
+**Validierung:**
+- `run-core-tests -k "datum or taper or up_to_first or model_thread or lcs"`: 8 passed; `pytest tests/tools tests/server/test_language.py`: 98 passed.
+- `uv run poe check`: ruff ✅, ruff format ✅, pyright 0 Fehler ✅, 183 Projekt-Python-Tests ✅, 246 FreeCAD-Python-Tests ✅.
+- Browser-/manuelle Abnahme: keine in S3.
+
+**Nächste Session:**
+- S4: #4.1 `boolean` (Spike-Ergebnis OF-02 umsetzen), #4.2 `draft`.
+- Dateien: `features.py` (`_dress_up`, `fillet`), `select.py` (`SELECTOR_PROPERTY`), `assembly.py` (`Parts`-Gruppe).
+- Architektur-Deltas: Boolean-Regel in 98 bestätigen.
+
+---
+
 ## Session 2 — 2026-09-29 (`helix`, `primitive`)
 
 **Ziel:** #2.2 und #2.3.

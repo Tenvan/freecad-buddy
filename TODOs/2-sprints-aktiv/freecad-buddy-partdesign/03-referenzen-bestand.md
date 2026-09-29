@@ -22,16 +22,16 @@ Enthaltene Aufgaben: #3.1, #3.2, #3.3, #3.4
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #3.1 | `features.datum(body, kind=point\|line\|lcs, base, offset[], angle, name)` → `PartDesign::Point`/`Line`/`CoordinateSystem` mit `AttachmentOffset` aus Parametern; Bridge `reference.datum`; Server-Tool `datum` in `tools/reference.py`; Tests: Lage folgt Parametern, `get_model_tree` zeigt die Datums | Geplant | `core`, `bridge`, `server` | — | — | AC-06 |
-| #3.2 | `_revolve_axis`, `pattern kind=polar` und `helix` akzeptieren eine Datum Line als `axis`; `create_sketch` akzeptiert einen LCS als Basis; Tests: Revolve/Polar um Datum Line auf der Body-Achse = Ergebnis um Body-Achse (Volumen, Bounding-Box) | Geplant | `core` | #3.1 | — | AC-06 |
-| #3.3 | `pad`/`pocket`: Parameter `taper` (→ `TaperAngle`, bei `two_sides` auch `TaperAngle2`) und Modus `up_to_first`; Tests: Volumen eines getaperten Pads gegen Pyramidenstumpf-Formel, `up_to_first` stoppt an der nächsten Fläche | Geplant | `core`, `server` | — | — | AC-07 |
-| #3.4 | `hole`: Option `model_thread` (nur mit `threaded=true`) → `ModelThread`; ohne Eigenschaft im Build `unsupported`; Regel: ab M5 sinnvoll; Tests: Volumen kleiner als ohne, Solid gültig, Fehlerpfade | Geplant | `core`, `server` | #1.2 | — | AC-08 |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| — | — | — | — |
+| #3.1 | `features.datum(kind, base, offset[x,y,z], angle, rotation_axis, body, purpose)` → `PartDesign::Point` (`ObjectOrigin`), `Line` (`ObjectZ`, entlang der Ebenennormalen), `CoordinateSystem` (`ObjectXY`) über `_attach` mit `AttachmentOffset`-Expressions und Winkel-Expression; Labels `DatumPoint_`, `DatumLine_`, `LCS_`; Bridge `feature.datum`; Server-Tool `datum` (Gruppe Referenzen); Beispiel; Test: Lage folgt Parametern | Datum-Referenzregel in 98 | 2026-09-29 |
+| #3.2 | `_axis_reference(body, axis)`: X/Y/Z oder Datum Line desselben Bodys; genutzt von `_revolve_axis` (damit `revolve` und `helix`) und `pattern kind=polar`; `plane_support` liefert jetzt `(support, warning, map_mode)` und akzeptiert einen LCS (`ObjectXY`), `create_sketch` und `_attach` nutzen den Modus; Tests: Torus um Datum Line exakt, Helix und Polar um dieselbe Line, Skizze auf LCS, Ablehnung einer Skizze als Achse | `plane_support` als gemeinsamer Ebenen-Resolver (98) | 2026-09-29 |
+| #3.3 | `pad`/`pocket`: `taper` (→ `TaperAngle`, bei `two_sides` auch `TaperAngle2`, Helfer `_apply_taper`) und Modus `up_to_first`; Server-Literale und Beschreibungen erweitert (positiver Taper = weiter zum Ende); Tests: Pad-Volumen gegen Pyramidenstumpf-Formel ±1 %, Boss mit `up_to_first` von einer Datum-Ebene bis zum Pad, Pocket `up_to_first` (Volumen) und Taper | keins | 2026-09-29 |
+| #3.4 | `hole(model_thread=true)` → `ModelThread`; `validation` ohne `threaded`, `unsupported` ohne Eigenschaft im Build; Server-Parameter mit Kostenhinweis (≈ 1,5 s, 60–90 Flächen je Loch, nur Einzelgewinde); Test: modelliertes M6 entfernt mehr Volumen als kosmetisch, Solid gültig, > 20 Flächen. Nebenbei: deutsche Beschreibung `polar: Gesamtwinkel` im `pattern`-Tool auf Englisch korrigiert | Regel „nur Einzelgewinde“ in 98 (aus S1) | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -45,8 +45,8 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 4
-> - Nächste Session: S3
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py`, `src/buddy_server/tools/reference.py`, `src/buddy_server/tools/feature.py`
-> - Architektur-Deltas: Datum-Referenzregel in `98-architecture-update.md`
-> - Startpunkt: #3.1
+> - Offene Aufgaben: 0
+> - Nächste Session: S4 (Phase 4, #4.1)
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py` (`_dress_up`, `fillet`), `addon/FreeCADBuddy/buddy_core/select.py`, `addon/FreeCADBuddy/buddy_core/assembly.py`
+> - Architektur-Deltas: Datum-Referenzregel in `98-architecture-update.md` eingetragen
+> - Startpunkt: #4.1

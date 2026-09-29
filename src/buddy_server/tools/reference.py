@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
@@ -28,6 +28,32 @@ def register(reg: Registration) -> None:
         """Datum plane as a stable sketch base (instead of a sketch on a solid face)."""
         return await ctx.call(
             "datum_plane", "feature.datum_plane", base=base, offset=offset, angle=angle,
+            rotation_axis=rotation_axis, body=body, purpose=purpose, document=document,
+        )  # fmt: skip
+
+    @tool
+    async def datum(
+        kind: Literal["point", "line", "lcs"],
+        base: Annotated[
+            str, Field(description="Base plane XY, XZ or YZ; a line runs along its normal")
+        ] = "XY",
+        offset: Annotated[
+            list[float | str] | None,
+            Field(
+                description="[x, y, z] in the base plane (x, y in the plane, z along the normal); numbers or parameters"
+            ),
+        ] = None,
+        angle: Annotated[Num, Field(description="Tilt in degrees about rotation_axis")] = 0,
+        rotation_axis: Annotated[str, Field(description="X, Y or Z")] = "X",
+        body: Annotated[str | None, Field(description="Body label; empty = the active/only body")] = None,
+        purpose: Purpose = None,
+        document: Doc = None,
+    ) -> dict[str, Any]:
+        """Datum point, datum line or local coordinate system (LCS) as a stable parametric reference.
+        A datum line is an axis for revolve, helix and pattern(polar); an LCS is a sketch plane for
+        create_sketch; a datum point is external geometry for sketches."""
+        return await ctx.call(
+            "datum", "feature.datum", kind=kind, base=base, offset=offset, angle=angle,
             rotation_axis=rotation_axis, body=body, purpose=purpose, document=document,
         )  # fmt: skip
 

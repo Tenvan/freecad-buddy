@@ -43,9 +43,9 @@ def create_sketch(
     with transaction(doc, f"Create sketch: {purpose or plane}"):
         sketch = target_body.newObject("Sketcher::SketchObject", "Sketch")
         sketch.Label = naming.make_label(doc, "Sketch", purpose or plane)
-        support, face_warning = plane_support(doc, target_body, plane, allow_face_attachment)
+        support, face_warning, map_mode = plane_support(doc, target_body, plane, allow_face_attachment)
         sketch.AttachmentSupport = [support]
-        sketch.MapMode = "FlatFace"
+        sketch.MapMode = map_mode
         sketch.MapReversed = reversed
         offset_value = values.resolve(doc, offset, "offset")
         sketch.AttachmentOffset = FreeCAD.Placement(
@@ -61,9 +61,13 @@ def create_sketch(
     return result
 
 
-def plane_support(doc: Any, body: Any, plane: str, allow_face: bool) -> tuple[tuple[Any, str], str | None]:
+def plane_support(
+    doc: Any, body: Any, plane: str, allow_face: bool
+) -> tuple[tuple[Any, str], str | None, str]:
+    """Resolve ``plane`` to (attachment support, warning, map mode) for sketches and primitives:
+    origin plane, datum plane, LCS (its XY plane) or, opt-in, a body face."""
     if plane.upper() in ORIGIN_PLANES:
-        return (origin_feature(body, plane.upper()), ""), None
+        return (origin_feature(body, plane.upper()), ""), None, "FlatFace"
     if plane.lower().startswith("face:"):
         if not allow_face:
             raise validation(
@@ -76,13 +80,17 @@ def plane_support(doc: Any, body: Any, plane: str, allow_face: bool) -> tuple[tu
         if tip is None:
             raise validation("The body has no geometry for a face reference yet")
         faces = select.resolve(tip.Shape, plane, single=True)
-        return (tip, faces[0]), (
-            f"Sketch is attached to {tip.Label}.{faces[0]} - the reference may jump on topology changes."
+        return (
+            (tip, faces[0]),
+            f"Sketch is attached to {tip.Label}.{faces[0]} - the reference may jump on topology changes.",
+            "FlatFace",
         )
     datum = resolve_object(doc, plane)
+    if datum.TypeId == "PartDesign::CoordinateSystem":
+        return (datum, ""), None, "ObjectXY"
     if datum.TypeId not in ("PartDesign::Plane", "App::Plane"):
-        raise validation(f"'{plane}' is not a plane (allowed: XY, XZ, YZ, datum plane, face:<selector>)")
-    return (datum, ""), None
+        raise validation(f"'{plane}' is not a plane (allowed: XY, XZ, YZ, datum plane, LCS, face:<selector>)")
+    return (datum, ""), None, "FlatFace"
 
 
 @contextmanager

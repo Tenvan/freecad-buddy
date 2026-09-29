@@ -14,7 +14,7 @@ import FreeCAD
 from buddy_core import display, naming, select, values, view
 from buddy_core.body import body_of, origin_feature, resolve_body
 from buddy_core.documents import resolve_document, resolve_object
-from buddy_core.errors import RECOMPUTE_FAILED, CoreError, validation
+from buddy_core.errors import RECOMPUTE_FAILED, UNSUPPORTED, CoreError, validation
 from buddy_core.result import ToolResult, describe
 from buddy_core.sketch.model import plane_support, resolve_sketch
 from buddy_core.transaction import transaction
@@ -95,10 +95,12 @@ def pad(
     mode: str = "length",
     length2: values.ValueSpec | None = None,
     reversed: bool = False,
+    taper: values.ValueSpec = 0,
     purpose: str | None = None,
     document: str | None = None,
 ) -> ToolResult:
-    """Extrude a closed profile. ``mode``: length | symmetric | two_sides | up_to_last."""
+    """Extrude a closed profile. ``mode``: length | symmetric | two_sides | up_to_last | up_to_first.
+    ``taper`` (degrees) tilts the side walls."""
     doc = resolve_document(document)
     profile, body = _profile(doc, sketch)
     result = ToolResult()
@@ -107,8 +109,8 @@ def pad(
         feature = _new(body, "PartDesign::Pad", "Pad", purpose, profile.Label.removeprefix("Sketch_"))
         feature.Profile = profile
         feature.Reversed = reversed
-        if mode == "up_to_last":
-            feature.Type = "UpToLast"
+        if mode in ("up_to_last", "up_to_first"):
+            feature.Type = "UpToLast" if mode == "up_to_last" else "UpToFirst"
         else:
             values.apply(feature, "Length", values.resolve(doc, length, "length"))
             if mode == "symmetric":
@@ -121,7 +123,8 @@ def pad(
                     values.resolve(doc, length2 if length2 is not None else length, "length2"),
                 )
             elif mode != "length":
-                raise validation("mode must be length, symmetric, two_sides or up_to_last")
+                raise validation("mode must be length, symmetric, two_sides, up_to_last or up_to_first")
+        _apply_taper(doc, feature, taper, mode == "two_sides")
         profile.Visibility = False
         _finish(doc, feature, result)
     if first:
@@ -129,15 +132,26 @@ def pad(
     return result
 
 
+def _apply_taper(doc: Any, feature: Any, taper: values.ValueSpec, both_sides: bool) -> None:
+    value = values.resolve(doc, taper, "taper")
+    if not (value.number or value.expression):
+        return
+    values.apply(feature, "TaperAngle", value, unit="deg")
+    if both_sides:
+        values.apply(feature, "TaperAngle2", value, unit="deg")
+
+
 def pocket(
     sketch: str,
     depth: values.ValueSpec = 5,
     mode: str = "length",
     reversed: bool = False,
+    taper: values.ValueSpec = 0,
     purpose: str | None = None,
     document: str | None = None,
 ) -> ToolResult:
-    """Cut a closed profile into the body. ``mode``: length | symmetric | through_all."""
+    """Cut a closed profile into the body. ``mode``: length | symmetric | through_all | up_to_first.
+    ``taper`` (degrees) tilts the side walls."""
     doc = resolve_document(document)
     profile, body = _profile(doc, sketch)
     result = ToolResult()
@@ -146,14 +160,15 @@ def pocket(
         feature = _new(body, "PartDesign::Pocket", "Pocket", purpose, profile.Label.removeprefix("Sketch_"))
         feature.Profile = profile
         feature.Reversed = reversed
-        if mode == "through_all":
-            feature.Type = "ThroughAll"
+        if mode in ("through_all", "up_to_first"):
+            feature.Type = "ThroughAll" if mode == "through_all" else "UpToFirst"
         else:
             values.apply(feature, "Length", values.resolve(doc, depth, "depth"))
             if mode == "symmetric":
                 feature.SideType = "Symmetric"
             elif mode != "length":
-                raise validation("mode must be length, symmetric or through_all")
+                raise validation("mode must be length, symmetric, through_all or up_to_first")
+        _apply_taper(doc, feature, taper, False)
         profile.Visibility = False
         _ensure_cuts(doc, feature, before, result)
         _finish(doc, feature, result)
@@ -164,9 +179,19 @@ def _revolve_axis(sketch: Any, body: Any, axis: str) -> tuple[Any, list[str]]:
     key = axis.upper()
     if key in ("V_AXIS", "H_AXIS"):
         return sketch, [key.replace("_AXIS", "_Axis")]
-    if key in ("X", "Y", "Z"):
-        return origin_feature(body, key), [""]
-    raise validation("axis must be V_Axis, H_Axis (sketch axes) or X/Y/Z (body axes)")
+    return _axis_reference(body, axis)
+
+
+def _axis_reference(body: Any, axis: str) -> tuple[Any, list[str]]:
+    """Body axis X/Y/Z or a datum line of the same body (revolve, polar pattern, helix)."""
+    if axis.upper() in ("X", "Y", "Z"):
+        return origin_feature(body, axis.upper()), [""]
+    line = resolve_object(body.Document, axis)
+    if line.TypeId != "PartDesign::Line" or body_of(line) is not body:
+        raise validation(
+            "axis must be V_Axis, H_Axis (sketch axes), X/Y/Z (body axes) or a datum line of this body"
+        )
+    return line, [""]
 
 
 def revolve(
@@ -450,11 +475,12 @@ def _attach(
     y: values.ValueSpec,
     z: values.ValueSpec,
     rotation: Any,
+    map_mode: str | None = None,
 ) -> None:
     """Attach a feature to an origin/datum plane with a parametric offset (like datum_plane)."""
-    support, _warning = plane_support(doc, body, plane, allow_face=False)
+    support, _warning, default_mode = plane_support(doc, body, plane, allow_face=False)
     feature.AttachmentSupport = [support]
-    feature.MapMode = "FlatFace"
+    feature.MapMode = map_mode or default_mode
     offsets = [
         values.resolve(doc, spec, what) for spec, what in ((x, "center x"), (y, "center y"), (z, "offset"))
     ]
@@ -555,8 +581,10 @@ def hole(
     cut_diameter: values.ValueSpec | None = None,
     cut_depth: values.ValueSpec | None = None,
     countersink_angle: values.ValueSpec | None = None,
+    model_thread: bool = False,
 ) -> ToolResult:
-    """ISO metric hole at every circle centre of the sketch.
+    """ISO metric hole at every circle centre of the sketch. ``model_thread`` cuts the real thread
+    geometry of a threaded hole (about 1.5 s and 60-90 faces per hole - single holes only).
 
     ``cut``: none | countersink | counterbore. Without ``depth`` the hole goes through all.
     ``diameter`` overrides the nominal diameter (e.g. clearance holes for printing).
@@ -569,6 +597,8 @@ def hole(
     if cut not in cut_types:
         raise validation("cut must be none, countersink or counterbore")
     custom = _hole_cut_values(doc, cut, cut_diameter, cut_depth, countersink_angle)
+    if model_thread and not threaded:
+        raise validation("model_thread needs threaded=true")
     result = ToolResult()
     with transaction(doc, f"Hole {size}: {purpose or profile.Label}"):
         before = _volume(body.Tip) if body.Tip else 0.0
@@ -577,6 +607,14 @@ def hole(
         feature.ThreadType = "ISOMetricProfile"
         feature.ThreadSize = _thread_size(feature, size)
         feature.Threaded = threaded
+        if model_thread:
+            if "ModelThread" not in feature.PropertiesList:
+                raise CoreError(
+                    UNSUPPORTED,
+                    "This FreeCAD build cannot model thread geometry (Hole has no ModelThread)",
+                    {"hints": ["Use FreeCAD 1.0 or newer, or keep the cosmetic thread."]},
+                )
+            feature.ModelThread = True
         feature.HoleCutType = cut_types[cut]
         if depth is None:
             feature.DepthType = "ThroughAll"
@@ -811,7 +849,7 @@ def pattern(
         elif kind == "linear":
             _linear(doc, body, feature, direction, length, count)
         elif kind == "polar":
-            feature.Axis = (origin_feature(body, axis), [""])
+            feature.Axis = _axis_reference(body, axis)
             values.apply(feature, "Angle", values.resolve(doc, angle, "angle"), unit="deg")
             _occurrences(doc, feature, count)
         # every newObject in the GUI hides the rest of the body, so the visibility is set last
@@ -854,4 +892,63 @@ def datum_plane(
         result.add_created(plane)
     result.data["plane"] = describe(plane)
     result.hints.append(f"create_sketch(plane='{plane.Label}') puts a sketch on this plane.")
+    return result
+
+
+# kind -> (type, label prefix, attachment mode on the base plane)
+_DATUMS = {
+    "point": ("PartDesign::Point", "DatumPoint", "ObjectOrigin"),
+    "line": ("PartDesign::Line", "DatumLine", "ObjectZ"),
+    "lcs": ("PartDesign::CoordinateSystem", "LCS", "ObjectXY"),
+}
+
+
+def datum(
+    kind: str,
+    base: str = "XY",
+    offset: list[values.ValueSpec] | None = None,
+    angle: values.ValueSpec = 0,
+    rotation_axis: str = "X",
+    body: str | None = None,
+    purpose: str | None = None,
+    document: str | None = None,
+) -> ToolResult:
+    """Datum point, datum line or local coordinate system (LCS) as a stable, parametric reference.
+
+    ``offset`` [x, y, z] is measured in the base plane (x, y in the plane, z along its normal),
+    ``angle`` tilts about ``rotation_axis``. A line runs along the normal of ``base`` (XY → Z,
+    XZ → Y, YZ → X). Sketches accept an LCS as ``plane``; revolve, pattern (polar) and helix
+    accept a datum line as ``axis``.
+    """
+    key = kind.lower()
+    if key not in _DATUMS:
+        raise validation("kind must be point, line or lcs")
+    type_id, prefix, map_mode = _DATUMS[key]
+    position = offset if offset is not None else [0, 0, 0]
+    if len(position) != 3:
+        raise validation("offset needs [x, y, z] relative to the base plane")
+    axes = {"X": FreeCAD.Vector(1, 0, 0), "Y": FreeCAD.Vector(0, 1, 0), "Z": FreeCAD.Vector(0, 0, 1)}
+    if rotation_axis.upper() not in axes:
+        raise validation("rotation_axis must be X, Y or Z")
+    doc = resolve_document(document)
+    target = resolve_body(doc, body)
+    angle_value = values.resolve(doc, angle, "angle")
+    rotation = FreeCAD.Rotation(axes[rotation_axis.upper()], angle_value.number)
+    result = ToolResult()
+    with transaction(doc, f"{prefix}: {purpose or base}"):
+        feature = target.newObject(type_id, prefix)
+        feature.Label = naming.make_label(doc, prefix, purpose or f"{base}_{key}")
+        x, y, z = position
+        _attach(doc, feature, target, base, x, y, z, rotation, map_mode=map_mode)
+        if angle_value.expression:
+            feature.setExpression(".AttachmentOffset.Rotation.Angle", angle_value.expression)
+        doc.recompute()
+        result.add_created(feature)
+    result.data["datum"] = describe(feature)
+    hints = {
+        "point": "Reference it as external geometry in a sketch (add_geometry type='external').",
+        "line": f"revolve/helix(axis='{feature.Label}') or pattern(kind='polar', axis='{feature.Label}').",
+        "lcs": f"create_sketch(plane='{feature.Label}') puts a sketch on its XY plane.",
+    }
+    result.hints.append(hints[key])
     return result

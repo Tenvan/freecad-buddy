@@ -449,3 +449,116 @@ def test_primitive_rejects_unknown_kind_missing_dims_and_empty_cut(doc: Any, par
     with pytest.raises(CoreError, match="removes no material"):
         features.primitive("sphere", {"diameter": 5}, offset=100, subtractive=True, document=doc.Name)
     assert part.Tip.Label == "Pad_Base"
+
+
+def test_datum_point_line_and_lcs_follow_their_parameters(doc: Any, part: Any) -> None:
+    import math
+
+    import FreeCAD
+
+    set_params(doc, Axis_X=20, Lcs_Height=30)
+    point = features.datum("point", offset=[5, 7, 9], purpose="Anchor", document=doc.Name).to_dict()
+    line = features.datum("line", offset=["Axis_X", 0, 0], purpose="HingeAxis", document=doc.Name).to_dict()
+    lcs = features.datum(
+        "lcs", offset=[0, 0, "Lcs_Height"], angle=45, purpose="Tilted", document=doc.Name
+    ).to_dict()
+
+    labels = [d["datum"]["label"] for d in (point, line, lcs)]
+    assert labels == ["DatumPoint_Anchor", "DatumLine_HingeAxis", "LCS_Tilted"]
+    pt, ln, cs = (doc.getObject(d["datum"]["name"]) for d in (point, line, lcs))
+    assert (pt.Placement.Base.x, pt.Placement.Base.y, pt.Placement.Base.z) == pytest.approx((5, 7, 9))
+    assert (ln.Placement.Base.x, ln.Placement.Base.y, ln.Placement.Base.z) == pytest.approx((20, 0, 0))
+    direction = ln.Placement.Rotation.multVec(FreeCAD.Vector(0, 0, 1))
+    assert (direction.x, direction.y, direction.z) == pytest.approx((0, 0, 1))
+    assert cs.Placement.Base.z == pytest.approx(30)
+    assert cs.Placement.Rotation.Angle == pytest.approx(math.radians(45))
+
+    set_params(doc, Axis_X=25, Lcs_Height=40)  # datums follow their parameters
+    doc.recompute()
+    assert ln.Placement.Base.x == pytest.approx(25) and cs.Placement.Base.z == pytest.approx(40)
+
+
+def test_sketch_on_lcs_and_axes_through_a_datum_line(doc: Any, part: Any) -> None:
+    import math
+
+    lcs = features.datum("lcs", offset=[0, 0, 30], purpose="Top", document=doc.Name).to_dict()
+    on_lcs = sketch_on(doc, plane=lcs["datum"]["label"], purpose="OnLcs")
+    assert on_lcs.MapMode == "ObjectXY" and on_lcs.Placement.Base.z == pytest.approx(30)
+
+    line = features.datum("line", offset=[10, 0, 0], purpose="RingAxis", document=doc.Name).to_dict()
+    axis = line["datum"]["label"]
+    ring = sketch_on(doc, plane="XZ", purpose="Ring")
+    profile(doc, ring, "circle", diameter=6, center=[20, 10])  # 10 mm beside the line, r = 3
+    torus = 2 * math.pi**2 * 10 * 3**2
+    result = features.revolve(ring.Name, axis=axis, purpose="Ring", document=doc.Name).to_dict()
+    assert result["volume"] == pytest.approx(torus, rel=0.01)
+
+    wire = sketch_on(doc, plane="XZ", purpose="Wire")
+    profile(doc, wire, "circle", diameter=2, center=[18, 12])  # coil of radius 8 fused into the ring
+    coil = features.helix(wire.Name, pitch=4, turns=2, axis=axis, purpose="Coil", document=doc.Name).to_dict()
+    assert torus < coil["volume"] < torus + math.pi * 2 * math.pi * 8 * 2
+
+    pattern = features.pattern([coil["feature"]["name"]], "polar", axis=axis, count=2, document=doc.Name)
+    assert doc.getObject(pattern.to_dict()["feature"]["name"]).isValid()
+    with pytest.raises(CoreError, match="datum line"):
+        features.revolve(ring.Name, axis="Sketch_Ring", document=doc.Name)
+
+
+def _taper_volume(side: float, height: float, degrees: float) -> float:
+    import math
+
+    growth = 2 * math.tan(math.radians(degrees))  # the square's side grows by this per mm of height
+    return ((side + growth * height) ** 3 - side**3) / (3 * growth)
+
+
+def test_pad_taper_and_up_to_first(doc: Any, part: Any) -> None:
+    import math
+
+    base = sketch_on(doc)
+    profile(doc, base, "rectangle", width=20, height=20)
+    result = features.pad(base.Name, length=10, taper=10, purpose="Base", document=doc.Name).to_dict()
+    assert result["volume"] == pytest.approx(_taper_volume(20, 10, 10), rel=0.01)
+
+    plane = features.datum_plane(offset=30, purpose="Above", document=doc.Name).to_dict()
+    boss = sketch_on(doc, plane=plane["plane"]["label"], purpose="Boss")
+    profile(doc, boss, "circle", diameter=10)
+    result = features.pad(
+        boss.Name, mode="up_to_first", reversed=True, purpose="Boss", document=doc.Name
+    ).to_dict()  # down from z = 30 until it meets the pad top at z = 10
+    assert result["volume"] == pytest.approx(_taper_volume(20, 10, 10) + math.pi * 25 * 20, rel=0.01)
+
+
+def test_pocket_up_to_first_and_taper(doc: Any, part: Any) -> None:
+    import math
+
+    _box(doc)  # 60 x 40 x 20
+    slot = sketch_on(doc, purpose="Slot")
+    profile(doc, slot, "rectangle", width=4, height=4)
+    result = features.pocket(slot.Name, mode="up_to_first", purpose="Slot", document=doc.Name).to_dict()
+    assert result["volume"] == pytest.approx(48000 - 4 * 4 * 20, rel=0.01)
+    assert doc.getObject(result["feature"]["name"]).Type == "UpToFirst"
+
+    dimple = sketch_on(doc, purpose="Dimple", offset=20)
+    profile(doc, dimple, "circle", diameter=10, center=[20, 10])
+    before = part.Tip.Shape.Volume
+    result = features.pocket(dimple.Name, depth=5, taper=10, purpose="Dimple", document=doc.Name).to_dict()
+    feature = doc.getObject(result["feature"]["name"])
+    assert feature.TaperAngle.Value == pytest.approx(10)
+    assert 0 < before - result["volume"] < math.pi * 25 * 5 * 1.5
+
+
+def test_hole_model_thread_cuts_real_thread_geometry(doc: Any, part: Any) -> None:
+    _box(doc)
+    tapped = sketch_on(doc, purpose="Tapped", offset=20)
+    profile(doc, tapped, "circle", diameter=5)
+    cosmetic = features.hole(tapped.Name, size="M6", threaded=True, document=doc.Name).to_dict()
+    documents.undo(document=doc.Name)
+
+    modelled = features.hole(
+        tapped.Name, size="M6", threaded=True, model_thread=True, purpose="Tapped", document=doc.Name
+    ).to_dict()
+
+    assert modelled["volume"] < cosmetic["volume"] and part.Tip.Shape.isValid()
+    assert modelled["created"][0]["label"] == "Hole_Tapped" and len(part.Tip.Shape.Faces) > 20
+    with pytest.raises(CoreError, match="threaded=true"):
+        features.hole(tapped.Name, size="M6", model_thread=True, document=doc.Name)

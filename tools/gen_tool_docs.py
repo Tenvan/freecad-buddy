@@ -130,6 +130,7 @@ EXAMPLES: dict[str, dict[str, Any]] = {
         "offset": "Knob_Height",
         "purpose": "Knob",
     },
+    "datum": {"kind": "line", "base": "XY", "offset": ["Hinge_X", 0, 0], "purpose": "HingeAxis"},
     "execute_python": {"code": "result = len(doc.Objects)"},
 }
 

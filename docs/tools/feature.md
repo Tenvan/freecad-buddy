@@ -6,8 +6,8 @@ Kategorie-Präfix: `[Feature]` · 14 Tools
 
 | Tool | Zweck |
 |---|---|
-| [`pad`](#pad) | Extrude a profile (additive). |
-| [`pocket`](#pocket) | Cut a pocket (subtractive). |
+| [`pad`](#pad) | Extrude a profile (additive). up_to_first stops at the next face of the solid. |
+| [`pocket`](#pocket) | Cut a pocket (subtractive). up_to_first stops at the next face of the solid. |
 | [`revolve`](#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
 | [`sweep`](#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
 | [`loft`](#loft) | Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels, |
@@ -23,15 +23,16 @@ Kategorie-Präfix: `[Feature]` · 14 Tools
 
 ## pad
 
-[Feature] Extrude a profile (additive).
+[Feature] Extrude a profile (additive). up_to_first stops at the next face of the solid.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `sketch` | string | ja | `—` | Sketch label with a closed profile |
 | `length` | number \| string | nein | `10` | Number in mm/degrees or the name of a parameter (bound by expression) |
-| `mode` | `length` \| `symmetric` \| `two_sides` \| `up_to_last` | nein | `"length"` |  |
+| `mode` | `length` \| `symmetric` \| `two_sides` \| `up_to_last` \| `up_to_first` | nein | `"length"` |  |
 | `length2` | number \| string \| null | nein | `null` |  |
 | `reversed` | boolean | nein | `false` |  |
+| `taper` | number \| string | nein | `0` | Taper angle of the side walls in degrees (0 = straight, positive = wider at the end) |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
@@ -47,14 +48,15 @@ Beispiel:
 
 ## pocket
 
-[Feature] Cut a pocket (subtractive).
+[Feature] Cut a pocket (subtractive). up_to_first stops at the next face of the solid.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `sketch` | string | ja | `—` | Sketch label with a closed profile |
 | `depth` | number \| string | nein | `5` | Number in mm/degrees or the name of a parameter (bound by expression) |
-| `mode` | `length` \| `symmetric` \| `through_all` | nein | `"length"` |  |
+| `mode` | `length` \| `symmetric` \| `through_all` \| `up_to_first` | nein | `"length"` |  |
 | `reversed` | boolean | nein | `false` | Direction; reversed automatically if nothing is cut |
+| `taper` | number \| string | nein | `0` | Taper angle of the side walls in degrees (0 = straight) |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
@@ -75,7 +77,7 @@ Beispiel:
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `sketch` | string | ja | `—` | Skizzen-Label |
-| `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis) |
+| `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label |
 | `angle` | number \| string | nein | `360` | Number in mm/degrees or the name of a parameter (bound by expression) |
 | `subtractive` | boolean | nein | `false` | true = Nut (Groove) |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
@@ -153,7 +155,7 @@ guides, custom grooves and threads. For ISO external threads on a cylinder use t
 | `pitch` | number \| string | ja | `—` | Axial distance per turn |
 | `height` | number \| string \| null | nein | `null` | Length along the axis (or give turns) |
 | `turns` | number \| string \| null | nein | `null` | Number of turns (or give height) |
-| `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis) |
+| `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label |
 | `angle` | number \| string | nein | `0` | Taper angle in degrees, 0 = cylindrical |
 | `left_handed` | boolean | nein | `false` |  |
 | `subtractive` | boolean | nein | `false` | true = cut a helical groove |
@@ -220,6 +222,7 @@ cut_diameter/cut_depth/countersink_angle set custom, parametric values.
 | `cut_diameter` | number \| string \| null | nein | `null` | Custom counterbore/countersink diameter (number, parameter or expression) |
 | `cut_depth` | number \| string \| null | nein | `null` | Custom counterbore depth (counterbore only) |
 | `countersink_angle` | number \| string \| null | nein | `null` | Custom countersink angle in degrees (countersink only) |
+| `model_thread` | boolean | nein | `false` | Cut the real thread geometry of a threaded hole (about 1.5 s and 60-90 faces per hole - single tapped holes only, never for rasters) |
 
 Beispiel:
 
@@ -306,9 +309,9 @@ Beispiel:
 | `kind` | `mirrored` \| `linear` \| `polar` \| `grid` | ja | `—` | grid = 2D raster (MultiTransform); PartDesign cannot pattern a pattern |
 | `plane` | string | nein | `"YZ"` | mirrored: XY/XZ/YZ |
 | `direction` | string | nein | `"X"` | linear/grid: X/Y/Z |
-| `axis` | string | nein | `"Z"` | polar: X/Y/Z |
+| `axis` | string | nein | `"Z"` | polar: X/Y/Z or a datum line label |
 | `length` | number \| string | nein | `20` | linear/grid: total length (mm, parameter, expression) |
-| `angle` | number \| string | nein | `360` | polar: Gesamtwinkel |
+| `angle` | number \| string | nein | `360` | polar: total angle in degrees |
 | `count` | integer \| string | nein | `2` | Count (linear/polar/grid), number or integer parameter |
 | `direction2` | string | nein | `"Y"` | grid: second direction X/Y/Z |
 | `length2` | number \| string | nein | `20` | grid: total length of the second direction |

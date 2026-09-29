@@ -2,11 +2,12 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten. Übersicht: [Tool-Katalog](../tools.md).
 
-Kategorie-Präfix: `[Reference]` · 3 Tools
+Kategorie-Präfix: `[Reference]` · 4 Tools
 
 | Tool | Zweck |
 |---|---|
 | [`datum_plane`](#datum_plane) | Datum plane as a stable sketch base (instead of a sketch on a solid face). |
+| [`datum`](#datum) | Datum point, datum line or local coordinate system (LCS) as a stable parametric reference. |
 | [`shape_binder`](#shape_binder) | Bind geometry of another body into this body (SubShapeBinder, follows its source). Use it as |
 | [`select_geometry`](#select_geometry) | Preview which faces/edges a selector hits (with centre, normal, length, radius). |
 
@@ -31,6 +32,38 @@ Beispiel:
   "base": "XY",
   "offset": "Box_Height",
   "purpose": "Top"
+}
+```
+
+## datum
+
+[Reference] Datum point, datum line or local coordinate system (LCS) as a stable parametric reference.
+A datum line is an axis for revolve, helix and pattern(polar); an LCS is a sketch plane for
+create_sketch; a datum point is external geometry for sketches.
+
+| Parameter | Typ | Pflicht | Standard | Beschreibung |
+|---|---|---|---|---|
+| `kind` | `point` \| `line` \| `lcs` | ja | `—` |  |
+| `base` | string | nein | `"XY"` | Base plane XY, XZ or YZ; a line runs along its normal |
+| `offset` | array<number \| string> \| null | nein | `null` | [x, y, z] in the base plane (x, y in the plane, z along the normal); numbers or parameters |
+| `angle` | number \| string | nein | `0` | Tilt in degrees about rotation_axis |
+| `rotation_axis` | string | nein | `"X"` | X, Y or Z |
+| `body` | string \| null | nein | `null` | Body label; empty = the active/only body |
+| `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
+| `document` | string \| null | nein | `null` | Document name or label; empty = active document |
+
+Beispiel:
+
+```json
+{
+  "kind": "line",
+  "base": "XY",
+  "offset": [
+    "Hinge_X",
+    0,
+    0
+  ],
+  "purpose": "HingeAxis"
 }
 ```
 

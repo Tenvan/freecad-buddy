@@ -19,40 +19,49 @@ def register(reg: Registration) -> None:
     async def pad(
         sketch: Annotated[str, Field(description="Sketch label with a closed profile")],
         length: Num = 10,
-        mode: Literal["length", "symmetric", "two_sides", "up_to_last"] = "length",
+        mode: Literal["length", "symmetric", "two_sides", "up_to_last", "up_to_first"] = "length",
         length2: Num | None = None,
         reversed: bool = False,
+        taper: Annotated[
+            Num,
+            Field(
+                description="Taper angle of the side walls in degrees (0 = straight, positive = wider at the end)"
+            ),
+        ] = 0,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Extrude a profile (additive)."""
+        """Extrude a profile (additive). up_to_first stops at the next face of the solid."""
         return await ctx.call(
             "pad", "feature.pad", sketch=sketch, length=length, mode=mode, length2=length2,
-            reversed=reversed, purpose=purpose, document=document,
+            reversed=reversed, taper=taper, purpose=purpose, document=document,
         )  # fmt: skip
 
     @tool
     async def pocket(
         sketch: Annotated[str, Field(description="Sketch label with a closed profile")],
         depth: Num = 5,
-        mode: Literal["length", "symmetric", "through_all"] = "length",
+        mode: Literal["length", "symmetric", "through_all", "up_to_first"] = "length",
         reversed: Annotated[
             bool, Field(description="Direction; reversed automatically if nothing is cut")
         ] = False,
+        taper: Annotated[
+            Num, Field(description="Taper angle of the side walls in degrees (0 = straight)")
+        ] = 0,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
-        """Cut a pocket (subtractive)."""
+        """Cut a pocket (subtractive). up_to_first stops at the next face of the solid."""
         return await ctx.call(
             "pocket", "feature.pocket", sketch=sketch, depth=depth, mode=mode, reversed=reversed,
-            purpose=purpose, document=document,
+            taper=taper, purpose=purpose, document=document,
         )  # fmt: skip
 
     @tool
     async def revolve(
         sketch: Annotated[str, Field(description="Skizzen-Label")],
         axis: Annotated[
-            str, Field(description="V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis)")
+            str, Field(description="V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label")
         ] = "V_Axis",
         angle: Num = 360,
         subtractive: Annotated[bool, Field(description="true = Nut (Groove)")] = False,
@@ -123,7 +132,7 @@ def register(reg: Registration) -> None:
         height: Annotated[Num | None, Field(description="Length along the axis (or give turns)")] = None,
         turns: Annotated[Num | None, Field(description="Number of turns (or give height)")] = None,
         axis: Annotated[
-            str, Field(description="V_Axis/H_Axis (sketch axis) or X/Y/Z (body axis)")
+            str, Field(description="V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label")
         ] = "V_Axis",
         angle: Annotated[Num, Field(description="Taper angle in degrees, 0 = cylindrical")] = 0,
         left_handed: bool = False,
@@ -199,13 +208,20 @@ def register(reg: Registration) -> None:
         countersink_angle: Annotated[
             float | str | None, Field(description="Custom countersink angle in degrees (countersink only)")
         ] = None,
+        model_thread: Annotated[
+            bool,
+            Field(
+                description="Cut the real thread geometry of a threaded hole (about 1.5 s and 60-90 faces "
+                "per hole - single tapped holes only, never for rasters)"
+            ),
+        ] = False,
     ) -> dict[str, Any]:
         """Holes (Hole feature) at every circle centre of the sketch. Cuts without cut_* use ISO defaults;
         cut_diameter/cut_depth/countersink_angle set custom, parametric values."""
         return await ctx.call(
             "hole", "feature.hole", sketch=sketch, size=size, cut=cut, depth=depth, threaded=threaded,
             diameter=diameter, purpose=purpose, document=document, cut_diameter=cut_diameter,
-            cut_depth=cut_depth, countersink_angle=countersink_angle,
+            cut_depth=cut_depth, countersink_angle=countersink_angle, model_thread=model_thread,
         )  # fmt: skip
 
     @tool
@@ -270,11 +286,11 @@ def register(reg: Registration) -> None:
         ],
         plane: Annotated[str, Field(description="mirrored: XY/XZ/YZ")] = "YZ",
         direction: Annotated[str, Field(description="linear/grid: X/Y/Z")] = "X",
-        axis: Annotated[str, Field(description="polar: X/Y/Z")] = "Z",
+        axis: Annotated[str, Field(description="polar: X/Y/Z or a datum line label")] = "Z",
         length: Annotated[
             float | str, Field(description="linear/grid: total length (mm, parameter, expression)")
         ] = 20,
-        angle: Annotated[float | str, Field(description="polar: Gesamtwinkel")] = 360,
+        angle: Annotated[float | str, Field(description="polar: total angle in degrees")] = 360,
         count: Annotated[
             int | str, Field(description="Count (linear/polar/grid), number or integer parameter")
         ] = 2,

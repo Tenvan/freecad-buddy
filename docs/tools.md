@@ -2,14 +2,14 @@
 
 > Generiert mit `uv run python tools/gen_tool_docs.py` – nicht von Hand bearbeiten.
 
-54 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
+55 Tools in 11 Gruppen nach Arbeitsphase (`execute_python` nur mit `FREECAD_BUDDY_ALLOW_PYTHON=1` bzw. `--allow-python`). Jede Tool-Beschreibung beginnt mit ihrer Kategorie, z. B. `[Sketch]`. Maße akzeptieren eine Zahl, einen Parameternamen oder einen Ausdruck über Parameter (`"Box_Width - 2*Wall"`).
 
 | Gruppe | Kategorie | Tools |
 |---|---|---|
 | [Session & Dokument](tools/session.md) | `[Session]` | 3 |
 | [Modell & Parameter](tools/model.md) | `[Model]` | 6 |
 | [Skizze](tools/sketch.md) | `[Sketch]` | 6 |
-| [Referenzen](tools/reference.md) | `[Reference]` | 3 |
+| [Referenzen](tools/reference.md) | `[Reference]` | 4 |
 | [Features](tools/feature.md) | `[Feature]` | 14 |
 | [Design-Tools](tools/design.md) | `[Design tools]` | 3 |
 | [Baugruppe](tools/assembly.md) | `[Assembly]` | 7 |
@@ -53,6 +53,7 @@
 | Tool | Zweck |
 |---|---|
 | [`datum_plane`](tools/reference.md#datum_plane) | Datum plane as a stable sketch base (instead of a sketch on a solid face). |
+| [`datum`](tools/reference.md#datum) | Datum point, datum line or local coordinate system (LCS) as a stable parametric reference. |
 | [`shape_binder`](tools/reference.md#shape_binder) | Bind geometry of another body into this body (SubShapeBinder, follows its source). Use it as |
 | [`select_geometry`](tools/reference.md#select_geometry) | Preview which faces/edges a selector hits (with centre, normal, length, radius). |
 
@@ -60,8 +61,8 @@
 
 | Tool | Zweck |
 |---|---|
-| [`pad`](tools/feature.md#pad) | Extrude a profile (additive). |
-| [`pocket`](tools/feature.md#pocket) | Cut a pocket (subtractive). |
+| [`pad`](tools/feature.md#pad) | Extrude a profile (additive). up_to_first stops at the next face of the solid. |
+| [`pocket`](tools/feature.md#pocket) | Cut a pocket (subtractive). up_to_first stops at the next face of the solid. |
 | [`revolve`](tools/feature.md#revolve) | Solid of revolution (Revolution) or rotational groove (Groove). |
 | [`sweep`](tools/feature.md#sweep) | Sweep a cross-section along a path (PartDesign AdditivePipe/SubtractivePipe): round handles, |
 | [`loft`](tools/feature.md#loft) | Loft through two or more sketches (PartDesign AdditiveLoft/SubtractiveLoft): funnels, |

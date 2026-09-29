@@ -7,13 +7,13 @@
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 6/16 Aufgaben (S1: Spikes, `REQUIRED_TYPES`, `loft`; S2: `helix`, `primitive`), Spec-Stand 1 freigegeben; offen: `datum`, Taper, `model_thread`, `boolean`, `draft`, Regelwerk; nächste Session S3 |
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 10/16 Aufgaben (S1: Spikes, `REQUIRED_TYPES`, `loft`; S2: `helix`, `primitive`; S3: `datum`, Taper, `model_thread`), Spec-Stand 1 freigegeben; offen: `boolean`, `draft`, Regelwerk, Doku, GUI-Abnahme; nächste Session S4 |
 
 ## Backlog (nach Domain)
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 2 offene Tickets: 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 1 Ticket im aktiven Sprint (PartDesign-Vollständigkeit); 4 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 3 offene Tickets: 🔵 Design-Stream mit Storepoints (Idee Ralf, nach dem PartDesign-Sprint), 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 1 Ticket im aktiven Sprint (PartDesign-Vollständigkeit); 4 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
 
 ## Konzepte
 
