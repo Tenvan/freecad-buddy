@@ -1,6 +1,6 @@
 # PartDesign-Vollständigkeit: Loft, Helix, Primitive, Boolean, Draft, Datum
 
-> Erstellt: 2026-09-29 │ Status: 🔵 In Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) │ Priorität: hoch │ Architektur-Impact: mehrere
+> Erstellt: 2026-09-29 │ Status: ✅ Umgesetzt im Sprint [`freecad-buddy-partdesign`](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md) │ Priorität: hoch │ Architektur-Impact: mehrere
 
 ## Spezifikation
 
@@ -77,42 +77,44 @@ Jedes Standard-Werkzeug der PartDesign-Werkzeugleiste (Stand FreeCAD 26.3) ist �
 
 ## Akzeptanzkriterien
 
-- [ ] AC-01: Trichter aus zwei Kreisskizzen per `loft` ergibt einen gültigen Solid; die Höhe folgt dem Parameter der Datum-Ebene; subtraktiver Loft schneidet aus einem Pad heraus.
-- [ ] AC-02: `helix` erzeugt additiv eine Feder und subtraktiv eine Nut mit parametrischer Steigung; Windungszahl folgt `pitch`/`height`. `thread` liefert weiterhin das bisherige Ergebnis (bestehende Tests grün).
-- [ ] AC-03: Alle acht `primitive`-Arten entstehen additiv und subtraktiv mit Maßen aus Parametern; Volumen stimmt je Art mit der Formel auf 1 % überein.
-- [ ] AC-04: `boolean` mit `fuse`, `cut`, `common` zwischen zwei Bodies ergibt jeweils den erwarteten Solid (Volumenprüfung); ungültige Kombinationen werden abgelehnt.
-- [ ] AC-05: `draft` neigt die selektierten Flächen um den Parameterwinkel; nach Parameteränderung und Recompute bleibt der Solid gültig und der Selektor trifft dieselben Flächen.
-- [ ] AC-06: `datum` legt Point, Line und LCS parametrisch an; `revolve` um eine Datum Line und `pattern kind=polar` um eine Datum Line liefern dasselbe Ergebnis wie um die Body-Achse bei gleicher Lage.
-- [ ] AC-07: `pad`/`pocket` mit `taper` erzeugen geneigte Wände (Kontrolle über Volumen); `up_to_first` stoppt an der nächsten Fläche.
-- [ ] AC-08: `hole` mit `model_thread=true` erzeugt Gewindegeometrie (Volumen kleiner als ohne, Solid gültig); ohne die Eigenschaft im Build kommt `unsupported`.
-- [ ] AC-09: `get_design_rules("features")` und `("references")` nennen alle neuen Tools; `test_rules_only_name_registered_tools` und `test_every_topic_of_r03_is_covered` sind grün. `docs/tools.md` ist regeneriert, Tool-Zahl ≤ 100.
-- [ ] AC-10: Jedes neue Tool ist ein Undo-Schritt, der Modellbaum zeigt sprechende Labels, `uv run poe check` ist grün, `test_language.py` findet keine deutschen Texte.
-- [ ] AC-11 (GUI, Nutzerabnahme): Loft, Helix und Primitiv aus AC-01 bis AC-03 sind in der GUI weiterbearbeitbar (Feature öffnen, Parameter ändern, Recompute ohne Fehler).
+AC-01 bis AC-11 sind erfüllt laut [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis); dort stehen Nachweis und Prüfebene. Der Wortlaut unten bleibt der Stand der Spezifikation.
+
+- [x] AC-01: Trichter aus zwei Kreisskizzen per `loft` ergibt einen gültigen Solid; die Höhe folgt dem Parameter der Datum-Ebene; subtraktiver Loft schneidet aus einem Pad heraus.
+- [x] AC-02: `helix` erzeugt additiv eine Feder und subtraktiv eine Nut mit parametrischer Steigung; Windungszahl folgt `pitch`/`height`. `thread` liefert weiterhin das bisherige Ergebnis (bestehende Tests grün).
+- [x] AC-03: Alle acht `primitive`-Arten entstehen additiv und subtraktiv mit Maßen aus Parametern; Volumen stimmt je Art mit der Formel auf 1 % überein.
+- [x] AC-04: `boolean` mit `fuse`, `cut`, `common` zwischen zwei Bodies ergibt jeweils den erwarteten Solid (Volumenprüfung); ungültige Kombinationen werden abgelehnt.
+- [x] AC-05: `draft` neigt die selektierten Flächen um den Parameterwinkel; nach Parameteränderung und Recompute bleibt der Solid gültig und der Selektor trifft dieselben Flächen.
+- [x] AC-06: `datum` legt Point, Line und LCS parametrisch an; `revolve` um eine Datum Line und `pattern kind=polar` um eine Datum Line liefern dasselbe Ergebnis wie um die Body-Achse bei gleicher Lage.
+- [x] AC-07: `pad`/`pocket` mit `taper` erzeugen geneigte Wände (Kontrolle über Volumen); `up_to_first` stoppt an der nächsten Fläche.
+- [x] AC-08: `hole` mit `model_thread=true` erzeugt Gewindegeometrie (Volumen kleiner als ohne, Solid gültig); ohne die Eigenschaft im Build kommt `unsupported`.
+- [x] AC-09: `get_design_rules("features")` und `("references")` nennen alle neuen Tools; `test_rules_only_name_registered_tools` und `test_every_topic_of_r03_is_covered` sind grün. `docs/tools.md` ist regeneriert, Tool-Zahl ≤ 100.
+- [x] AC-10: Jedes neue Tool ist ein Undo-Schritt, der Modellbaum zeigt sprechende Labels, `uv run poe check` ist grün, `test_language.py` findet keine deutschen Texte.
+- [x] AC-11 (GUI, Nutzerabnahme): Loft, Helix und Primitiv aus AC-01 bis AC-03 sind in der GUI weiterbearbeitbar (Feature öffnen, Parameter ändern, Recompute ohne Fehler).
 
 ## Offene Fragen
 
 | ID | Frage | Betroffen | Annahme bis Klärung | Verantwortlich |
 |---|---|---|---|---|
 | OF-01 | Soll `draft` aufgenommen werden? Für FDM bringt es wenig (Entformungsschrägen sind Guss/Spritzguss). | A-05, AC-05 | Ja, wegen „jedes Standard-Werkzeug“; niedrigste Priorität im Sprint | Ralf |
-| OF-02 | `PartDesign::Boolean` zieht die beteiligten Bodies in seine Gruppe (vermutet, ungeprüft). Verträgt sich das mit `get_model_tree`, Assembly4-`Parts` und „ein Body = ein Bauteil“? | A-04, AC-04 | Spike zu Beginn; falls nicht, bleibt `shape_binder` + `pocket`/`pad` die Empfehlung und `boolean` wird auf `fuse` beschränkt | Agent (Spike), Entscheidung Ralf |
-| OF-03 | Ist `ModelThread` in FreeCAD 26.3 vorhanden und ist das Ergebnis mit 0,4-mm-Düse druckbar? | A-08, AC-08 | Vorhanden seit 1.0 (vermutet); Regelwerk empfiehlt ab M5 | Agent (Spike) |
+| OF-02 | `PartDesign::Boolean` zieht die beteiligten Bodies in seine Gruppe (vermutet, ungeprüft). Verträgt sich das mit `get_model_tree`, Assembly4-`Parts` und „ein Body = ein Bauteil“? | A-04, AC-04 | ✅ Geklärt (Spike S1, 2026-09-29): Bodies wandern in die Boolean-Gruppe, `get_model_tree` listet sie weiter; fuse/cut/common voll umgesetzt, Bodies aus Assembly-`Parts` abgelehnt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#offene-fragen) | Agent (Spike), Entscheidung Ralf |
+| OF-03 | Ist `ModelThread` in FreeCAD 26.3 vorhanden und ist das Ergebnis mit 0,4-mm-Düse druckbar? | A-08, AC-08 | ✅ Geklärt (Spike S1, 2026-09-29): Eigenschaft in 26.3 vorhanden, Solids gültig; Druckbarkeit mit 0,4-mm-Düse bleibt ungeprüft (Probedruck offen), siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#offene-fragen) | Agent (Spike) |
 | OF-04 | Ein Sprint oder zwei (Features / Referenzen und Kleinigkeiten)? | Sprint-Planung | Ein Sprint mit fünf Phasen | Ralf |
 
 ## Umsetzung und Nachweis
 
 | Kriterium | Geplante Aufgabe / Schritte | Prüfebene und erwartetes Ergebnis | Nachweis / Status |
 |---|---|---|---|
-| AC-01 | `features.loft` (Additive/SubtractiveLoft), Bridge-Methode `feature.loft`, Server-Tool | Headless-Core-Test: Trichter, Parameterfolge, subtraktiv | offen |
-| AC-02 | `features.helix` (Additive/SubtractiveHelix), `thread.py` auf den gemeinsamen Kern umstellen | Headless-Core-Test Feder/Nut; bestehende `thread`-Tests | offen |
-| AC-03 | `features.primitive` mit Typ-Tabelle `kind → (Additive*, Subtractive*)`, Lage über Attachment an Ebene | Headless-Core-Test: 8 Arten × 2, Volumenformeln | offen |
-| AC-04 | Spike OF-02, dann `features.boolean` (PartDesign::Boolean) | Headless-Core-Test fuse/cut/common, Ablehnungsfälle | offen |
-| AC-05 | `features.draft` über `_dress_up` mit Face-Selektor | Headless-Core-Test inkl. Re-Resolve nach Parameteränderung | offen |
-| AC-06 | `features.datum` (Point/Line/CoordinateSystem), `_revolve_axis` und `pattern` um Datum-Line-Achse erweitern, `create_sketch` auf LCS | Headless-Core-Test Achsvergleich | offen |
-| AC-07 | `pad`/`pocket`: `TaperAngle`, Modus `up_to_first` | Headless-Core-Test Volumen | offen |
-| AC-08 | Spike OF-03, `hole`: `model_thread` → `ModelThread` | Headless-Core-Test Volumen/Gültigkeit; `unsupported`-Pfad mit Fake | offen |
-| AC-09 | `design_rules.py` Themen `features`/`references`, `compat.REQUIRED_TYPES`, `python tools/gen_tool_docs.py` | Unit-Tests Regelwerk, Tool-Doku-Test | offen |
-| AC-10 | Labels, Undo, Sprache je Tool | `uv run poe check` | offen |
-| AC-11 | GUI-Abnahme durch Ralf nach Freigabe | Nutzerprüfung GUI | offen |
+| AC-01 | `features.loft` (Additive/SubtractiveLoft), Bridge-Methode `feature.loft`, Server-Tool | Headless-Core-Test: Trichter, Parameterfolge, subtraktiv | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-02 | `features.helix` (Additive/SubtractiveHelix), `thread.py` auf den gemeinsamen Kern umstellen | Headless-Core-Test Feder/Nut; bestehende `thread`-Tests | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-03 | `features.primitive` mit Typ-Tabelle `kind → (Additive*, Subtractive*)`, Lage über Attachment an Ebene | Headless-Core-Test: 8 Arten × 2, Volumenformeln | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-04 | Spike OF-02, dann `features.boolean` (PartDesign::Boolean) | Headless-Core-Test fuse/cut/common, Ablehnungsfälle | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-05 | `features.draft` über `_dress_up` mit Face-Selektor | Headless-Core-Test inkl. Re-Resolve nach Parameteränderung | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-06 | `features.datum` (Point/Line/CoordinateSystem), `_revolve_axis` und `pattern` um Datum-Line-Achse erweitern, `create_sketch` auf LCS | Headless-Core-Test Achsvergleich | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-07 | `pad`/`pocket`: `TaperAngle`, Modus `up_to_first` | Headless-Core-Test Volumen | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-08 | Spike OF-03, `hole`: `model_thread` → `ModelThread` | Headless-Core-Test Volumen/Gültigkeit; `unsupported`-Pfad mit Fake | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-09 | `design_rules.py` Themen `features`/`references`, `compat.REQUIRED_TYPES`, `python tools/gen_tool_docs.py` | Unit-Tests Regelwerk, Tool-Doku-Test | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-10 | Labels, Undo, Sprache je Tool | `uv run poe check` | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
+| AC-11 | GUI-Abnahme durch Ralf nach Freigabe | Nutzerprüfung GUI | erfüllt, siehe [Sprint-Index](../../3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md#umsetzung-und-nachweis) |
 
 Umsetzung folgt dem freigegebenen Spec-Stand. Browser-/manuelle Prüfungen zusätzlich nach der [Abnahmefreigabe](../../README.md#browser--und-manuelle-abnahmeprüfungen) behandeln; Spec-Freigabe ist keine Testfreigabe.
 

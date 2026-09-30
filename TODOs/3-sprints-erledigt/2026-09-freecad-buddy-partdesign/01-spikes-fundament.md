@@ -30,7 +30,7 @@ Enthaltene Aufgaben: #1.1, #1.2, #1.3 (dazu #2.1 aus Phase 2)
 |---|---|---|---|
 | #1.1 | Spike OF-02 headless (Skript im Scratchpad, nicht im Repo): `PartDesign::Boolean` mit `addObjects([body])` für Fuse (9000 mm³), Cut (6000), Common (2000), alle gültig; der Werkzeug-Body verlässt `RootObjects` und hängt in `Boolean.Group`, sein Shape bleibt gültig, `InList` zeigt den Boolean; Undo ist ein Schritt, danach und nach `abortTransaction` sind beide Bodies gültig und wieder Root. Assembly-`Parts`-Fall nicht gemessen → Ablehnung per Regel. Ergebnis im Index (OF-02) | Boolean-Regel in 98 bestätigt | 2026-09-29 |
 | #1.2 | Spike OF-03 headless: `ModelThread` in 26.3 vorhanden (dazu `CosmeticThread`, `ThreadDepth`, `ThreadDepthType`, `ThreadFit`, `ThreadClass`); `ThreadSize`-Enumeration wird erst durch `ThreadType` gefüllt (bestehender Helfer `_thread_size` deckt das ab). M6: 1767 ms, 91 Flächen, 467 mm³ statt 393; M10: 1396 ms, 64 Flächen, 1321 mm³ statt 1135; Solids gültig. Ergebnis im Index (OF-03) | Regel „nur einzelne Gewinde“ in 98 | 2026-09-29 |
-| #1.3 | `compat.REQUIRED_TYPES` um 25 Typen erweitert (Loft, Helix, 16 Primitive, Boolean, Draft, Point, CoordinateSystem); `test_all_required_types_are_available` grün in 26.3. Volumenhelfer verschoben nach #2.3 (erst dort gebraucht, Scope-Entscheidung Agent) | `REQUIRED_TYPES`-Delta in 98 | 2026-09-29 |
+| #1.3 | `compat.REQUIRED_TYPES` um 24 Typen erweitert (Loft, Helix, 16 Primitive, Boolean, Draft, Point, CoordinateSystem); `test_all_required_types_are_available` grün in 26.3. Volumenhelfer verschoben nach #2.3 (erst dort gebraucht, Scope-Entscheidung Agent) | `REQUIRED_TYPES`-Delta in 98 | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 

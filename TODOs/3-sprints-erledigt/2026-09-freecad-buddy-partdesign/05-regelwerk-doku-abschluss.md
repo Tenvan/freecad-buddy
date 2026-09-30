@@ -31,7 +31,7 @@ Enthaltene Aufgaben: #5.1, #5.2, #5.3, #5.4
 | #5.1 | Regelwerk: Thema `features` um fünf Regeln (loft, helix + model_thread, primitive, draft/taper/up_to_first, boolean) und Thema `references` um die Datum-Regel erweitert, jeweils mit `requires`; Tests `test_rules_only_name_registered_tools`, `test_every_topic_of_r03_is_covered`, `test_language.py` grün | keins | 2026-09-29 |
 | #5.2 | `docs/tools.md` regeneriert (57 Tools); `docs/architecture.md` mit allen sieben Deltas aus 98; README (57 Tools, PartDesign-Abdeckung); `CHANGELOG.md` 0.3.0; Version 0.3.0 in `pyproject.toml`, `uv.lock`, Server, Bridge, Core; `docs/acceptance.md` um G13 ergänzt | in `docs/architecture.md` übernommen (98) | 2026-09-29 |
 | #5.4 | GUI-Abnahme AC-11 = G13 bestanden (Nachweis in der Tabelle unten) | keins | 2026-09-30 |
-| #5.3 | Gesamtcheck `uv run poe check` grün (siehe Session-Log S5); jedes neue Tool ist ein Undo-Schritt (Core-Tests nutzen `documents.undo` gegen `boolean`, `hole`, `draft`), Labels nach Konvention (`Loft_`, `Helix_`, `HelixCut_`, `<Primitive>_`/`<Primitive>Cut_`, `DatumPoint_`/`DatumLine_`/`LCS_`, `Boolean_`, `Draft_`) | keins | 2026-09-29 |
+| #5.3 | Gesamtcheck `uv run poe check` grün (siehe Session-Log S5); Undo ist im Core-Test für `boolean` und `draft` belegt (`documents.undo`); `loft`, `helix` und `primitive` sind manuell in G13 geprüft, `datum` nicht separat, Labels nach Konvention (`Loft_`, `Helix_`, `HelixCut_`, `<Primitive>_`/`<Primitive>Cut_`, `DatumPoint_`/`DatumLine_`/`LCS_`, `Boolean_`, `Draft_`) | keins | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 

@@ -606,7 +606,7 @@ def test_boolean_cut_fuse_and_common_between_bodies(doc: Any, part: Any) -> None
     tool = doc.getObjectsByLabel("Tool")[0]
     inside = math.pi * 100 * 20
 
-    cut = features.boolean("cut", ["Tool"], body="Part", purpose="Bore", document=doc.Name).to_dict()
+    cut = features.boolean("cut", ["Tool", "Tool"], body="Part", purpose="Bore", document=doc.Name).to_dict()
     assert cut["created"][0]["label"] == "Boolean_Bore" and cut["bodies"] == ["Tool"]
     assert cut["volume"] == pytest.approx(48000 - inside, rel=0.01)
     assert tool not in doc.RootObjects and part.Tip.Label == "Boolean_Bore"
@@ -636,6 +636,14 @@ def test_boolean_rejects_itself_empty_bodies_and_assembly_parts(doc: Any, part: 
 
     bodies.create_body("Tool", document=doc.Name)
     features.primitive("sphere", {"diameter": 10}, body="Tool", document=doc.Name)
+    features.boolean("fuse", ["Tool"], body="Part", document=doc.Name)
+    with pytest.raises(CoreError, match="already used by a boolean"):
+        features.boolean("cut", ["Tool"], body="Part", document=doc.Name)
+    with pytest.raises(CoreError, match="cycle"):  # Part already contains Tool
+        features.boolean("fuse", ["Part"], body="Tool", document=doc.Name)
+    assert {"Part"} <= {obj.Label for obj in doc.RootObjects}
+    documents.undo(document=doc.Name)
+
     assembly.create_assembly(document=doc.Name)  # moves the root bodies into 'Parts'
     with pytest.raises(CoreError, match="assembly part"):
         features.boolean("fuse", ["Tool"], body="Part", document=doc.Name)

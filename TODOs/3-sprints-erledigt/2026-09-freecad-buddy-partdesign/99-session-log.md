@@ -5,6 +5,39 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 7 — 2026-09-30 (Review-Gate)
+
+**Ziel:** Review-Gate in frischer Session (nach dem Sprint Storepoints): `git diff --name-status 4fd92f8..da5701a` in `97-review.md`, jede Datei bewerten, `/code-review high` und `/simplify`, Befunde im Sprint beheben, übrige in den Eingang.
+
+**Erledigt:**
+- `97-review.md` mit allen 37 Dateien. Code hat ein Reviewer-Agent mit Probe-Tests gelesen, Doku ein zweiter Reviewer-Agent, Doku-Fixes ein Fixer-Agent.
+- `boolean`: Zyklus zweier gegenseitiger Booleans wird abgelehnt (vorher leerer Modellbaum und trotzdem speicherbar), doppelte Tool-Bodies werden entfernt, Prüfungen in `_check_boolean_tool`; Tests für Zyklus, Doppelung und „already used by a boolean“.
+- `C901` wieder 14 wie bei `4fd92f8`: `_loft_sketches` ausgelagert, Primitive als Dispatch-Tabelle. `features.py` bleibt bei 1025 Zeilen, `tools/feature.py` von 406 auf 394 (fillet/chamfer kompakt).
+- Deutsche MCP-Texte in `tools/feature.py` übersetzt (`Sketch label`, `groove (cut)`, `ISO metric`, `Body label`), Tool-Doku neu generiert.
+- Doku: Ticket-Nachweise, AC-03/AC-06 als teilweise erfüllt mit Folgetests, AC-10 und OF-03 präzisiert, Entscheidung `draft` ohne `pull_direction`, 24 statt 25 Typen, Loft-Vorprüfung korrekt beschrieben, CHANGELOG/README mit Ausnahmen, `ModelThread` nur für 26.3 belegt. Eingang E-39 bis E-50.
+
+**Release-Änderungen:**
+- `[bugfix][core]` `boolean` lehnt einen Zyklus zwischen zwei Bodies ab und fügt doppelt genannte Bodies nur einmal ein.
+- `[bugfix][server]` Englische Parameterbeschreibungen in den Feature-Tools statt deutscher Reste.
+- `[skip][todos]` Review-Gate, Doku-Korrekturen, Backlog-Eingang.
+
+**Blocker:**
+- keine; Abnahme durch Ralf am 2026-09-30 erteilt.
+
+**Erkenntnisse:**
+- Nachweise, die auf Volumen-Schranken statt exakten Werten beruhen (Pocket-Taper), belegen kein Vorzeichen; Aussagen dazu nur mit passendem Test.
+
+**Komplexität:** `C901` 16 → 14 (`loft`, `_primitive_props` wieder ≤ 10; `boolean` von 10 auf klein); gewachsen über 400 Zeilen: keine durch die Review-Fixes.
+
+**Validierung:**
+- `uv run poe check`: ruff, pyright, 186 + 269 Tests grün (neue Prüfungen in bestehenden Boolean-Tests).
+- Browser-/manuelle Abnahme: keine neue.
+
+**Nächste Session:**
+- Nach Ralfs Abnahme: Sprint nach `3-sprints-erledigt/2026-09-freecad-buddy-partdesign/`, Ticket, Backlog-Index, `master-todo.md`, Roadmap R0 auf erledigt.
+
+---
+
 ## Session 6 — 2026-09-30 (GUI-Abnahme G13)
 
 **Ziel:** #5.4; Ralf überträgt die Führung an den Agenten und prüft selbst in der GUI.
@@ -210,7 +243,7 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 **Erledigt:**
 - #1.1 Spike Boolean: fuse/cut/common funktionieren über `addObjects`; Werkzeug-Body wandert in die Boolean-Gruppe, Undo/Rollback sauber. Entscheidung OF-02 im Index.
 - #1.2 Spike ModelThread: Eigenschaft in 26.3 vorhanden, M6 ≈ 1,8 s / 91 Flächen, M10 ≈ 1,4 s / 64 Flächen, Solids gültig. Entscheidung OF-03 im Index.
-- #1.3 `compat.REQUIRED_TYPES` + 25 Typen, `test_compat` grün. Volumenhelfer nach #2.3 verschoben.
+- #1.3 `compat.REQUIRED_TYPES` + 24 Typen, `test_compat` grün. Volumenhelfer nach #2.3 verschoben.
 - #2.1 `loft` in Core (`features.loft`, `_same_plane`), Bridge (`feature.loft`), Server (Tool `loft`), Beispiel in `gen_tool_docs`, `docs/tools.md` regeneriert (52 Tools); drei Core-Tests.
 
 **Release-Änderungen:**

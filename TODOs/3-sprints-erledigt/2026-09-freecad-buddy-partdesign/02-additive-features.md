@@ -40,7 +40,7 @@ Enthaltene Aufgaben: #2.2, #2.3
 |---|---|---|---|
 | #2.2 | `features.make_helix` (gemeinsamer Kern) und `features.helix(sketch, pitch, height\|turns, axis, angle, left_handed, subtractive)` → `AdditiveHelix`/`SubtractiveHelix`, Modus `pitch-height-angle` bzw. `pitch-turns-angle`, Achse wie `revolve` (Skizzen- oder Body-Achse; Datum Line folgt in #3.2); `thread.py` nutzt `make_helix`; Bridge `feature.helix`; Server-Tool `helix`; Tests: Feder (Volumen nach Pappus, folgt `Spring_Pitch`), Nut über `turns`, Ablehnungen; `thread`-Tests unverändert grün | keins | 2026-09-29 |
 | #2.3 | `features.primitive(kind, dims, plane, center, offset, subtractive, body)` mit Tabelle `_PRIMITIVES` (8 Arten, Additive*/Subtractive*), Maße als Durchmesser/Ausdehnungen über `values.resolve` (Radius = Durchmesser/2 als Expression), Lage per `_attach` an Ursprungs-/Datum-Ebene mit `AttachmentOffset`-Expressions, Box um die Fußabdruck-Mitte, Wedge um 90° gedreht; `_ensure_primitive_cuts` (Primitive haben kein `Reversed`); Bridge `feature.primitive`; Server-Tool `primitive`; `plane_support` aus `sketch/model.py` (vorher privat) wiederverwendet; Tests: 8 Volumenformeln ±1 %, subtraktiver Zylinder folgt Parameter, Kugel auf Datum-Ebene mit `center`/`offset` parametrisch, Ablehnungen. Volumenhelfer liegen als `_PRIMITIVE_CASES` im Testmodul (statt conftest, nur dort gebraucht) | Primitive-Regel in 98 | 2026-09-29 |
-| #2.1 | `features.loft(sketches, subtractive, ruled, closed, purpose)` → `AdditiveLoft`/`SubtractiveLoft` mit `Profile` + `Sections`; Vorprüfung: ≥ 2 Skizzen, gleicher Body, geschlossene Profile, keine zwei Skizzen auf derselben Ebene (`validation` mit Hinweis auf `datum_plane`); Bridge `feature.loft`; Server-Tool `loft`; Beispiel in `gen_tool_docs`, `docs/tools.md` regeneriert (52 Tools). Tests: Trichter (Kegelstumpf-Volumen ±1 %, folgt `Funnel_Height`), subtraktiver Kegelstumpf aus dem Quader, Ablehnungen | keins | 2026-09-29 |
+| #2.1 | `features.loft(sketches, subtractive, ruled, closed, purpose)` → `AdditiveLoft`/`SubtractiveLoft` mit `Profile` + `Sections`; Vorprüfung: ≥ 2 Skizzen, gleicher Body, jede Skizze hat Wires (ob sie geschlossen sind, wird nicht geprüft), keine zwei aufeinanderfolgenden Skizzen auf derselben Ebene (`validation` mit Hinweis auf `datum_plane`); Härtung (Geschlossenheit, alle Paare) im Backlog-Eingang (E-39); Bridge `feature.loft`; Server-Tool `loft`; Beispiel in `gen_tool_docs`, `docs/tools.md` regeneriert (52 Tools). Tests: Trichter (Kegelstumpf-Volumen ±1 %, folgt `Funnel_Height`), subtraktiver Kegelstumpf aus dem Quader, Ablehnungen | keins | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
 
@@ -48,7 +48,7 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| GUI-Anteil (Loft, Helix, Primitiv in der GUI öffnen und ändern) läuft gesammelt als AC-11 in Phase 5 | offen | ausstehend | ausstehend |
+| GUI-Anteil (Loft, Helix, Primitiv in der GUI öffnen und ändern) läuft gesammelt als AC-11 in Phase 5 | bestanden | Ralf, 2026-09-30 (G13) | AC-11/G13 am 2026-09-30 durch Ralf in der GUI bestätigt, siehe [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) |
 
 ## 🔄 Nächste Session
 
@@ -57,5 +57,5 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 > - Offene Aufgaben: 0
 > - Nächste Session: S3 (Phase 3, #3.1)
 > - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/features.py` (`datum_plane`, `_attach`, `_revolve_axis`), `src/buddy_server/tools/reference.py`
-> - Architektur-Deltas: Primitive-Regel in `98-architecture-update.md` (Status offen bis #5.2)
+> - Architektur-Deltas: Primitive-Regel in `98-architecture-update.md` (Status: in `docs/architecture.md` übernommen, #5.2)
 > - Startpunkt: #3.1

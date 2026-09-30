@@ -31,11 +31,12 @@ Verbindliche Arbeitsregeln (Domänen, Sprintgröße, Session-Regeln, Review-Gate
 
 | Nr. | Sprint (Ordnername) | Domäne | Quelle | Ziel | Umfang | Voraussetzung | Status |
 |---|---|---|---|---|---|---|---|
-| R0 | `freecad-buddy-partdesign` und `freecad-buddy-storepoints` abschließen | `abnahme` | aktive Sprints | GUI-Abnahmen G13 und G14/G15 bestanden (2026-09-30); Review-Gate `freecad-buddy-storepoints` bestanden (2026-09-30); offen: Review-Gate `freecad-buddy-partdesign` (Bereich `4fd92f8..da5701a`) | 1–2 Sessions | Ralf hat Zeit für die GUI-Prüfung | 🔵 Nächster |
-| R1 | `infra-qualitaets-gates` | `infra` | Eingang E-01 bis E-04 | Komplexitätsgrenze (ruff `C901`, max. 10) mit eingefrorener Baseline, `poe review-files` (geänderte Dateien seit Start-Commit), CI für `lint`/`typecheck`/`test-tools`, projekteigene `CLAUDE.md` | 2 Sessions | R0 | 🔴 |
+| R0 | `freecad-buddy-partdesign` und `freecad-buddy-storepoints` abschließen | `abnahme` | aktive Sprints | GUI-Abnahmen G13 und G14/G15 bestanden; Review-Gates beider Sprints bestanden und von Ralf abgenommen (2026-09-30); Review-Befunde im Eingang E-29 bis E-50 | 1–2 Sessions | Ralf hat Zeit für die GUI-Prüfung | ✅ Erledigt (2026-09-30) |
+| R0a | `core-ungespeicherte-aenderungen` | `core` | Eingang E-35 | `close` erkennt ungespeicherte Änderungen headless auch bei vollem Undo-Stack (Zähler `transaction.commits` statt `UndoCount`) und verwirft sie nicht mehr ohne Rückfrage; Regressionstest mit mehr als 20 Änderungen seit dem Speichern; Patch 0.4.1 | 1 Session | — | 🔵 Nächster |
+| R1 | `infra-qualitaets-gates` | `infra` | Eingang E-01 bis E-04, E-36 | Komplexitätsgrenze (ruff `C901`, max. 10) mit eingefrorener Baseline (14 Befunde), `poe review-files` (geänderte Dateien seit Start-Commit), CI für `lint`/`typecheck`/`test-tools`, projekteigene `CLAUDE.md` | 2 Sessions | R0 ✅; nach R0a | 🟡 Bereit (nach R0a) |
 | R2 | `abnahme-gui-rest` | `abnahme` | Ticket [`gui-abnahme.md`](1-backlog/freecad-buddy/gui-abnahme.md) | G2, G6, G8 abnehmen oder bewusst verwerfen | 1 Session | — (läuft, wenn Ralf prüfen kann) | 🟡 |
-| R3 | `core-komplexitaet` | `core` | Eingang E-05, E-06 | `features.py` (1025 Zeilen) in ein Paket aufteilen; `C901`-Baseline in `core` abbauen (`fill_pattern` 20, `_add_constraint_item` 14, `_edge_filter` 13, `_face_filter` 12, `screenshot` 12, `add_fastener`/`loft`/`_primitive_props` 11) – verhaltensneutral | 2–3 Sessions | R1 | 🔴 |
-| R4 | `server-komplexitaet` | `server` | Eingang E-07 | `register`-Funktionen der Tool-Module (`rules` 19, `feature` 17, `session` 13, `assembly` 11), `payloads` (16, 11), `slicer.read_result` 11 vereinfachen – verhaltensneutral | 2 Sessions | R1 | 🔴 |
+| R3 | `core-komplexitaet` | `core` | Eingang E-05, E-06, E-43, E-50 | `features.py` (1025 Zeilen) in ein Paket aufteilen, dabei die `/simplify`-Kandidaten aus E-50; `C901`-Baseline in `core` abbauen (`fill_pattern` 20, `_add_constraint_item` 14, `_edge_filter` 13, `_face_filter` 12, `screenshot` 12, `add_fastener` 11) – verhaltensneutral | 2–3 Sessions | R1 | 🔴 |
+| R4 | `server-komplexitaet` | `server` | Eingang E-07 | `register`-Funktionen der Tool-Module (`rules` 19, `feature` 17, `assembly` 11), `payloads` (16, 11), `slicer.read_result` 11 vereinfachen – verhaltensneutral | 2 Sessions | R1 | 🔴 |
 | R5 | `core-druckpruefung` | `core` | Ticket [`druckpruefung-ueberhang-kruemmung.md`](1-backlog/freecad-buddy/druckpruefung-ueberhang-kruemmung.md) | Überhänge an gekrümmten Flächen und freie Brücken erkennen | 2–3 Sessions | Spec-Freigabe durch Ralf | 🟡 |
 | R6 | `core-lage-und-ebenen` | `core` | Eingang E-10 bis E-12 (Praxisbefunde Becherschutz) | XZ-Offset-Richtung, Achsen flächengebundener Skizzen im Ergebnis melden, Ausdrücke mit `sin()`/`cos()` in `add_profile` | 2 Sessions (S1 Spike) | Ticket mit Spec aus dem Eingang | 🔴 |
 | R7 | `core-recompute-robustheit` | `core` | Eingang E-13 bis E-15 (Praxisbefunde Becherschutz) | Winkeländerung an `datum_plane` erreicht abhängige Features; leerer Body zerstört den Recompute nicht mehr (Schutz oder Warnung); stabile Labels nach `add_fastener` | 2–3 Sessions (S1 Spike) | Ticket mit Spec aus dem Eingang | 🔴 |
@@ -48,7 +49,6 @@ Verbindliche Arbeitsregeln (Domänen, Sprintgröße, Session-Regeln, Review-Gate
 | Slicer-Integration: Slicen per CLI, Druckzeit und Material zurückmelden | `server` | Eingang E-20 |
 | Bauteil-Bibliothek: Snap-Fits, Scharniere, Gewindeeinsätze, Schraubendome | `core` (Durchstich) | Eingang E-21 |
 | Multi-Body-Projekte mit Passungen ohne volle Assembly | `core` (Durchstich) | Eingang E-22 |
-| `bridge`-Komplexität: `replay` (12) | `bridge` | Eingang E-08 |
 | `tui`-Komplexität: `chat._flush` (12) | `tui` | Eingang E-09 |
 | Tool-Budget-Review (60 von 100 Tools): Überschneidungen, Zusammenlegungen | `server` | Eingang E-23 |
 
@@ -56,7 +56,8 @@ Verbindliche Arbeitsregeln (Domänen, Sprintgröße, Session-Regeln, Review-Gate
 
 ```mermaid
 graph TD
-    R0[R0 Abschluss aktive Sprints] --> R1[R1 infra-qualitaets-gates]
+    R0[R0 Abschluss aktive Sprints] --> R0a[R0a core-ungespeicherte-aenderungen]
+    R0a --> R1[R1 infra-qualitaets-gates]
     R1 --> R3[R3 core-komplexitaet]
     R1 --> R4[R4 server-komplexitaet]
     R3 --> R5[R5 core-druckpruefung]

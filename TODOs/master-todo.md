@@ -5,19 +5,17 @@
 
 ## Roadmap
 
-Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.md) (nächster Schritt R0: Review-Gate des Sprints PartDesign; Storepoints abgeschlossen).
+Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.md) (R0 erledigt; nächster Schritt R0a `core-ungespeicherte-aenderungen` für E-35, danach R1 `infra-qualitaets-gates`).
 
 ## Aktive Sprints
 
-| Name | Pfad | Status | Notiz |
-|---|---|---|---|
-| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🟡 Wartet auf Review-Gate (seit 2026-09-30) | 16/16 Aufgaben (6 neue Tools, Taper, `model_thread`, Regelwerk, Doku, Version 0.3.0); GUI-Abnahme G13 bestanden; offen nur Review-Gate |
+Keine – nächster Sprint laut Roadmap: R0a (E-35), danach R1.
 
 ## Backlog (nach Domain)
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 2 offene Tickets: 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; 1 Ticket im aktiven Sprint (PartDesign-Vollständigkeit); 5 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
+| Backlog — freecad-buddy | [`1-backlog/freecad-buddy/00-index.md`](1-backlog/freecad-buddy/00-index.md) | Backlog | 2 offene Tickets: 🟡 GUI-Abnahme Rest (G2, G6, G8), 🟡 Druckprüfung Überhang/Brücken; keine Tickets in aktiven Sprints; 6 umgesetzte Tickets als Historie; dazu Ideen-Parkplatz |
 
 ## Konzepte
 
@@ -30,6 +28,7 @@ Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-partdesign/00-index.md) | ✅ Erledigt (2026-09-30) | 16/16 Aufgaben, Version 0.3.0, 57 Tools; Review-Gate mit Boolean-Zyklus-Fix und englischen Tool-Texten, Eingang E-39 bis E-50 |
 | FreeCAD Buddy: Design-Stream mit Storepoints | [`3-sprints-erledigt/2026-09-freecad-buddy-storepoints/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-storepoints/00-index.md) | ✅ Erledigt (2026-09-30) | 10/10 Aufgaben, Version 0.4.0, 60 Tools; Review-Gate mit Stream-Korrekturen (voller Undo-Stack, Undo-Abgleich, Thread-Guard), Eingang E-29 bis E-37 |
 | FreeCAD Buddy: Design-Regelwerk, Design-Tools & Addon-Suche | [`3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-design-regelwerk/00-index.md) | ✅ Erledigt (2026-09-29) | 21/21 Aufgaben, Spec-Stand 6, Version 0.2.0; Regelwerk, `fill_pattern`, Addon-Suche/-Installation, Chat-Log, englische MCP-Ausgaben; GUI-Rest G2/G6/G8 → Backlog |
 | FreeCAD Buddy: Externe Geometrie, Shape-Binder & Layout-Skizze | [`3-sprints-erledigt/2026-09-freecad-buddy-referenzen/00-index.md`](3-sprints-erledigt/2026-09-freecad-buddy-referenzen/00-index.md) | ✅ Erledigt (2026-09-28) | 16/16 Aufgaben, Spec-Stand 2; externe Geometrie, `shape_binder`, Hole-Senkungen, gruppierter Katalog, `document`-Tool |

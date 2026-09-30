@@ -285,22 +285,7 @@ def loft(
     the profile, the others the sections - that is how a person sets up a loft in FreeCAD.
     """
     doc = resolve_document(document)
-    if len(sketches) < 2:
-        raise validation("A loft needs at least two sketches on different planes")
-    first, body = _profile(doc, sketches[0])
-    sections = [resolve_sketch(doc, ref) for ref in sketches[1:]]
-    for sketch in sections:
-        if body_of(sketch) is not body:
-            raise validation("All loft sketches must be in the same body")
-    for sketch in (first, *sections):
-        if sketch.Shape.isNull() or not sketch.Shape.Wires:
-            raise validation(f"Sketch '{sketch.Label}' contains no closed profile")
-    for previous, sketch in zip((first, *sections), sections, strict=False):
-        if _same_plane(previous, sketch):
-            raise validation(
-                f"Sketches '{previous.Label}' and '{sketch.Label}' lie on the same plane",
-                hints=["Put each section on its own plane, e.g. a datum_plane with an offset parameter."],
-            )
+    first, body, sections = _loft_sketches(doc, sketches)
     type_id, prefix = (
         ("PartDesign::SubtractiveLoft", "LoftCut") if subtractive else ("PartDesign::AdditiveLoft", "Loft")
     )
@@ -321,6 +306,27 @@ def loft(
     if first_solid:
         _show_first_base_feature(doc, feature, result)
     return result
+
+
+def _loft_sketches(doc: Any, sketches: list[str]) -> tuple[Any, Any, list[Any]]:
+    """Profile, body and sections of a loft, checked: same body, a profile each, no shared plane."""
+    if len(sketches) < 2:
+        raise validation("A loft needs at least two sketches on different planes")
+    first, body = _profile(doc, sketches[0])
+    sections = [resolve_sketch(doc, ref) for ref in sketches[1:]]
+    for sketch in sections:
+        if body_of(sketch) is not body:
+            raise validation("All loft sketches must be in the same body")
+    for sketch in (first, *sections):
+        if sketch.Shape.isNull() or not sketch.Shape.Wires:
+            raise validation(f"Sketch '{sketch.Label}' contains no closed profile")
+    for previous, sketch in zip((first, *sections), sections, strict=False):
+        if _same_plane(previous, sketch):
+            raise validation(
+                f"Sketches '{previous.Label}' and '{sketch.Label}' lie on the same plane",
+                hints=["Put each section on its own plane, e.g. a datum_plane with an offset parameter."],
+            )
+    return first, body, sections
 
 
 def make_helix(
@@ -430,32 +436,20 @@ def _primitive_props(
         return values.resolve(doc, f"-({dims[key]}) / 2", key)
 
     mm = "mm"
-    if kind == "box":
-        return [("Length", full("length"), mm), ("Width", full("width"), mm), ("Height", full("height"), mm)]
-    if kind == "cylinder":
-        return [("Radius", half("diameter"), mm), ("Height", full("height"), mm)]
-    if kind == "sphere":
-        return [("Radius", half("diameter"), mm)]
-    if kind == "cone":
-        return [
-            ("Radius1", half("diameter"), mm),
-            ("Radius2", half("top_diameter"), mm),
-            ("Height", full("height"), mm),
-        ]
-    if kind == "ellipsoid":  # Radius1 = Z, Radius2 = X, Radius3 = Y
-        return [
-            ("Radius1", half("height"), mm),
-            ("Radius2", half("length"), mm),
-            ("Radius3", half("width"), mm),
-        ]
-    if kind == "torus":
-        return [("Radius1", half("diameter"), mm), ("Radius2", half("tube_diameter"), mm)]
-    if kind == "prism":
-        return [
-            ("Polygon", full("sides"), "int"),
-            ("Circumradius", half("diameter"), mm),
-            ("Height", full("height"), mm),
-        ]
+    kinds = {  # ellipsoid: Radius1 = Z, Radius2 = X, Radius3 = Y
+        "box": lambda: [("Length", full("length"), mm), ("Width", full("width"), mm), ("Height", full("height"), mm)],
+        "cylinder": lambda: [("Radius", half("diameter"), mm), ("Height", full("height"), mm)],
+        "sphere": lambda: [("Radius", half("diameter"), mm)],
+        "cone": lambda: [("Radius1", half("diameter"), mm), ("Radius2", half("top_diameter"), mm),
+                          ("Height", full("height"), mm)],
+        "ellipsoid": lambda: [("Radius1", half("height"), mm), ("Radius2", half("length"), mm),
+                          ("Radius3", half("width"), mm)],
+        "torus": lambda: [("Radius1", half("diameter"), mm), ("Radius2", half("tube_diameter"), mm)],
+        "prism": lambda: [("Polygon", full("sides"), "int"), ("Circumradius", half("diameter"), mm),
+                          ("Height", full("height"), mm)],
+    }  # fmt: skip
+    if kind in kinds:
+        return kinds[kind]()
     # wedge: X = length, Z = width, Y = height; the attachment turns Y onto the plane normal
     return [
         ("Xmin", neg_half("length"), mm), ("Xmax", half("length"), mm),
@@ -977,6 +971,22 @@ def datum(
     return result
 
 
+def _check_boolean_tool(target: Any, tool: Any) -> None:
+    if tool is target:
+        raise validation("A body cannot be combined with itself")
+    if not _has_solid(tool):
+        raise validation(f"'{tool.Label}' has no geometry")
+    group = tool.getParentGroup()
+    if group is not None and group.Name == "Parts":
+        raise validation(
+            f"'{tool.Label}' is an assembly part; boolean only combines bodies of the same printable part"
+        )
+    if any(parent.TypeId == "PartDesign::Boolean" for parent in tool.InList):
+        raise validation(f"'{tool.Label}' is already used by a boolean")
+    if target in tool.OutListRecursive:
+        raise validation(f"'{tool.Label}' already contains '{target.Label}' (boolean cycle)")
+
+
 def boolean(
     op: str,
     bodies: list[str],
@@ -998,19 +1008,9 @@ def boolean(
     target = resolve_body(doc, body)
     if not _has_solid(target):
         raise validation("The target body has no geometry yet")
-    tools = [resolve_body(doc, ref) for ref in bodies]
+    tools = list({tool.Name: tool for tool in (resolve_body(doc, ref) for ref in bodies)}.values())
     for tool in tools:
-        if tool is target:
-            raise validation("A body cannot be combined with itself")
-        if not _has_solid(tool):
-            raise validation(f"'{tool.Label}' has no geometry")
-        group = tool.getParentGroup()
-        if group is not None and group.Name == "Parts":
-            raise validation(
-                f"'{tool.Label}' is an assembly part; boolean only combines bodies of the same printable part"
-            )
-        if any(parent.TypeId == "PartDesign::Boolean" for parent in tool.InList):
-            raise validation(f"'{tool.Label}' is already used by a boolean")
+        _check_boolean_tool(target, tool)
     labels = ", ".join(tool.Label for tool in tools)
     result = ToolResult()
     with transaction(doc, f"Boolean {op}: {purpose or labels}"):

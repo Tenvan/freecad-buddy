@@ -14,7 +14,7 @@ Aus dem Sprint `freecad-buddy-storepoints` (Idee Ralf): der Aufbau eines Designs
 
 ## 0.3.0 — 2026-09-29
 
-Aus dem Sprint `freecad-buddy-partdesign`: jedes Standard-Werkzeug der PartDesign-Leiste ist jetzt über ein Tool erreichbar (57 Tools).
+Aus dem Sprint `freecad-buddy-partdesign`: jedes Standard-Werkzeug der PartDesign-Leiste ist jetzt über ein Tool erreichbar, bis auf Clone, Scaled außerhalb von MultiTransform, Sprocket, Shaft Wizard, Involute Gear und die Feature-Verwaltung (57 Tools).
 
 ### Neu
 

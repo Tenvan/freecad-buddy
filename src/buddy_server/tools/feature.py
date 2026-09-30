@@ -59,12 +59,12 @@ def register(reg: Registration) -> None:
 
     @tool
     async def revolve(
-        sketch: Annotated[str, Field(description="Skizzen-Label")],
+        sketch: Annotated[str, Field(description="Sketch label")],
         axis: Annotated[
             str, Field(description="V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label")
         ] = "V_Axis",
         angle: Num = 360,
-        subtractive: Annotated[bool, Field(description="true = Nut (Groove)")] = False,
+        subtractive: Annotated[bool, Field(description="true = groove (cut)")] = False,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
@@ -189,7 +189,7 @@ def register(reg: Registration) -> None:
         sketch: Annotated[
             str, Field(description="Sketch with circles at the hole positions (e.g. hole_rect)")
         ],
-        size: Annotated[str, Field(description="ISO-Metrisch, z. B. M3, M4")] = "M3",
+        size: Annotated[str, Field(description="ISO metric, e.g. M3, M4")] = "M3",
         cut: Literal["none", "countersink", "counterbore"] = "none",
         depth: Annotated[float | str | None, Field(description="empty = through all")] = None,
         threaded: bool = False,
@@ -228,46 +228,34 @@ def register(reg: Registration) -> None:
     async def fillet(
         selector: Annotated[str, Field(description=SELECTOR_HELP)] = "edges:top",
         radius: Num = 1,
-        body: Annotated[str | None, Field(description="Body-Label")] = None,
+        body: Annotated[str | None, Field(description="Body label")] = None,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
         """Round edges. The selector is stored and resolved again after parameter changes."""
         return await ctx.call(
-            "fillet",
-            "feature.fillet",
-            selector=selector,
-            radius=radius,
-            body=body,
-            purpose=purpose,
-            document=document,
-        )
+            "fillet", "feature.fillet", selector=selector, radius=radius, body=body, purpose=purpose, document=document
+        )  # fmt: skip
 
     @tool
     async def chamfer(
         selector: Annotated[str, Field(description=SELECTOR_HELP)] = "edges:bottom",
         size: Num = 0.5,
-        body: Annotated[str | None, Field(description="Body-Label")] = None,
+        body: Annotated[str | None, Field(description="Body label")] = None,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:
         """Chamfer edges (on the bed side better than a fillet - against elephant foot)."""
         return await ctx.call(
-            "chamfer",
-            "feature.chamfer",
-            selector=selector,
-            size=size,
-            body=body,
-            purpose=purpose,
-            document=document,
-        )
+            "chamfer", "feature.chamfer", selector=selector, size=size, body=body, purpose=purpose, document=document
+        )  # fmt: skip
 
     @tool
     async def shell(
         selector: Annotated[str, Field(description="Opening face(s), e.g. face:top")] = "face:top",
         thickness: Num = 2,
         outward: bool = False,
-        body: Annotated[str | None, Field(description="Body-Label")] = None,
+        body: Annotated[str | None, Field(description="Body label")] = None,
         purpose: Purpose = None,
         document: Doc = None,
     ) -> dict[str, Any]:

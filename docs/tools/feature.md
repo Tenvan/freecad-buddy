@@ -78,10 +78,10 @@ Beispiel:
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
-| `sketch` | string | ja | `—` | Skizzen-Label |
+| `sketch` | string | ja | `—` | Sketch label |
 | `axis` | string | nein | `"V_Axis"` | V_Axis/H_Axis (sketch axis), X/Y/Z (body axis) or a datum line label |
 | `angle` | number \| string | nein | `360` | Number in mm/degrees or the name of a parameter (bound by expression) |
-| `subtractive` | boolean | nein | `false` | true = Nut (Groove) |
+| `subtractive` | boolean | nein | `false` | true = groove (cut) |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
@@ -214,7 +214,7 @@ cut_diameter/cut_depth/countersink_angle set custom, parametric values.
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `sketch` | string | ja | `—` | Sketch with circles at the hole positions (e.g. hole_rect) |
-| `size` | string | nein | `"M3"` | ISO-Metrisch, z. B. M3, M4 |
+| `size` | string | nein | `"M3"` | ISO metric, e.g. M3, M4 |
 | `cut` | `none` \| `countersink` \| `counterbore` | nein | `"none"` |  |
 | `depth` | number \| string \| null | nein | `null` | empty = through all |
 | `threaded` | boolean | nein | `false` |  |
@@ -245,7 +245,7 @@ Beispiel:
 |---|---|---|---|---|
 | `selector` | string | nein | `"edges:top"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
 | `radius` | number \| string | nein | `1` | Number in mm/degrees or the name of a parameter (bound by expression) |
-| `body` | string \| null | nein | `null` | Body-Label |
+| `body` | string \| null | nein | `null` | Body label |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
@@ -266,7 +266,7 @@ Beispiel:
 |---|---|---|---|---|
 | `selector` | string | nein | `"edges:bottom"` | Semantic selector, e.g. edges:top, edges:vertical, edges:bottom, faces:top, faces:vertical (side walls), face:top, edges:circular,radius=2, edges:of_feature=Pocket_Cut. select_geometry previews the hits. |
 | `size` | number \| string | nein | `0.5` | Number in mm/degrees or the name of a parameter (bound by expression) |
-| `body` | string \| null | nein | `null` | Body-Label |
+| `body` | string \| null | nein | `null` | Body label |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 
@@ -288,7 +288,7 @@ Beispiel:
 | `selector` | string | nein | `"face:top"` | Opening face(s), e.g. face:top |
 | `thickness` | number \| string | nein | `2` | Number in mm/degrees or the name of a parameter (bound by expression) |
 | `outward` | boolean | nein | `false` |  |
-| `body` | string \| null | nein | `null` | Body-Label |
+| `body` | string \| null | nein | `null` | Body label |
 | `purpose` | string \| null | nein | `null` | Purpose for the label, e.g. 'Base' → 'Pad_Base' |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 

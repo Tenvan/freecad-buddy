@@ -6,7 +6,7 @@
 
 > Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-29 („ok, dann umsetzen“), inklusive der Annahmen OF-01 bis OF-05 als Entscheidungen
 
-Quelle: Backlog-Ticket [`design-stream-storepoints.md`](../../1-backlog/freecad-buddy/design-stream-storepoints.md), Spec-Stand 1. Ausgangslage, Beteiligte, Anforderungen (A-01 bis A-08), Nicht-Ziele, Regeln, Beispiele, Ausnahmefälle und die Kriterien AC-01 bis AC-10 gelten unverändert aus dem Ticket. Parallel offen: Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md), dort ist nur noch das Review-Gate offen.
+Quelle: Backlog-Ticket [`design-stream-storepoints.md`](../../1-backlog/freecad-buddy/design-stream-storepoints.md), Spec-Stand 1. Ausgangslage, Beteiligte, Anforderungen (A-01 bis A-08), Nicht-Ziele, Regeln, Beispiele, Ausnahmefälle und die Kriterien AC-01 bis AC-10 gelten unverändert aus dem Ticket. Parallel lief Sprint [`freecad-buddy-partdesign`](../2026-09-freecad-buddy-partdesign/00-index.md), ebenfalls am 2026-09-30 abgeschlossen.
 
 ## Ausgangslage
 
