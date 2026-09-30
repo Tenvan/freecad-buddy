@@ -9,7 +9,7 @@ Aus dem Sprint `freecad-buddy-storepoints` (Idee Ralf): der Aufbau eines Designs
 - Design-Stream: Jeder mutierende Tool-Aufruf wird mit Parametern im Dokument aufgezeichnet (Gruppe `Storepoints`), überlebt Speichern und Öffnen, wird bei Undo kompaktiert; manuelle GUI-Änderungen zwischen den Aufrufen werden als `manual_edit` erkannt.
 - `storepoint`: Meilenstein setzen. Im Baum als Marker in der Gruppe `Storepoints` (Icon, Doppelklick markiert das Feature) und als Beschreibung „◆ Storepoint n: Name“ am Feature; optional eine FCStd-Kopie als Snapshot.
 - `list_storepoints`: Storepoints mit Position, Zeit, Schritten seit dem vorherigen und verlinktem Feature; Zahl der Schritte und erkannten manuellen Änderungen.
-- `replay`: Design aus dem Stream bis zu einem Storepoint in einem neuen Dokument neu aufbauen, über dieselben Tools; Python-Ausführung und Addon-Installation werden übersprungen und gemeldet, ein scheiternder Schritt bricht mit Schrittnummer ab.
+- `replay`: Design aus dem Stream bis zu einem Storepoint in einem neuen Dokument neu aufbauen, über dieselben Tools; nur Modellier-Methoden werden abgespielt (Skripte, Addon-Installation, Dateizugriffe, Exporte und STEP-Import werden übersprungen und gemeldet), ein scheiternder Schritt bricht mit Schrittnummer ab.
 - Regelwerk: Thema `workflow` empfiehlt Storepoints an Meilensteinen.
 
 ## 0.3.0 — 2026-09-29

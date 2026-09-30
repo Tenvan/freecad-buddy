@@ -1,5 +1,9 @@
 """Replay a design stream into a new document, step by step over the same registry path that
-recorded it. Python execution and addon installation are never replayed."""
+recorded it.
+
+The stream is document data and may come from any FCStd file, so only modelling methods are
+replayed (allowlist). Scripts, addon installation, file and document lifecycle, exports and the
+STEP import (a file path from the stream) are skipped and reported."""
 
 from __future__ import annotations
 
@@ -12,7 +16,22 @@ from buddy_core import __version__, documents, stream
 from buddy_core.errors import CoreError, not_found, validation
 from buddy_core.result import ToolResult
 
-NEVER_REPLAYED = ("python.", "addons.install")
+REPLAYABLE = (
+    "body.",
+    "sketch.",
+    "feature.",
+    "design.",
+    "appearance.",
+    "assembly.",
+    "parameters.set",
+    "document.delete",
+    stream.STOREPOINT_METHOD,
+)
+NEVER_REPLAYED = ("assembly.insert_step",)  # reads a file path taken from the stream
+
+
+def replayable(method: str) -> bool:
+    return method.startswith(REPLAYABLE) and method not in NEVER_REPLAYED
 
 
 def replay(registry: Any, storepoint: str, into: str, document: str | None = None) -> ToolResult:
@@ -48,7 +67,7 @@ def replay(registry: Any, storepoint: str, into: str, document: str | None = Non
                 f"Step {index}: manual edits in the original ({names}) are not in the stream."
             )
             continue
-        if method.startswith(NEVER_REPLAYED):
+        if not replayable(method):
             skipped.append({"step": index, "method": method})
             continue
         params = dict(entry["params"])
@@ -76,6 +95,9 @@ def replay(registry: Any, storepoint: str, into: str, document: str | None = Non
     result.data["steps"] = executed
     result.data["skipped"] = skipped
     if skipped:
-        result.hints.append("Skipped steps need a manual follow-up (Python execution, addon installation).")
+        result.hints.append(
+            "Skipped steps are not replayed for safety (scripts, addon installation, file access, STEP import) "
+            "and need a manual follow-up."
+        )
     result.hints.append(f"'{into}' is the active document now; the original is unchanged.")
     return result

@@ -5,6 +5,40 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 1b — 2026-09-30 (Sicherheitsbefund Replay)
+
+**Ziel:** Befund „allowlist-semantic-escape“ der Push-Sicherheitsprüfung in `buddy_bridge/replay.py` beheben.
+
+**Erledigt:**
+- Replay spielt nur noch Modellier-Methoden ab (Allowlist `REPLAYABLE`), `assembly.insert_step` (Pfad aus dem Stream) ausgenommen; alles andere wird übersprungen und gemeldet. Vorher hätte eine präparierte FCStd `document.save`, `document.open` oder `print.export` mit fremden Pfaden abspielen können.
+- `MethodRegistry.execute` prüft Parameter aus dem Stream gegen die Signatur wie eine RPC-Anfrage.
+- `NOT_RECORDED` explizit statt Präfix `document.`: `document.delete` gehört zum Design und wird jetzt aufgezeichnet.
+- Test: präparierter `document.save`-Eintrag wird übersprungen, keine Datei entsteht.
+
+**Release-Änderungen:**
+- `[bugfix][bridge]` Replay führt nur Modellier-Methoden aus; `document.delete` wird aufgezeichnet.
+
+**Blocker:**
+- unverändert #4.3 (GUI-Abnahme, Ralf).
+
+**Erkenntnisse:**
+- Denylists an Datengrenzen sind ein Fehler; der Stream ist Fremddaten, sobald eine Datei geöffnet wird.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: Abschnitt Design-Stream (Allowlist, Aufzeichnungsliste) aktualisiert.
+- Nicht übernehmen: —
+
+**Validierung:**
+- `run-core-tests -- tests/bridge/test_stream.py`: 7 passed (neu: präparierter `document.save`-Eintrag wird übersprungen, `document.delete` aufgezeichnet).
+- `uv run poe check`: ruff, pyright 0 Fehler, 186 Projekt-Python-Tests, 256 FreeCAD-Python-Tests.
+- Browser-/manuelle Abnahme: unverändert offen.
+
+**Nächste Session:**
+- unverändert S2.
+
+---
+
 ## Session 1 — 2026-09-29 (Umsetzung Phase 1–4)
 
 **Ziel:** #1.1 bis #4.2, #4.3 ohne GUI-Anteil.

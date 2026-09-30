@@ -161,7 +161,9 @@ def test_replay_rebuilds_the_design_up_to_each_storepoint(registry: MethodRegist
         registry.execute("stream.replay", {"storepoint": "Nope", "into": "Copy3", "document": doc.Name})
 
 
-def test_replay_skips_python_and_stops_at_a_failing_step(registry: MethodRegistry, doc: Any) -> None:
+def test_replay_skips_python_and_stops_at_a_failing_step(
+    registry: MethodRegistry, doc: Any, tmp_path: Path
+) -> None:
     _add_hole_and_storepoints(registry, doc.Name)
     items = stream.entries(doc)
     items[6]["method"] = "python.execute"  # the hole profile now looks like a script step
@@ -189,3 +191,23 @@ def test_replay_skips_python_and_stops_at_a_failing_step(registry: MethodRegistr
 
     assert result["skipped"] == [{"step": 7, "method": "python.execute"}] and result["steps"] == 8
     assert not FreeCAD.getDocument(result["document"]["name"]).getObjectsByLabel("Pocket_Hole")
+
+    evil = tmp_path / "evil.FCStd"
+    items = stream.entries(doc)
+    items[7]["method"] = "document.save"  # a crafted file must not make the replay touch the disk
+    items[7]["params"] = {"path": str(evil)}
+    stream._write(doc, items)
+
+    result = registry.execute(
+        "stream.replay", {"storepoint": "Done", "into": "Guarded", "document": doc.Name}
+    )
+
+    assert result["skipped"] == [{"step": 7, "method": "document.save"}] and not evil.exists()
+
+
+def test_deleting_an_object_is_part_of_the_stream(registry: MethodRegistry, doc: Any) -> None:
+    _build_box(registry, doc.Name)
+
+    registry.execute("document.delete", {"ref": "Pad_Base", "document": doc.Name})
+
+    assert _methods(doc) == [*BOX_STEPS, "document.delete"]

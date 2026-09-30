@@ -20,8 +20,25 @@ from buddy_core import stream
 from buddy_core.errors import CoreError
 
 DEFAULT_TIMEOUT = 30.0
-# read-only, session and lifecycle methods never enter a design stream; replay records its own steps
-NOT_RECORDED = ("system.", "python.", "addons.", "document.", "stream.list", "stream.replay")
+# never part of a design stream: session, scripts, addons, document lifecycle, read-only calls, exports
+NOT_RECORDED = (
+    "system.",
+    "python.",
+    "addons.",
+    "select.",
+    "view.",
+    "print.",
+    "document.new",
+    "document.open",
+    "document.save",
+    "document.close",
+    "document.revert",
+    "document.undo",
+    "document.tree",
+    "document.object",
+    "stream.list",
+    "stream.replay",
+)
 CODES_BY_NAME = {name: code for code, name in ERROR_NAMES.items()}
 
 
@@ -56,6 +73,10 @@ class MethodRegistry:
         """Run a method on the current thread and record it in the design stream of every document
         it changed (the one execution path, shared by RPC calls and the replay)."""
         fn = self.function(name)
+        try:
+            inspect.signature(fn).bind(**params)  # stream entries are data - check them like a request
+        except TypeError as error:
+            raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{name}': {error}") from None
         before = stream.snapshot()
         result = fn(**params)
         payload = result.to_dict() if hasattr(result, "to_dict") else result
