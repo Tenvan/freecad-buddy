@@ -79,6 +79,23 @@ def test_undo_compacts_the_stream_and_manual_edits_are_marked(registry: MethodRe
     assert registry.execute("stream.list", {"document": doc.Name})["manual_edits"] == 1
 
 
+def test_gui_transactions_between_polls_stay_one_manual_edit(registry: MethodRegistry, doc: Any) -> None:
+    """A sketch edit in the GUI is several transactions; read-only calls (TUI, get_model_tree)
+    reconcile in between - it must still count as one manual edit with its own undo names."""
+    _build_box(registry, doc.Name)
+    sketch = doc.getObjectsByLabel("Sketch_Base")[0]
+    for index, name in enumerate(["Edit", "Drag Constraint", "Sketch recompute"]):
+        doc.openTransaction(name)
+        sketch.AttachmentOffset = FreeCAD.Placement(FreeCAD.Vector(0, 0, index + 1), FreeCAD.Rotation())
+        doc.commitTransaction()
+        registry.execute("document.tree", {"document": doc.Name})  # read-only, reconciles
+
+    items = stream.entries(doc)
+    assert _methods(doc) == [*BOX_STEPS, "manual_edit"]
+    assert items[-1]["undo_names"] == ["Sketch recompute", "Drag Constraint", "Edit"]
+    assert registry.execute("stream.list", {"document": doc.Name})["manual_edits"] == 1
+
+
 def test_stream_survives_save_close_and_open(registry: MethodRegistry, doc: Any, tmp_path: Path) -> None:
     _build_box(registry, doc.Name)
     path = tmp_path / "stream.FCStd"

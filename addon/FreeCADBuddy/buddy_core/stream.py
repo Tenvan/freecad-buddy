@@ -155,8 +155,12 @@ def reconcile(doc: Any, keep: int = 0) -> list[dict[str, Any]]:
             continue
         if entry["method"] == MANUAL_EDIT:
             names = entry.get("undo_names", [])
-            if history[cursor : cursor + len(names)] == names:
-                cursor += len(names)  # already noted
+            start = _find(history, names, cursor)
+            if start is not None:
+                if start > cursor:  # further GUI transactions right after it: the same manual edit
+                    entry = {**entry, "undo_names": history[cursor:start] + names}
+                    changed = True
+                cursor = start + len(names)  # already noted
             result.append(entry)
             continue
         try:
@@ -174,6 +178,14 @@ def reconcile(doc: Any, keep: int = 0) -> list[dict[str, Any]]:
     if changed:
         _write(doc, result)
     return result
+
+
+def _find(history: list[str], names: list[str], start: int) -> int | None:
+    """Index of the first occurrence of ``names`` as a run in ``history`` from ``start`` on."""
+    for index in range(start, len(history) - len(names) + 1):
+        if history[index : index + len(names)] == names:
+            return index
+    return None
 
 
 def _now() -> str:
