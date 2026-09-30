@@ -22,4 +22,18 @@ Vorbereitung: `uv sync`, `uv run poe install-addon`, FreeCAD neu starten, `uv ru
 | G13 | Sprint `freecad-buddy-partdesign`, AC-11 | Trichter (`loft` über zwei Kreise auf XY und einer Datum-Ebene), Feder (`helix`) und Kugelknauf (`primitive`) über MCP bauen lassen; in der GUI jedes Feature per Doppelklick öffnen, einen Parameter im VarSet ändern, Recompute | Features öffnen sich im Task-Panel, das Modell folgt dem Parameter ohne Fehler, Skizzen weiterhin „vollständig bestimmt“ |
 | G8 | optional | Probedruck Box mit Deckel | Deckel passt mit dem Spiel `clearance_fit` |
 
+## Agentengestützte Prüfung
+
+Übergang bis zum GUI-Testlauf (Backlog E-27): Einige Prüfungen kann der Agent in der laufenden GUI selbst ausführen, ohne Maus und Bildschirmkoordinaten, in-process über `FreeCADGui` und Qt ([`tools/gui_checks.py`](../tools/gui_checks.py)). Voraussetzung ist die Freigabe der Prüfung und `execute_python`, das du in der TUI mit `p` einschaltest und danach wieder ausschaltest. Während des Laufs die Maus nicht im FreeCAD-Fenster bewegen.
+
+| # | Automatisch | Bleibt bei dir |
+|---|---|---|
+| G13 | `task_panels`: jedes Feature öffnet sein Task-Panel (`setEdit`) und schließt wieder, Dokument danach gültig. Parameter ändern und nachmessen über die normalen Tools | Ob sich das Weiterarbeiten im Panel gut anfühlt |
+| G14 | `storepoint_tree`: Marker-Icon vorhanden, Beschreibungsspalte = `Label2` am verlinkten Feature, Doppelklick-Handler des ViewProviders wählt das Feature und öffnet kein Panel | Ob das Icon die Raute ist; der echte Maus-Doppelklick (ein synthetischer per `QTest` wirkte unzuverlässig) |
+| G15 | teilweise: Auswertung über `list_storepoints` und `replay`; die GUI-Bearbeitung selbst noch von Hand (echte Sketcher-Transaktionen) | die Skizzenbearbeitung |
+
+Nicht automatisierbar: G6 (Slicer), G7 (Verständlichkeit der TUI), G8 (Probedruck) und alle Urteile über Aussehen und Bedienbarkeit.
+
+Aufruf: Die Datei per `exec` aus dem Repo laden (so läuft der eingecheckte Stand) und `result` setzen, Beispiel im Docstring von `tools/gui_checks.py`. Erprobt am 2026-09-30 auf FreeCAD 26.3 (G13 3/3, G14 in drei Läufen stabil).
+
 Ergebnisse bitte im Folgeticket (`TODOs/1-backlog/freecad-buddy/gui-abnahme.md`) oder im Chat festhalten.

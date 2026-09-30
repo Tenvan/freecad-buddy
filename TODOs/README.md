@@ -184,6 +184,8 @@ Verbindlich für bestehende und neue Sprints sowie Backlog-Pläne:
 
 Diese Freigaberegel betrifft Browser- und manuelle Abnahmeprüfungen. **In diesem Projekt zählen dazu insbesondere Prüfungen in der laufenden FreeCAD-GUI** (Modellbaum sichten, Skizze öffnen und manuell bearbeiten, Maß ändern und Recompute beobachten) sowie Probedrucke. Gezielte Unit-/Komponententests während der Implementierung sowie bestehende Build- und Komplexitätsregeln bleiben unverändert. Browser-Skills beschreiben die Ausführung, ersetzen aber weder Testplanung noch Freigabe.
 
+GUI-Prüfungen, die der Agent über `execute_python` in der laufenden GUI ausführt ([`tools/gui_checks.py`](../tools/gui_checks.py), siehe [`docs/acceptance.md`](../docs/acceptance.md#agentengestützte-prüfung)), sind Agentenprüfungen im Sinne dieser Regel: Sie brauchen die Freigabe der konkreten Prüfung **und** Ralfs Freischaltung von `execute_python` in der TUI (`p`), die er danach wieder abschaltet. Der Agent schaltet `execute_python` nie selbst frei.
+
 ## Vorlagen
 
 Neue Sprints/Tickets aus den Templates in `0-vorlagen/` ableiten:
