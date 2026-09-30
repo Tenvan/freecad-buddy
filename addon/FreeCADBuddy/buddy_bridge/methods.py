@@ -96,16 +96,6 @@ def execute_python(code: str, document: str | None = None) -> dict[str, Any]:
     return {"stdout": output.getvalue(), "result": value}
 
 
-_active_registry: MethodRegistry | None = None  # set by build_registry; replay runs the steps through it
-
-
-def replay(storepoint: str, into: str, document: str | None = None) -> ToolResult:
-    """Rebuild the design stream of ``document`` up to ``storepoint`` in the new document ``into``."""
-    if _active_registry is None:
-        raise RuntimeError("replay needs a built registry")
-    return replaying.replay(_active_registry, storepoint, into, document)
-
-
 METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "system.ping": (ping, {"main_thread": False}),
     "system.status": (status, {}),
@@ -148,7 +138,7 @@ METHODS: dict[str, tuple[Any, dict[str, Any]]] = {
     "feature.gear": (gears.add_gear, {"timeout": 120.0}),
     "stream.storepoint": (stream.storepoint, {}),
     "stream.list": (stream.list_storepoints, {}),
-    "stream.replay": (replay, {"timeout": 600.0}),
+    "stream.replay": (replaying.replay, {"timeout": 600.0}),
     "design.fill_pattern": (design_tools.fill_pattern, {"timeout": 120.0}),
     "appearance.set_material": (appearance.set_material, {}),
     "assembly.create": (assembly.create_assembly, {}),
@@ -179,13 +169,13 @@ OPT_IN_METHODS = PYTHON_METHODS | ADDON_INSTALL_METHODS
 
 def build_registry(allow_python: bool = False, allow_addon_install: bool = False) -> MethodRegistry:
     """All methods; ``python.execute`` and addon installation only with an opt-in on the FreeCAD side."""
-    global _active_registry
     registry = MethodRegistry()
-    _active_registry = registry
     for name, (fn, options) in METHODS.items():
         if name in PYTHON_METHODS and not allow_python:
             continue
         if name in ADDON_INSTALL_METHODS and not allow_addon_install:
             continue
+        if fn is replaying.replay:  # replays its steps through this registry
+            fn = functools.partial(fn, registry)
         registry.add(name, fn, **options)
     return registry

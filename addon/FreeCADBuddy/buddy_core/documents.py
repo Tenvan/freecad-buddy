@@ -198,14 +198,14 @@ def _node(obj: Any) -> dict[str, Any]:
         node["dof"] = obj.DoF
         node["fully_constrained"] = bool(obj.FullyConstrained)
     elif obj.Name == stream.GROUP_NAME:
-        node["steps"] = len(obj.Stream)
+        node["steps"] = len(stream.entries(obj.Document))
         node["storepoints"] = [
             {
                 **describe(marker),
                 "position": marker.Position,
                 "feature": marker.Feature.Label if marker.Feature is not None else None,
             }
-            for marker in obj.Group
+            for marker in stream.markers(obj.Document)
         ]
     return node
 
@@ -223,7 +223,7 @@ def model_tree(document: str | None = None) -> dict[str, Any]:
         if obj.TypeId.startswith("App::Origin")
         for feature in getattr(obj, "OriginFeatures", [])
     }
-    markers = stream.claimed(doc)  # storepoint markers are listed under their group
+    markers = {marker.Name for marker in stream.markers(doc)}  # listed under their group
     top_level = [
         obj
         for obj in doc.Objects

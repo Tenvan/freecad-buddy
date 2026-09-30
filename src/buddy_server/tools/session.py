@@ -31,7 +31,7 @@ def register(reg: Registration) -> None:
         document: Doc = None,
     ) -> dict[str, Any]:
         """Mark a milestone in the design stream: a marker in the group 'Storepoints' linked to the current
-        feature plus the description 'Storepoint n: name' on that feature. replay rebuilds the design up to
+        feature plus the description '◆ Storepoint n: name' on that feature. replay rebuilds the design up to
         a storepoint in a new document."""
         return await ctx.call(
             "storepoint", "stream.storepoint", name=name, snapshot=snapshot, document=document
@@ -51,10 +51,10 @@ def register(reg: Registration) -> None:
     ) -> dict[str, Any]:
         """Rebuild the design from its recorded stream up to a storepoint in a new document, over the same
         tools and without changes: recover a broken model, rebuild after a FreeCAD update or branch a
-        variant. Python execution and addon installation are skipped and reported; manual GUI edits in the
-        original are not part of the stream (warning)."""
+        variant. Only modelling steps are replayed - scripts, addon installation, file access and STEP import
+        are skipped and reported; manual GUI edits in the original are not part of the stream (warning)."""
         return await ctx.call(
-            "replay", "stream.replay", timeout=600, storepoint=storepoint, into=into, document=document
+            "replay", "stream.replay", timeout=630, storepoint=storepoint, into=into, document=document
         )  # fmt: skip
 
     @tool
@@ -83,19 +83,19 @@ def register(reg: Registration) -> None:
         add_profile → pad/pocket → details → check_printability → export_body); open: open and activate a
         .FCStd; save: save as .FCStd; close: refuses with unsaved changes unless unsaved='save'/'discard' - ask
         the user before discarding; revert: discard all changes since the last save (ask the user first)."""
-        if action == "new":
-            if not name:
-                raise ToolError("[validation] document(action='new') needs 'name'")
-            return await ctx.call("document", "document.new", name=name)
-        if action == "open":
-            if not path:
-                raise ToolError("[validation] document(action='open') needs 'path'")
-            return await ctx.call("document", "document.open", path=path)
-        if action == "save":
-            return await ctx.call("document", "document.save", path=path, document=document)
-        if action == "close":
-            return await ctx.call("document", "document.close", unsaved=unsaved, path=path, document=document)
-        return await ctx.call("document", "document.revert", document=document)
+        calls = {
+            "new": lambda: ctx.call("document", "document.new", name=name),
+            "open": lambda: ctx.call("document", "document.open", path=path),
+            "save": lambda: ctx.call("document", "document.save", path=path, document=document),
+            "close": lambda: ctx.call(
+                "document", "document.close", unsaved=unsaved, path=path, document=document
+            ),
+            "revert": lambda: ctx.call("document", "document.revert", document=document),
+        }
+        required = {"new": "name", "open": "path"}.get(action)
+        if required and not {"name": name, "path": path}[required]:
+            raise ToolError(f"[validation] document(action='{action}') needs '{required}'")
+        return await calls[action]()
 
     @tool
     async def undo(

@@ -1,12 +1,12 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Stream mit Storepoints
 
-> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-30 │ Status: 🟡 Wartet auf Review-Gate (alle Aufgaben und Abnahmen erledigt)
+> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-30 │ Status: ✅ Erledigt (2026-09-30) – Review-Gate bestanden, Abnahme durch Ralf
 
 ## Spezifikation
 
 > Spec-Stand: 1 │ Spec-Status: Freigegeben │ Freigabe: Stand 1 durch Ralf im Chat, 2026-09-29 („ok, dann umsetzen“), inklusive der Annahmen OF-01 bis OF-05 als Entscheidungen
 
-Quelle: Backlog-Ticket [`design-stream-storepoints.md`](../../1-backlog/freecad-buddy/design-stream-storepoints.md), Spec-Stand 1. Ausgangslage, Beteiligte, Anforderungen (A-01 bis A-08), Nicht-Ziele, Regeln, Beispiele, Ausnahmefälle und die Kriterien AC-01 bis AC-10 gelten unverändert aus dem Ticket. Parallel offen: Sprint [`freecad-buddy-partdesign`](../freecad-buddy-partdesign/00-index.md), nur noch G13 (GUI-Abnahme durch Ralf).
+Quelle: Backlog-Ticket [`design-stream-storepoints.md`](../../1-backlog/freecad-buddy/design-stream-storepoints.md), Spec-Stand 1. Ausgangslage, Beteiligte, Anforderungen (A-01 bis A-08), Nicht-Ziele, Regeln, Beispiele, Ausnahmefälle und die Kriterien AC-01 bis AC-10 gelten unverändert aus dem Ticket. Parallel offen: Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md), dort ist nur noch das Review-Gate offen.
 
 ## Ausgangslage
 
@@ -74,15 +74,15 @@ Unverändert AC-01 bis AC-10 aus dem Ticket; Nachweis unten.
 | Kriterium / Quelle | Beobachtbares Ergebnis oder Verweis | Umsetzung / Phase | Prüfebene | Nachweis / Status |
 |---|---|---|---|---|
 | AC-01 | Stream enthält jeden mutierenden Aufruf, keine zurückgerollten | #1.1, #1.2 / P1 | Headless-Bridge-Test | **erfüllt** (`test_registry_records_mutating_calls_in_order_and_skips_failures`) |
-| AC-02 | Stream überlebt Speichern/Schließen/Öffnen | #1.1 / P1 | Headless-Core-Test | **erfüllt** (`test_stream_survives_save_close_and_open`) |
-| AC-03 | `storepoint`, `list_storepoints`, doppelte Namen abgelehnt | #2.1, #2.2 / P2 | Headless-Core-Test | **erfüllt** (`test_storepoint_marks_the_feature_lists_and_undoes`) |
+| AC-02 | Stream überlebt Speichern/Schließen/Öffnen | #1.1 / P1 | Headless-Bridge-Test | **erfüllt** (`test_stream_survives_save_close_and_open`) |
+| AC-03 | `storepoint`, `list_storepoints`, doppelte Namen abgelehnt | #2.1, #2.2 / P2 | Headless-Bridge-Test | **erfüllt** (`test_storepoint_marks_the_feature_lists_and_undoes`) |
 | AC-04 | Replay bis zum letzten Storepoint: gleiche Labels und Volumen | #3.1 / P3 | Headless-Bridge-Test (Referenzmodell) | **erfüllt** (`test_replay_rebuilds_the_design_up_to_each_storepoint`: Labels identisch, Volumen gleich; E2E `test_storepoints_and_replay_over_mcp`) |
 | AC-05 | Replay bis zu einem mittleren Storepoint | #3.1 / P3 | Headless-Bridge-Test | **erfüllt** (gleicher Test: Kopie bis „Base“ ohne Pocket) |
 | AC-06 | Scheiternder Schritt: Abbruch mit Schrittnummer, Teilergebnis bleibt | #3.1 / P3 | Headless-Bridge-Test | **erfüllt** (`test_replay_skips_python_and_stops_at_a_failing_step`) |
-| AC-07 | `manual_edit` erkannt, Replay warnt | #1.1 / P1 | Headless-Core-Test (Fremdtransaktion) + GUI-Nutzerabnahme | **erfüllt** (headless `test_undo_compacts_the_stream_and_manual_edits_are_marked`, `test_gui_transactions_between_polls_stay_one_manual_edit`; GUI G15 am 2026-09-30 im 2. Lauf nach Fix `0b8025f` bestanden) |
-| AC-08 | `execute_python` übersprungen, `install_addon` nie erneut | #1.2, #3.1 / P1, P3 | Headless-Bridge-Test | **erfüllt** (Skip-Liste `NEVER_REPLAYED`, Test wie AC-06) |
-| AC-09 | Tool-Budget ≤ 100, `poe check` grün, englische Texte | #4.1–#4.3 / P4 | `uv run poe check` | **erfüllt** (60 Tools; ruff, pyright, 186 + 255 Tests grün) |
-| AC-10 | `Label2` auf dem Tip-Feature, Marker mit Link, Undo räumt auf; Icon/Beschreibungsspalte in der GUI | #2.1, #2.3 / P2 | Headless-Core-Test + GUI-Nutzerabnahme | **erfüllt** (headless Test wie AC-03; GUI G14 am 2026-09-30 von Ralf bestätigt: Icon, Beschreibungsspalte, Doppelklick) |
+| AC-07 | `manual_edit` erkannt, Replay warnt | #1.1 / P1 | Headless-Bridge-Test (Fremdtransaktion) + GUI-Nutzerabnahme | **erfüllt** (headless `test_undo_compacts_the_stream_and_manual_edits_are_marked`, `test_gui_transactions_between_polls_stay_one_manual_edit`; GUI G15 am 2026-09-30 im 2. Lauf nach Fix `0b8025f` bestanden) |
+| AC-08 | `execute_python` übersprungen, `install_addon` nie erneut | #1.2, #3.1 / P1, P3 | Headless-Bridge-Test | **erfüllt** (Allowlist `REPLAYABLE` plus `NEVER_REPLAYED`, Test wie AC-06) |
+| AC-09 | Tool-Budget ≤ 100, `poe check` grün, englische Texte | #4.1–#4.3 / P4 | `uv run poe check` | **erfüllt** (60 Tools; ruff, pyright, 186 + 255 Tests grün; nach den Review-Fixes am 2026-09-30: 186 + 269 Tests grün, `C901` 16 wie bei `da5701a`) |
+| AC-10 | `Label2` auf dem Tip-Feature, Marker mit Link, Undo räumt auf; Icon/Beschreibungsspalte in der GUI | #2.1, #2.3 / P2 | Headless-Bridge-Test + GUI-Nutzerabnahme | **erfüllt** (headless Test wie AC-03; GUI G14 am 2026-09-30 von Ralf bestätigt: Icon, Beschreibungsspalte, Doppelklick) |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -92,8 +92,9 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 |---|---|---|---|
 | 2026-09-29 | Sprint aus dem Ticket mit den Annahmen OF-01 bis OF-05 gestartet (Ralf, „ok, dann umsetzen“) | Annahmen sind tragfähig, Ralf kann vor dem Release widersprechen | mehrere |
 | 2026-09-29 | Aufzeichnung in `MethodRegistry.invoke` über Undo-Zähler und -Namen statt über eine Liste mutierender Methoden | Jede Buddy-Transaktion ist genau ein Undo-Schritt; neue Tools werden automatisch erfasst | bridge, core |
-| 2026-09-30 | G14: Soll ist die Beschreibungsspalte, kein Hover-Tooltip; Katalogtext korrigiert (Ralf) | FreeCAD zeigt `Label2` nicht als Tooltip; Ralf wählt Checklisten-Korrektur statt neuer Anforderung | keiner |
 | 2026-09-29 | Stream-Einträge speichern Bridge-Methode und Parameter (nicht MCP-Tool-Namen) | Replay ohne MCP-Umweg, ein Ausführungsweg (S-01) | bridge |
+| 2026-09-30 | Replay spielt nur Modellier-Methoden ab (Allowlist `REPLAYABLE` plus `NEVER_REPLAYED` statt Denylist); der Stream gilt als Fremddaten, seine Parameter werden wie eine RPC-Anfrage geprüft (`53e57bd`) | Der Stream kommt mit jeder FCStd; eine Denylist hätte `document.save`, `document.open` oder `print.export` mit fremden Pfaden abgespielt (Befund der Push-Sicherheitsprüfung) | bridge, Sicherheit |
+| 2026-09-30 | G14: Soll ist die Beschreibungsspalte, kein Hover-Tooltip; Katalogtext korrigiert (Ralf) | FreeCAD zeigt `Label2` nicht als Tooltip; Ralf wählt Checklisten-Korrektur statt neuer Anforderung | keiner |
 
 ## Gesamtfortschritt
 
@@ -117,6 +118,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
 | S1 | Phase 1–4 | Stream-Modul, Registry-Hook, Storepoints, Marker, ViewProvider, Replay, Server-Tools, Doku, Version 0.4.0, `poe check` | ✅ Erledigt (2026-09-29), #4.3 GUI offen |
+| S1b | Phase 3 | Sicherheitsfix Replay: Allowlist statt Denylist, Stream als Fremddaten (`53e57bd`, `bae72c0`) | ✅ Erledigt (2026-09-30) |
 | S2 | Phase 4 | GUI-Abnahme G14/G15 (Agent führt, Ralf prüft), Bugfix `manual_edit`, Abnahme-Doku | ✅ Erledigt (2026-09-30) |
 | **→ S3** | — | Review-Gate (`97-review.md`, Bereich `da5701a..HEAD`), Abnahme durch Ralf, Verschieben nach `3-sprints-erledigt/` | **Nächste** |
 
@@ -156,8 +158,8 @@ Pflicht zum Sprint-Abschluss:
 - [x] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
 - [x] `98-architecture-update.md` ausgewertet.
 - [x] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
-- [ ] Review-Gate bestanden (`97-review.md`, Abnahme durch Ralf).
-- [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben.
+- [x] Review-Gate bestanden (`97-review.md`, Abnahme durch Ralf am 2026-09-30).
+- [x] Sprint nach `TODOs/3-sprints-erledigt/2026-09-freecad-buddy-storepoints/` verschoben.
 - [x] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
 
 ## 📓 Session-Log

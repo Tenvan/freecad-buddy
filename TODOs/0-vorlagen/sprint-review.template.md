@@ -1,6 +1,6 @@
 # 🔍 Sprint-Review — <SPRINT-TITEL>
 
-> Bereich: `<Start-Commit>..<End-Commit>` │ Domäne: `<domäne>` │ Review-Session: YYYY-MM-DD │ Abnahme: ausstehend
+> Bereich: `<Start-Commit>..HEAD` │ Domäne: `<domäne>` │ Review-Session: YYYY-MM-DD │ Abnahme: ausstehend
 
 Regeln: [README → Review-Gate](../../README.md#review-gate-sprint-abnahme). Review in einer frischen Session; jede Datei wird vollständig gelesen.
 

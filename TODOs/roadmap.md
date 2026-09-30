@@ -1,6 +1,6 @@
 # Roadmap — FreeCAD Buddy
 
-> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-29 │ Basis: Version 0.4.0, Commit `03e0881`, 60 Tools
+> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-30 │ Basis: Version 0.4.0, Commit `03e0881`, 60 Tools
 
 ## Zweck
 
@@ -31,7 +31,7 @@ Verbindliche Arbeitsregeln (Domänen, Sprintgröße, Session-Regeln, Review-Gate
 
 | Nr. | Sprint (Ordnername) | Domäne | Quelle | Ziel | Umfang | Voraussetzung | Status |
 |---|---|---|---|---|---|---|---|
-| R0 | `freecad-buddy-partdesign` und `freecad-buddy-storepoints` abschließen | `abnahme` | aktive Sprints | GUI-Abnahmen G13 und G14/G15 bestanden (2026-09-30); offen: Review-Gate für beide Sprints (Bereiche `4fd92f8..da5701a` und `da5701a..0b8025f`, inkl. der Stream-Bugfixes) | 1–2 Sessions | Ralf hat Zeit für die GUI-Prüfung | 🔵 Nächster |
+| R0 | `freecad-buddy-partdesign` und `freecad-buddy-storepoints` abschließen | `abnahme` | aktive Sprints | GUI-Abnahmen G13 und G14/G15 bestanden (2026-09-30); Review-Gate `freecad-buddy-storepoints` bestanden (2026-09-30); offen: Review-Gate `freecad-buddy-partdesign` (Bereich `4fd92f8..da5701a`) | 1–2 Sessions | Ralf hat Zeit für die GUI-Prüfung | 🔵 Nächster |
 | R1 | `infra-qualitaets-gates` | `infra` | Eingang E-01 bis E-04 | Komplexitätsgrenze (ruff `C901`, max. 10) mit eingefrorener Baseline, `poe review-files` (geänderte Dateien seit Start-Commit), CI für `lint`/`typecheck`/`test-tools`, projekteigene `CLAUDE.md` | 2 Sessions | R0 | 🔴 |
 | R2 | `abnahme-gui-rest` | `abnahme` | Ticket [`gui-abnahme.md`](1-backlog/freecad-buddy/gui-abnahme.md) | G2, G6, G8 abnehmen oder bewusst verwerfen | 1 Session | — (läuft, wenn Ralf prüfen kann) | 🟡 |
 | R3 | `core-komplexitaet` | `core` | Eingang E-05, E-06 | `features.py` (1025 Zeilen) in ein Paket aufteilen; `C901`-Baseline in `core` abbauen (`fill_pattern` 20, `_add_constraint_item` 14, `_edge_filter` 13, `_face_filter` 12, `screenshot` 12, `add_fastener`/`loft`/`_primitive_props` 11) – verhaltensneutral | 2–3 Sessions | R1 | 🔴 |

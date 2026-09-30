@@ -191,7 +191,6 @@ def test_replay_skips_python_and_stops_at_a_failing_step(
         registry.execute("stream.replay", {"storepoint": "Done", "into": "Partial", "document": doc.Name})
 
     assert info.value.data["step"] == 7 and info.value.data["executed"] == 6
-    assert "python.execute" in str(info.value.data.get("skipped", info.value.message)) or True
     partial = FreeCAD.getDocument(info.value.data["document"])
     assert partial.getObjectsByLabel("Sketch_Hole") and not partial.getObjectsByLabel("Pocket_Hole")
 
@@ -239,3 +238,127 @@ def test_deleting_an_object_is_part_of_the_stream(registry: MethodRegistry, doc:
     registry.execute("document.delete", {"ref": "Pad_Base", "document": doc.Name})
 
     assert _methods(doc) == [*BOX_STEPS, "document.delete"]
+
+
+def _set_width(registry: MethodRegistry, document: str, value: int) -> None:
+    registry.execute("parameters.set", {"parameters": {"Box_Width": value}, "document": document})
+
+
+def test_recording_continues_once_the_undo_stack_is_full(registry: MethodRegistry, doc: Any) -> None:
+    for index in range(25):  # FreeCAD keeps 20 undo steps, the undo count stops growing
+        registry.execute("parameters.set", {"parameters": {f"Rib_{index}": index}, "document": doc.Name})
+
+    assert len(stream.entries(doc)) == 25
+
+
+def test_undo_drops_the_newest_of_two_identically_named_steps(registry: MethodRegistry, doc: Any) -> None:
+    _set_width(registry, doc.Name, 60)
+    _set_width(registry, doc.Name, 80)  # same undo name "Set parameters: Box_Width"
+
+    registry.execute("document.undo", {"steps": 1, "document": doc.Name})
+
+    assert [entry["params"]["parameters"] for entry in stream.entries(doc)] == [{"Box_Width": 60}]
+
+
+def test_undo_back_to_the_start_empties_the_stream(registry: MethodRegistry, doc: Any) -> None:
+    registry.execute("body.create", {"label": "Box", "document": doc.Name})
+    registry.execute("sketch.create", {"plane": "XY", "purpose": "Base", "document": doc.Name})
+
+    registry.execute("document.undo", {"steps": 2, "document": doc.Name})
+
+    assert stream.entries(doc) == []
+
+
+def test_methods_off_the_main_thread_never_touch_the_stream(registry: MethodRegistry, doc: Any) -> None:
+    create_body = registry.function("body.create")
+    registry.add("test.off_thread", lambda: create_body(label="Box", document=doc.Name), main_thread=False)
+
+    registry.execute("test.off_thread", {})
+
+    assert stream.group(doc) is None
+
+
+def test_foreign_objects_in_the_storepoint_group_are_not_markers(registry: MethodRegistry, doc: Any) -> None:
+    _build_box(registry, doc.Name)
+    registry.execute("stream.storepoint", {"name": "Base", "document": doc.Name})
+    doc.getObject(stream.GROUP_NAME).addObject(doc.addObject("App::FeaturePython", "Foreign"))
+
+    tree = registry.execute("document.tree", {"document": doc.Name})
+
+    group = next(node for node in tree["objects"] if node["name"] == stream.GROUP_NAME)
+    assert [point["label"] for point in group["storepoints"]] == ["Storepoint_Base"]
+    assert any(node["name"] == "Foreign" for node in tree["objects"])
+
+
+def _widths(doc: Any) -> list[Any]:
+    return [entry.get("params", {}).get("parameters") or entry["undo_names"] for entry in stream.entries(doc)]
+
+
+def test_gui_undo_then_a_manual_edit_drops_the_undone_step(registry: MethodRegistry, doc: Any) -> None:
+    for value in (10, 20, 30):
+        registry.execute("parameters.set", {"parameters": {f"Rib_{value}": value}, "document": doc.Name})
+    doc.undo()  # in the GUI, not through Buddy
+    doc.openTransaction("Manual")
+    doc.addObject("App::FeaturePython", "Manual")
+    doc.commitTransaction()
+
+    registry.execute("document.tree", {"document": doc.Name})
+
+    assert _widths(doc) == [{"Rib_10": 10}, {"Rib_20": 20}, ["Manual"]]
+
+
+def test_gui_undo_then_a_buddy_call_drops_the_undone_step(registry: MethodRegistry, doc: Any) -> None:
+    _set_width(registry, doc.Name, 60)
+    _set_width(registry, doc.Name, 80)
+    doc.undo()  # in the GUI; the next call clears the redo stack
+
+    registry.execute("parameters.set", {"parameters": {"Box_Depth": 30}, "document": doc.Name})
+
+    assert _widths(doc) == [{"Box_Width": 60}, {"Box_Depth": 30}]
+
+
+def test_gui_undo_of_two_steps_then_a_buddy_call(registry: MethodRegistry, doc: Any) -> None:
+    for value in (10, 20, 30):
+        registry.execute("parameters.set", {"parameters": {f"Rib_{value}": value}, "document": doc.Name})
+    doc.undo()
+    doc.undo()
+
+    registry.execute("parameters.set", {"parameters": {"Rib_40": 40}, "document": doc.Name})
+
+    assert _widths(doc) == [{"Rib_10": 10}, {"Rib_40": 40}]
+
+
+def test_full_undo_stack_then_gui_undo_and_a_manual_edit(registry: MethodRegistry, doc: Any) -> None:
+    for index in range(22):
+        registry.execute("parameters.set", {"parameters": {f"Rib_{index}": index}, "document": doc.Name})
+    doc.undo()
+    doc.openTransaction("Manual")
+    doc.addObject("App::FeaturePython", "Manual")
+    doc.commitTransaction()
+
+    registry.execute("document.tree", {"document": doc.Name})
+
+    assert _widths(doc)[-2:] == [{"Rib_20": 20}, ["Manual"]] and len(stream.entries(doc)) == 22
+
+
+def test_gui_undo_of_an_identically_named_step_then_a_buddy_call(registry: MethodRegistry, doc: Any) -> None:
+    _set_width(registry, doc.Name, 60)
+    _set_width(registry, doc.Name, 80)
+    doc.undo()  # in the GUI
+
+    _set_width(registry, doc.Name, 100)
+
+    assert _widths(doc) == [{"Box_Width": 60}, {"Box_Width": 100}]
+
+
+def test_reloading_in_place_keeps_the_saved_stream(
+    registry: MethodRegistry, doc: Any, tmp_path: Path
+) -> None:
+    _set_width(registry, doc.Name, 60)
+    registry.execute("document.save", {"path": str(tmp_path / "reload.FCStd"), "document": doc.Name})
+    _set_width(registry, doc.Name, 80)
+    doc.restore()  # FreeCAD's revert: same document object, empty undo history
+
+    _set_width(registry, doc.Name, 100)
+
+    assert _widths(doc) == [{"Box_Width": 60}, {"Box_Width": 100}]

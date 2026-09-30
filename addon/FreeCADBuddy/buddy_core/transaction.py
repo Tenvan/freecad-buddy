@@ -14,6 +14,10 @@ from buddy_core.errors import BUSY_USER_TRANSACTION, RECOMPUTE_FAILED, CoreError
 _open: set[str] = set()
 """Documents with an open Buddy transaction; design tools nest the tools they are built from."""
 
+commits: dict[str, int] = {}
+"""Committed Buddy transactions per document; the design stream detects changing calls with it
+(``UndoCount`` stops growing once FreeCAD's undo stack is full)."""
+
 
 def invalid_objects(doc: Any) -> dict[str, str]:
     """Objects whose last recompute failed, mapped to FreeCAD's status text."""
@@ -76,6 +80,7 @@ def transaction(doc: Any, label: str) -> Iterator[None]:
                 },
             )
         doc.commitTransaction()
+        commits[doc.Name] = commits.get(doc.Name, 0) + 1
     except BaseException as error:
         doc.abortTransaction()
         doc.recompute()

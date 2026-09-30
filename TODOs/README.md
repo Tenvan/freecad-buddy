@@ -119,6 +119,7 @@ Eine Release-Queue (`pending-release-log.md`) ist in diesem Projekt derzeit **ni
   - Session-Pakete, Active Tasks, Done Tasks
 - `98-architecture-update.md` für Architektur-Deltas, die am Sprint-Ende in `docs/architecture.md` übernommen oder begründet verworfen werden
 - `99-session-log.md` für chronologisches Protokoll
+- `97-review.md` (Review-Gate, aus [`sprint-review.template.md`](0-vorlagen/sprint-review.template.md)): Dateiliste, Bewertung je Datei, Komplexität, Befunde, Abnahme; angelegt in der Review-Session, nicht zum Sprint-Start
 
 ### In jedem Backlog-Domain-Ordner
 

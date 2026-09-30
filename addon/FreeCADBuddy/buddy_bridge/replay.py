@@ -42,54 +42,33 @@ def replay(registry: Any, storepoint: str, into: str, document: str | None = Non
     match = next((point for point in points if point["name"] == storepoint), None)
     if match is None:
         raise not_found(f"Unknown storepoint '{storepoint}'", available=[point["name"] for point in points])
-    taken = {name for name in FreeCAD.listDocuments()} | {
-        doc.Label for doc in FreeCAD.listDocuments().values()
-    }
+    taken = {key for name, doc in FreeCAD.listDocuments().items() for key in (name, doc.Label)}
     if into in taken:
         raise validation(f"Document '{into}' already exists - choose a new name")
+    steps = items[: match["position"] + 1]
     result = ToolResult()
-    target = documents.new_document(into).data["document"]["name"]
-    executed = 0
-    skipped: list[dict[str, Any]] = []
-    versions = sorted(
-        str(entry.get("version")) for entry in items[: match["position"] + 1] if entry.get("version")
+    foreign_versions = sorted(
+        {str(entry["version"]) for entry in steps if entry.get("version")} - {__version__}
     )
-    foreign_versions = sorted(set(versions) - {__version__})
     if foreign_versions:
         result.warnings.append(
             f"Stream was recorded with FreeCAD Buddy {', '.join(foreign_versions)}; tools may have changed."
         )
-    for index, entry in enumerate(items[: match["position"] + 1]):
+    target = documents.new_document(into).data["document"]["name"]
+    executed = 0
+    skipped: list[dict[str, Any]] = []
+    for index, entry in enumerate(steps):
         method = entry["method"]
         if method == stream.MANUAL_EDIT:
             names = ", ".join(entry.get("undo_names", []))
             result.warnings.append(
                 f"Step {index}: manual edits in the original ({names}) are not in the stream."
             )
-            continue
-        if not replayable(method):
+        elif not replayable(method):
             skipped.append({"step": index, "method": method})
-            continue
-        params = dict(entry.get("params") or {})
-        if "document" in inspect.signature(registry.function(method)).parameters:
-            params["document"] = target
-        if method == stream.STOREPOINT_METHOD:
-            params["snapshot"] = False  # the copy has no file yet
-        try:
-            registry.execute(method, params)
-        except CoreError as error:
-            raise CoreError(
-                error.name,
-                f"Replay stopped at step {index} ({method}): {error.message}",
-                {**error.data, "step": index, "method": method, "document": target, "executed": executed},
-            ) from None
-        except Exception as error:  # report the step, keep the partial document
-            raise CoreError(
-                "recompute_failed",
-                f"Replay stopped at step {index} ({method}): {type(error).__name__}: {error}",
-                {"step": index, "method": method, "document": target, "executed": executed},
-            ) from error
-        executed += 1
+        else:
+            _run_step(registry, index, entry, target, executed)
+            executed += 1
     result.data["document"] = {"name": target, "label": into}
     result.data["storepoint"] = storepoint
     result.data["steps"] = executed
@@ -101,3 +80,27 @@ def replay(registry: Any, storepoint: str, into: str, document: str | None = Non
         )
     result.hints.append(f"'{into}' is the active document now; the original is unchanged.")
     return result
+
+
+def _run_step(registry: Any, index: int, entry: dict[str, Any], target: str, executed: int) -> None:
+    """Run one stream step in ``target``; a failure stops the replay and keeps the partial document."""
+    method = entry["method"]
+    params = dict(entry.get("params") or {})
+    if "document" in inspect.signature(registry.function(method)).parameters:
+        params["document"] = target
+    if method == stream.STOREPOINT_METHOD:
+        params["snapshot"] = False  # the copy has no file yet
+    try:
+        registry.execute(method, params)
+    except CoreError as error:
+        raise CoreError(
+            error.name,
+            f"Replay stopped at step {index} ({method}): {error.message}",
+            {**error.data, "step": index, "method": method, "document": target, "executed": executed},
+        ) from None
+    except Exception as error:  # report the step, keep the partial document
+        raise CoreError(
+            "recompute_failed",
+            f"Replay stopped at step {index} ({method}): {type(error).__name__}: {error}",
+            {"step": index, "method": method, "document": target, "executed": executed},
+        ) from error

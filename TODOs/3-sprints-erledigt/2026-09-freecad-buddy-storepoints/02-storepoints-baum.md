@@ -8,9 +8,9 @@
 
 ### 📦 Session S2 (Teil) — Storepoints, Marker, ViewProvider
 
-- **Kontext-Anker:** `addon/FreeCADBuddy/buddy_core/stream.py`, `addon/FreeCADBuddy/buddy_core/naming.py`, `addon/FreeCADBuddy/buddy_bridge/workbench` (ViewProvider-Muster, falls vorhanden), `docs/acceptance.md`
+- **Kontext-Anker:** `addon/FreeCADBuddy/buddy_core/stream.py`, `addon/FreeCADBuddy/buddy_core/naming.py`, `docs/acceptance.md`
 - **Einstiegspunkt:** #2.1
-- **Erfolgskriterium:** Core-Test: Marker mit Link, `Label2` am Feature, Undo räumt auf, doppelte Namen abgelehnt, Liste korrekt.
+- **Erfolgskriterium:** Headless-Test (`tests/bridge/test_stream.py`): Marker mit Link, `Label2` am Feature, Undo räumt auf, doppelte Namen abgelehnt, Liste korrekt.
 - **Architektur-Relevanz:** `docs/architecture.md` (Marker als sichtbare Buddy-Objekte neben dem VarSet)
 - **Architektur-Notiz:** Marker sind `App::FeaturePython` ohne App-Proxy (kein Proxy-Zwang beim Laden); nur der ViewProvider hat einen Proxy (GUI).
 
@@ -45,7 +45,7 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
 > - Offene Aufgaben: 0
-> - Nächste Session: S2 (GUI-Abnahme, wartet auf Ralf)
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/stream.py`, `tests/core/test_stream.py` (neu)
-> - Architektur-Deltas: Marker-Objekte in `98-architecture-update.md`
-> - Startpunkt: #2.1
+> - Nächste Session: S3 (Review-Gate in frischer Session, `97-review.md`, Bereich `da5701a..HEAD`)
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_core/stream.py`, `tests/bridge/test_stream.py`
+> - Architektur-Deltas: Marker-Objekte in `98-architecture-update.md`, übernommen
+> - Startpunkt: `git diff --name-status da5701a..HEAD` in `97-review.md` eintragen

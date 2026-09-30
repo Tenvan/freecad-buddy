@@ -10,7 +10,7 @@
 
 - **Kontext-Anker:** `addon/FreeCADBuddy/buddy_bridge/registry.py` (`MethodRegistry.invoke`), `addon/FreeCADBuddy/buddy_core/transaction.py`, `addon/FreeCADBuddy/buddy_core/documents.py` (`model_tree`, `undo`), `tests/bridge/test_methods.py`
 - **Einstiegspunkt:** #1.1
-- **Erfolgskriterium:** Bridge-Test: Aufrufe erscheinen in Reihenfolge, zurückgerollte nicht, Undo kompaktiert, fremde Transaktion ergibt `manual_edit`; Core-Test: Stream nach Speichern/Öffnen vorhanden.
+- **Erfolgskriterium:** Bridge-Test (`tests/bridge/test_stream.py`): Aufrufe erscheinen in Reihenfolge, zurückgerollte nicht, Undo kompaktiert, fremde Transaktion ergibt `manual_edit`, Stream nach Speichern/Öffnen vorhanden.
 - **Architektur-Relevanz:** `docs/architecture.md` (Design-Stream, Transaktionen)
 - **Architektur-Notiz:** Die Registry ist der einzige Ort, an dem Methode und Parameter zusammen mit dem Ergebnis bekannt sind; Aufzeichnung dort hält Core frei von Bridge-Wissen.
 
@@ -28,8 +28,8 @@ Enthaltene Aufgaben: #1.1, #1.2, #1.3
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
-| #1.1 | `buddy_core/stream.py`: Gruppe `Storepoints` (Name `BuddyStorepoints`, `App::DocumentObjectGroup`) mit Properties `Stream` (StringList, ein JSON je Eintrag) und `StreamVersion`; `entries(doc)`, `append(doc, entry)`, `compact(doc, undone_names)`; Eintrag = method, params, created, undo_name, undo_count, time, version; Erkennung fremder Transaktionen über `UndoCount`/`UndoNames` → Eintrag `manual_edit` | siehe 98 | 2026-09-29 |
-| #1.2 | `MethodRegistry.execute(name, params)` als gemeinsamer Ausführungsweg (auch für Replay): Undo-Zähler aller Dokumente vor/nach dem Aufruf, Aufzeichnung nur bei gewachsenem Zähler, Kompaktierung bei gesunkenem; keine Aufzeichnung für `system.*`, `python.*`, `addons.install`, `document.new/open`; `invoke` nutzt `execute` | siehe 98 | 2026-09-29 |
+| #1.1 | `buddy_core/stream.py`: Gruppe `Storepoints` (Name `BuddyStorepoints`, `App::DocumentObjectGroup`) mit Properties `Stream` (StringList, ein JSON je Eintrag) und `StreamVersion`; `entries(doc)`, `append(doc, entry)`, `snapshot()`, `record(...)`, `reconcile(doc)` (Abgleich mit der Undo-Historie: Kompaktierung zurückgenommener Schritte); Eintrag = method, params, created, undo_name, time, version; fremde Transaktionen über `UndoNames` → Eintrag `manual_edit` mit `undo_names` | siehe 98 | 2026-09-29 |
+| #1.2 | `MethodRegistry.execute(name, params)` als gemeinsamer Ausführungsweg (auch für Replay): Commit-Zähler aller Dokumente vor/nach dem Aufruf, Aufzeichnung nur bei gewachsenem Zähler, sonst nur Abgleich mit der Undo-Historie (`reconcile`); was nie aufgezeichnet wird, steht in `NOT_RECORDED` (`registry.py`); `invoke` nutzt `execute` | siehe 98 | 2026-09-29 |
 | #1.3 | `get_model_tree`: Gruppe und Marker lesbar (Typ, Position, verlinktes Feature); `undo`-Tool bleibt unverändert, Kompaktierung passiert in der Registry | siehe 98 | 2026-09-29 |
 
 ## Geplante Abnahmeprüfungen
@@ -38,14 +38,14 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| AC-07 GUI-Anteil: in der GUI eine Skizze von Hand verschieben, danach ein Tool aufrufen → `list_storepoints`/Stream zeigt `manual_edit` | offen | ausstehend | ausstehend |
+| AC-07 GUI-Anteil (G15): in der GUI eine Skizze von Hand verschieben, danach ein Tool aufrufen → `list_storepoints`/Stream zeigt `manual_edit` | ✅ bestanden (2. Lauf) | Ralf bearbeitet `Sketch_Recess` in der GUI, Agent führt MCP-Schritte aus, 2026-09-30 | 1. Lauf ❌ → Fix `0b8025f`; 2. Lauf: genau ein `manual_edit`, eine Replay-Warnung (Session-Log S2) |
 
 ## 🔄 Nächste Session
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
 > - Offene Aufgaben: 0
-> - Nächste Session: S2 (GUI-Abnahme, wartet auf Ralf)
-> - Relevante Dateien: `addon/FreeCADBuddy/buddy_bridge/registry.py`, `addon/FreeCADBuddy/buddy_core/stream.py` (neu), `tests/bridge/test_stream.py` (neu)
-> - Architektur-Deltas: Design-Stream in `98-architecture-update.md`
-> - Startpunkt: #1.1
+> - Nächste Session: S3 (Review-Gate in frischer Session, `97-review.md`, Bereich `da5701a..HEAD`)
+> - Relevante Dateien: `addon/FreeCADBuddy/buddy_bridge/registry.py`, `addon/FreeCADBuddy/buddy_core/stream.py`, `tests/bridge/test_stream.py`
+> - Architektur-Deltas: Design-Stream in `98-architecture-update.md`, alle übernommen
+> - Startpunkt: `git diff --name-status da5701a..HEAD` in `97-review.md` eintragen

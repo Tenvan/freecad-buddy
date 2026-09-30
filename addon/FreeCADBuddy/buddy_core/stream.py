@@ -18,7 +18,7 @@ import FreeCAD
 from buddy_core import __version__, naming
 from buddy_core.errors import validation
 from buddy_core.result import ToolResult, describe
-from buddy_core.transaction import transaction
+from buddy_core.transaction import commits, transaction
 
 GROUP_NAME = "BuddyStorepoints"
 GROUP_LABEL = "Storepoints"
@@ -96,31 +96,47 @@ def append(doc: Any, entry: dict[str, Any]) -> None:
     _write(doc, [*entries(doc), entry])
 
 
-def claimed(doc: Any) -> set[str]:
-    """Names of the marker objects (listed under the group in the model tree, not at the root)."""
+def markers(doc: Any) -> list[Any]:
+    """Storepoint markers in the group; foreign objects the user dropped there are not markers."""
     obj = group(doc)
-    return {child.Name for child in obj.Group} if obj is not None else set()
+    return [child for child in obj.Group if hasattr(child, "Position")] if obj is not None else []
 
 
 # --- recording (called by the bridge registry) ----------------------------------------------------
+_seen: dict[str, list[str]] = {}
+"""Undo history per document at the last reconcile; forgotten when a document is closed, created or
+reloaded in place (``restore``), since its undo history starts empty again."""
+
+
+class _ForgetHistory:
+    def slotCreatedDocument(self, doc: Any) -> None:
+        _seen.pop(doc.Name, None)
+
+    def slotDeletedDocument(self, doc: Any) -> None:  # also fired by doc.restore()
+        _seen.pop(doc.Name, None)
+
+
+FreeCAD.addDocumentObserver(_ForgetHistory())
+
+
 def snapshot() -> dict[str, int]:
-    """Undo counts of all open documents before a call."""
-    return {name: doc.UndoCount for name, doc in FreeCAD.listDocuments().items()}
+    """Committed Buddy transactions of all open documents before a call."""
+    return {name: commits.get(name, 0) for name in FreeCAD.listDocuments()}
 
 
 def record(
     method: str, params: dict[str, Any], payload: Any, before: dict[str, int], store: bool = True
 ) -> None:
-    """Append the call to the stream of every document whose undo count grew (``store``);
+    """Append the call to the stream of every document it committed a transaction in (``store``);
     otherwise just align the streams with the undo history."""
     created = [item["label"] for item in payload.get("created", [])] if isinstance(payload, dict) else []
     for name, doc in FreeCAD.listDocuments().items():
         if name not in before:
             continue  # a document created by this call starts with an empty stream
-        if not store or doc.UndoCount <= before[name]:
-            reconcile(doc)
+        if not store or commits.get(name, 0) <= before[name]:
+            _align(doc)
         else:
-            reconcile(doc, keep=1)
+            _align(doc, keep=1)
             append(
                 doc,
                 {
@@ -128,64 +144,81 @@ def record(
                     "params": params,
                     "created": created,
                     "undo_name": next(iter(doc.UndoNames), ""),
-                    "time": datetime.now().isoformat(timespec="seconds"),
+                    "time": _now(),
                     "version": __version__,
                 },
             )
 
 
 def reconcile(doc: Any, keep: int = 0) -> list[dict[str, Any]]:
-    """Align the stream with the undo history: drop entries the user undid, note foreign
-    transactions (manual GUI edits) as ``manual_edit``. ``keep`` skips the newest undo names
-    (the transaction of the call being recorded).
+    """Align the stream with the undo history (see ``_align``) and return its entries."""
+    _align(doc, keep)
+    return entries(doc)
 
-    Only the undo history FreeCAD still holds is inspected (default 20 steps); older entries count
-    as applied. # ponytail: undo-then-redo of an already reconciled entry loses it from the stream.
+
+def _align(doc: Any, keep: int = 0) -> None:
+    """Drop entries the user undid and note foreign transactions (manual GUI edits) as
+    ``manual_edit``. ``keep`` skips the newest undo names (the transaction of the call being
+    recorded). The stream is only parsed when the undo history changed.
+
+    The difference to the history of the last reconcile tells how many steps were undone and how
+    many foreign ones were added since. # ponytail: undo-then-redo of a reconciled entry comes back
+    as a manual edit; a history of identical names only stays ambiguous.
     """
-    items = entries(doc)
+    history = list(doc.UndoNames)
+    previous = _seen.get(doc.Name, [])
+    _seen[doc.Name] = history
+    undone, added = _difference(previous, history, _undo_limit(), keep)
+    if not added and doc.RedoCount < undone:
+        undone = 0  # the history was cleared (undo switched off), nothing was undone
+    added = max(added - keep, 0)
+    items = entries(doc) if undone or added else []
     if not items:
-        return items
-    history = list(doc.UndoNames)[keep:]  # newest first
-    result: list[dict[str, Any]] = []
-    cursor = 0
-    changed = False
-    for entry in reversed(items):
-        if cursor >= len(history):
-            result.append(entry)
-            continue
-        if entry["method"] == MANUAL_EDIT:
-            names = entry.get("undo_names", [])
-            start = _find(history, names, cursor)
-            if start is not None:
-                if start > cursor:  # further GUI transactions right after it: the same manual edit
-                    entry = {**entry, "undo_names": history[cursor:start] + names}
-                    changed = True
-                cursor = start + len(names)  # already noted
-            result.append(entry)
-            continue
-        try:
-            position = history.index(entry.get("undo_name", ""), cursor)
-        except ValueError:
-            changed = True  # undone by the user
-            continue
-        foreign = history[cursor:position]
-        if foreign:
-            result.append({"method": MANUAL_EDIT, "undo_names": foreign, "time": _now()})
-            changed = True
-        result.append(entry)
-        cursor = position + 1
-    result.reverse()
-    if changed:
-        _write(doc, result)
+        return
+    result = _drop(items, undone)
+    if added:
+        names = history[keep : keep + added]
+        if result and result[-1]["method"] == MANUAL_EDIT:  # further GUI transactions: the same edit
+            result[-1] = {**result[-1], "undo_names": names + result[-1].get("undo_names", [])}
+        else:
+            result.append({"method": MANUAL_EDIT, "undo_names": names, "time": _now()})
+    _write(doc, result)
+
+
+def _undo_limit() -> int:
+    """Undo steps FreeCAD keeps at least (GUI preference, headless fixed 20). Too low is harmless,
+    too high would read a full stack as undone steps - so never above 20."""
+    return min(FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Document").GetInt("MaxUndoSize", 20), 20)
+
+
+def _difference(previous: list[str], current: list[str], limit: int, least_added: int = 0) -> tuple[int, int]:
+    """(undone, added): the shortest explanation - fewest steps, then fewest undone - that turns the
+    previous undo history into the current one (newest first), with at least ``least_added`` new
+    steps (the call being recorded). Only a full stack (``limit``) drops its oldest steps."""
+    for total in range(len(previous) + len(current) + 1):
+        for undone in range(min(total, len(previous)) + 1):
+            added, rest = total - undone, previous[undone:]
+            expected = len(rest) + added
+            fits = expected == len(current) or (expected > len(current) >= limit)
+            if (
+                least_added <= added <= len(current)
+                and fits
+                and current[added:] == rest[: len(current) - added]
+            ):
+                return undone, added
+    return 0, 0  # unreachable: undoing everything and adding the whole history always fits
+
+
+def _drop(items: list[dict[str, Any]], undone: int) -> list[dict[str, Any]]:
+    """``items`` without their newest ``undone`` transactions (a manual edit may be cut)."""
+    result = list(items)
+    while undone > 0 and result:
+        entry = result.pop()
+        names = entry.get("undo_names", []) if entry["method"] == MANUAL_EDIT else [entry.get("undo_name")]
+        if len(names) > undone:
+            result.append({**entry, "undo_names": names[undone:]})
+        undone -= len(names)
     return result
-
-
-def _find(history: list[str], names: list[str], start: int) -> int | None:
-    """Index of the first occurrence of ``names`` as a run in ``history`` from ``start`` on."""
-    for index in range(start, len(history) - len(names) + 1):
-        if history[index : index + len(names)] == names:
-            return index
-    return None
 
 
 def _now() -> str:
@@ -240,7 +273,8 @@ def storepoint(name: str, snapshot: bool = False, document: str | None = None) -
     if not clean:
         raise validation("name must not be empty")
     items = reconcile(doc)
-    existing = [point["name"] for point in storepoints(items)]
+    points = storepoints(items)
+    existing = [point["name"] for point in points]
     if clean in existing:
         raise validation(f"Storepoint '{clean}' already exists", available=existing)
     if snapshot and not doc.FileName:
@@ -261,7 +295,7 @@ def storepoint(name: str, snapshot: bool = False, document: str | None = None) -
         marker.Feature = feature
         marker.Position = len(items)
         marker.Created = _now()
-        marker.Steps = len(items) - (storepoints(items)[-1]["position"] + 1 if existing else 0)
+        marker.Steps = len(items) - (points[-1]["position"] + 1 if points else 0)
         container.addObject(marker)
         if feature is not None:
             feature.Label2 = f"◆ Storepoint {number}: {clean}"

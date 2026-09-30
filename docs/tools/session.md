@@ -28,7 +28,7 @@ Beispiel:
 ## storepoint
 
 [Session] Mark a milestone in the design stream: a marker in the group 'Storepoints' linked to the current
-feature plus the description 'Storepoint n: name' on that feature. replay rebuilds the design up to
+feature plus the description '◆ Storepoint n: name' on that feature. replay rebuilds the design up to
 a storepoint in a new document.
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
@@ -64,8 +64,8 @@ Beispiel:
 
 [Session] Rebuild the design from its recorded stream up to a storepoint in a new document, over the same
 tools and without changes: recover a broken model, rebuild after a FreeCAD update or branch a
-variant. Python execution and addon installation are skipped and reported; manual GUI edits in the
-original are not part of the stream (warning).
+variant. Only modelling steps are replayed - scripts, addon installation, file access and STEP import
+are skipped and reported; manual GUI edits in the original are not part of the stream (warning).
 
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|

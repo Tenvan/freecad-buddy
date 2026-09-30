@@ -50,6 +50,13 @@ class Method:
     timeout: float = DEFAULT_TIMEOUT
 
 
+def _check_params(method: Method, name: str, params: dict[str, Any]) -> None:
+    try:
+        inspect.signature(method.fn).bind(**params)
+    except TypeError as error:
+        raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{name}': {error}") from None
+
+
 class MethodRegistry:
     def __init__(self) -> None:
         self._methods: dict[str, Method] = {}
@@ -64,34 +71,31 @@ class MethodRegistry:
     def names(self) -> list[str]:
         return sorted(self._methods)
 
-    def function(self, name: str) -> Callable[..., Any]:
+    def _method(self, name: str) -> Method:
         method = self._methods.get(name)
         if method is None:
             raise RpcError(METHOD_NOT_FOUND, f"Unknown method '{name}'")
-        return method.fn
+        return method
+
+    def function(self, name: str) -> Callable[..., Any]:
+        return self._method(name).fn
 
     def execute(self, name: str, params: dict[str, Any]) -> Any:
         """Run a method on the current thread and record it in the design stream of every document
-        it changed (the one execution path, shared by RPC calls and the replay)."""
-        fn = self.function(name)
-        try:
-            inspect.signature(fn).bind(**params)  # stream entries are data - check them like a request
-        except TypeError as error:
-            raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{name}': {error}") from None
-        before = stream.snapshot()
-        result = fn(**params)
+        it changed (the one execution path, shared by RPC calls and the replay). Methods off the main
+        thread never touch the stream: FreeCAD documents are not thread-safe."""
+        method = self._method(name)
+        _check_params(method, name, params)  # stream entries are data - check them like a request
+        before = stream.snapshot() if method.main_thread else None
+        result = method.fn(**params)
         payload = result.to_dict() if hasattr(result, "to_dict") else result
-        stream.record(name, params, payload, before, store=not name.startswith(NOT_RECORDED))
+        if before is not None:
+            stream.record(name, params, payload, before, store=not name.startswith(NOT_RECORDED))
         return payload
 
     def invoke(self, request: Request, dispatcher: Dispatcher) -> Any:
-        method = self._methods.get(request.method)
-        if method is None:
-            raise RpcError(METHOD_NOT_FOUND, f"Unknown method '{request.method}'")
-        try:
-            inspect.signature(method.fn).bind(**request.params)
-        except TypeError as error:
-            raise RpcError(INVALID_PARAMS, f"Invalid parameters for '{request.method}': {error}") from None
+        method = self._method(request.method)
+        _check_params(method, request.method, request.params)  # reject before the main-thread hop
 
         def run() -> Any:
             return self.execute(request.method, request.params)
