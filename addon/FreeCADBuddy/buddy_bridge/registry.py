@@ -38,6 +38,7 @@ NOT_RECORDED = (
     "document.object",
     "stream.list",
     "stream.replay",
+    "assembly.insert_step",  # carries a local file path and is never replayed
 )
 CODES_BY_NAME = {name: code for code, name in ERROR_NAMES.items()}
 

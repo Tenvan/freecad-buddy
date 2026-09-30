@@ -14,6 +14,7 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 - `MethodRegistry.execute` prüft Parameter aus dem Stream gegen die Signatur wie eine RPC-Anfrage.
 - `NOT_RECORDED` explizit statt Präfix `document.`: `document.delete` gehört zum Design und wird jetzt aufgezeichnet.
 - Test: präparierter `document.save`-Eintrag wird übersprungen, keine Datei entsteht.
+- Erneute Sicherheitsprüfung (Subagent, alle replaybaren Namespaces auf Datei-, Netz-, Subprozess- und Code-Senken verfolgt): kein Befund über der Schwelle. Zwei Beobachtungen umgesetzt: `assembly.insert_step` wird nicht mehr aufgezeichnet (lokaler Pfad in der FCStd), beschädigte Stream-Zeilen werden verworfen statt jeden Aufruf scheitern zu lassen (Test `test_damaged_stream_lines_are_ignored`).
 
 **Release-Änderungen:**
 - `[bugfix][bridge]` Replay führt nur Modellier-Methoden aus; `document.delete` wird aufgezeichnet.
@@ -30,8 +31,8 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 - Nicht übernehmen: —
 
 **Validierung:**
-- `run-core-tests -- tests/bridge/test_stream.py`: 7 passed (neu: präparierter `document.save`-Eintrag wird übersprungen, `document.delete` aufgezeichnet).
-- `uv run poe check`: ruff, pyright 0 Fehler, 186 Projekt-Python-Tests, 256 FreeCAD-Python-Tests.
+- `run-core-tests -- tests/bridge/test_stream.py`: 8 passed (neu: präparierter `document.save`-Eintrag, `document.delete`, beschädigte Zeilen).
+- `uv run poe check`: ruff, pyright 0 Fehler, 186 Projekt-Python-Tests, 257 FreeCAD-Python-Tests.
 - Browser-/manuelle Abnahme: unverändert offen.
 
 **Nächste Session:**

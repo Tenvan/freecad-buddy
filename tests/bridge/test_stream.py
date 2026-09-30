@@ -205,6 +205,17 @@ def test_replay_skips_python_and_stops_at_a_failing_step(
     assert result["skipped"] == [{"step": 7, "method": "document.save"}] and not evil.exists()
 
 
+def test_damaged_stream_lines_are_ignored(registry: MethodRegistry, doc: Any) -> None:
+    _build_box(registry, doc.Name)
+    container = doc.getObject(stream.GROUP_NAME)
+    container.Stream = [*container.Stream, "{not json", '["a", "list"]', '{"no_method": 1}']
+
+    registry.execute("stream.storepoint", {"name": "Base", "document": doc.Name})
+
+    assert _methods(doc) == [*BOX_STEPS, "stream.storepoint"]
+    assert registry.execute("stream.list", {"document": doc.Name})["storepoints"][0]["name"] == "Base"
+
+
 def test_deleting_an_object_is_part_of_the_stream(registry: MethodRegistry, doc: Any) -> None:
     _build_box(registry, doc.Name)
 

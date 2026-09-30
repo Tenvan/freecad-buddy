@@ -71,8 +71,19 @@ def group(doc: Any, create: bool = False) -> Any:
 
 
 def entries(doc: Any) -> list[dict[str, Any]]:
+    """Stream entries of the document; damaged lines (foreign or edited files) are dropped."""
     obj = group(doc)
-    return [json.loads(line) for line in obj.Stream] if obj is not None else []
+    if obj is None:
+        return []
+    items: list[dict[str, Any]] = []
+    for line in obj.Stream:
+        try:
+            entry = json.loads(line)
+        except ValueError:
+            continue  # ponytail: a damaged line is dropped, not repaired
+        if isinstance(entry, dict) and isinstance(entry.get("method"), str):
+            items.append(entry)
+    return items
 
 
 def _write(doc: Any, items: list[dict[str, Any]]) -> None:
@@ -149,7 +160,7 @@ def reconcile(doc: Any, keep: int = 0) -> list[dict[str, Any]]:
             result.append(entry)
             continue
         try:
-            position = history.index(entry["undo_name"], cursor)
+            position = history.index(entry.get("undo_name", ""), cursor)
         except ValueError:
             changed = True  # undone by the user
             continue
@@ -175,10 +186,11 @@ def storepoints(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     found: list[dict[str, Any]] = []
     previous = -1
     for index, entry in enumerate(items):
-        if entry["method"] == STOREPOINT_METHOD:
+        name = (entry.get("params") or {}).get("name") if entry["method"] == STOREPOINT_METHOD else None
+        if isinstance(name, str):
             found.append(
                 {
-                    "name": entry["params"]["name"],
+                    "name": name,
                     "position": index,
                     "created": entry.get("time"),
                     "steps": index - previous - 1,

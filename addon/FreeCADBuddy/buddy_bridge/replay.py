@@ -70,7 +70,7 @@ def replay(registry: Any, storepoint: str, into: str, document: str | None = Non
         if not replayable(method):
             skipped.append({"step": index, "method": method})
             continue
-        params = dict(entry["params"])
+        params = dict(entry.get("params") or {})
         if "document" in inspect.signature(registry.function(method)).parameters:
             params["document"] = target
         if method == stream.STOREPOINT_METHOD:
