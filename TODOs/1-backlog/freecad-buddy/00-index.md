@@ -1,6 +1,6 @@
 # Backlog — freecad-buddy
 
-> Letzte Aktualisierung: 2026-09-29
+> Letzte Aktualisierung: 2026-09-30
 
 ## Übersicht
 
@@ -20,8 +20,8 @@ Domain-Backlog für den FreeCAD-MCP-Server. Tickets sind nach Priorität geliste
 
 | Status | Ticket | Pfad | Architektur-Impact | Kurzbeschreibung |
 |---|---|---|---|---|
-| 🔵 | PartDesign-Vollständigkeit: Loft, Helix, Primitive, Boolean, Draft, Datum | [`partdesign-vollstaendigkeit.md`](partdesign-vollstaendigkeit.md) | mehrere | In Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) (seit 2026-09-29): 6 neue Tools plus Taper in `pad`/`pocket` und `model_thread` in `hole` (51 → 57 Tools) |
-| 🔵 | Design-Stream mit Storepoints: Aufbau aufzeichnen, neu aufbauen, zurückspringen | [`design-stream-storepoints.md`](design-stream-storepoints.md) | mehrere | In Sprint [`freecad-buddy-storepoints`](../../2-sprints-aktiv/freecad-buddy-storepoints/00-index.md) (seit 2026-09-29): Stream im Dokument, `storepoint`/`list_storepoints`/`replay` umgesetzt, GUI-Abnahme offen |
+| 🔵 | PartDesign-Vollständigkeit: Loft, Helix, Primitive, Boolean, Draft, Datum | [`partdesign-vollstaendigkeit.md`](partdesign-vollstaendigkeit.md) | mehrere | In Sprint [`freecad-buddy-partdesign`](../../2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) (seit 2026-09-29): 6 neue Tools plus Taper in `pad`/`pocket` und `model_thread` in `hole` (51 → 57 Tools), GUI-Abnahme G13 bestanden (2026-09-30), Review-Gate offen |
+| 🔵 | Design-Stream mit Storepoints: Aufbau aufzeichnen, neu aufbauen, zurückspringen | [`design-stream-storepoints.md`](design-stream-storepoints.md) | mehrere | In Sprint [`freecad-buddy-storepoints`](../../2-sprints-aktiv/freecad-buddy-storepoints/00-index.md) (seit 2026-09-29): Stream im Dokument, `storepoint`/`list_storepoints`/`replay` umgesetzt, GUI-Abnahme G14/G15 bestanden (2026-09-30), Review-Gate offen |
 | 🟡 | Druckprüfung: Überhänge an gekrümmten Flächen und freie Brücken | [`druckpruefung-ueberhang-kruemmung.md`](druckpruefung-ueberhang-kruemmung.md) | core | Griff-Test: Überhang am runden Stab nicht erkannt (eine Normale pro Fläche) |
 | ✅ | Design-Regelwerk und Design-Tool-Regel | [`design-regelwerk.md`](design-regelwerk.md) | server | Umgesetzt im Sprint `freecad-buddy-design-regelwerk` |
 | ✅ | Addon-Manager-Integration (Suche, Installation) | [`addon-manager-integration.md`](addon-manager-integration.md) | mehrere | Umgesetzt im Sprint `freecad-buddy-design-regelwerk` |
@@ -55,6 +55,11 @@ Schnelle Erfassung von Ideen und Problemen ohne Spezifikation (Regeln: [README �
 | E-21 | 2026-09-29 | `core` | idee | Bauteil-Bibliothek: Snap-Fits, Scharniere, Gewindeeinsätze, Schraubendome als Intent-Tools | früherer Ideen-Parkplatz | Kandidat |
 | E-22 | 2026-09-29 | `core` | idee | Multi-Body-Projekte mit Passungen zwischen Bauteilen (ohne volle Assembly) | früherer Ideen-Parkplatz | Kandidat |
 | E-23 | 2026-09-29 | `server` | idee | Tool-Budget-Review (60 von 100 Tools): Überschneidungen finden, Zusammenlegungen prüfen | Roadmap-Planung | Kandidat |
+| E-24 | 2026-09-30 | `core` | problem | Nach `loft` bleibt die Datum-Ebene der oberen Skizze sichtbar und verdeckt die Öffnung (Trichter); nach dem Feature ausblenden wie die Skizzen | GUI-Abnahme G13 | Kandidat |
+| E-25 | 2026-09-30 | `bridge` | idee | Offenes Task-Panel sperrt auch reine Lesezugriffe (`get_model_tree`, `list_storepoints`) mit `[busy_user_transaction]`; prüfen, ob Lesen ohne Transaktion erlaubt werden kann | GUI-Abnahme G13/G15 | Kandidat |
+| E-26 | 2026-09-30 | `bridge` | idee | Gruppe `Storepoints` steht nach jedem Aufruf auf `Touched` (Recompute-Symbol im Baum) | GUI-Abnahme G14 | Kandidat |
+| E-27 | 2026-09-30 | `infra` | idee | GUI-Testlauf: FreeCAD im GUI-Modus, Prüfungen in-process über `FreeCADGui` und Qt (`setEdit`/`Control.closeDialog`, Baum-Widget auslesen, `QTest`-Doppelklick) statt pyautogui/pywin32; automatisiert G13, G14, G15 (echte Sketcher-Transaktionen), G2 (Event-Loop-Latenz). G6/G7/G8 bleiben manuell. Spike 2026-09-30 (über `execute_python` in der laufenden GUI) trägt: G13 `setEdit` → Task-Panel aktiv → `closeDialog` für Loft/Helix/Kugel; G14 Baum-Widget liefert Spalte „Beschreibung“ = `Label2`, Tooltip leer, Marker-Icon gesetzt, `QTest.mouseDClick` auf den Marker wählt das verlinkte Feature | Ralf, GUI-Abnahme | R1 |
+| E-28 | 2026-09-30 | `server` | idee | Tool `edit_feature`: ein Feature im Task-Panel für den Nutzer öffnen (`setEdit`), z. B. zum Nachjustieren; Budget 60 → 61 | Ralf, GUI-Abnahme | Kandidat |
 
 ## Hinweise
 

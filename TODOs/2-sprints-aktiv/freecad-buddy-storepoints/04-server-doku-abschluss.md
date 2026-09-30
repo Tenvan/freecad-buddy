@@ -22,12 +22,13 @@ Enthaltene Aufgaben: #4.1, #4.2, #4.3
 
 | Aufgabe | Beschreibung | Status | Architektur-Relevanz | Abhängigkeiten | Aufwand (h) | Spec-Kriterien / Voraussetzung |
 |---|---|---|---|---|---|---|
-| #4.3 | GUI-Abnahme G14 (Marker, Beschreibung, Doppelklick) und G15 (`manual_edit` nach GUI-Änderung) nur nach Freigabe durch Ralf; `poe check` ist grün | Blockiert (wartet auf Ralf) | `keine` | #4.2 | — | AC-07/AC-10 (GUI) |
+| — | — | — | — | — | — | — |
 
 ## ✔️ Done Tasks
 
 | Aufgabe | Beschreibung | Architektur-Delta | Erledigt am |
 |---|---|---|---|
+| #4.3 | GUI-Abnahme G14 und G15 (Agent führt, Ralf prüft in der GUI); Befund G15 als Bugfix `0b8025f` behoben und erneut abgenommen; G14-Text in `docs/acceptance.md` korrigiert (Beschreibungsspalte statt Tooltip) | `docs/architecture.md` (Zusammenfassung von GUI-Transaktionen) | 2026-09-30 |
 | #4.1 | Server-Tools `storepoint`, `list_storepoints`, `replay` (Gruppe Session, Timeout 600 s für Replay); Bridge `stream.storepoint`, `stream.list`, `stream.replay`; Beispiele; E2E `test_storepoints_and_replay_over_mcp` | keins | 2026-09-29 |
 | #4.2 | Regelwerk `workflow` + Storepoint-Regel; `docs/architecture.md` Abschnitt „Design-Stream und Storepoints“, Tool-Zahl 60; README-Zeile; `CHANGELOG.md` 0.4.0; Version 0.4.0 in `pyproject.toml`, `uv.lock`, Server, Bridge, Core; `docs/acceptance.md` G14/G15; `docs/tools.md` regeneriert | in `docs/architecture.md` übernommen (98) | 2026-09-29 |
 | #4.3 (Teil) | `uv run poe check`: ruff, pyright 0 Fehler, 186 Projekt-Tests, 255 FreeCAD-Tests | keins | 2026-09-29 |
@@ -38,15 +39,15 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| G14 (AC-10 GUI): siehe Phase 2 | offen | ausstehend | ausstehend |
-| G15 (AC-07 GUI): Skizze in der GUI verschieben, danach `pad` über MCP → `list_storepoints`/Stream zeigt `manual_edit`, `replay` warnt | offen | ausstehend | ausstehend |
+| G14 (AC-10 GUI): siehe Phase 2 | ✅ bestanden | Ralf im Chat, 2026-09-30: Rauten-Icon ja, Doppelklick markiert das Feature, „◆ Storepoint 1: Grundkörper“ steht in der Beschreibungsspalte (Hover-Tooltip war Fehlinterpretation des Katalogtexts, Text korrigiert) | Session-Log S2 |
+| G15 (AC-07 GUI): Skizze in der GUI bearbeiten, danach `pad` über MCP → `list_storepoints`/Stream zeigt `manual_edit`, `replay` warnt | ✅ bestanden (2. Lauf) | Ralf bearbeitet `Sketch_Recess` in der GUI, Agent führt MCP-Schritte aus, 2026-09-30 | 1. Lauf ❌ (`manual_edits` = 5, überlappende Warnungen) → Fix `0b8025f`; 2. Lauf: `manual_edits` = 1, genau eine Replay-Warnung, Replay-Volumen ohne die manuelle Änderung (Session-Log S2) |
 
 ## 🔄 Nächste Session
 
 > **Einstieg für den nächsten Agenten / die nächste Session:**
 >
-> - Offene Aufgaben: 1 (#4.3 GUI-Anteil, wartet auf Ralf)
-> - Nächste Session: S2 (Abnahme und Sprint-Abschluss)
-> - Relevante Dateien: `docs/acceptance.md` (G14, G15), `00-index.md`
+> - Offene Aufgaben: keine; Sprint wartet auf das Review-Gate
+> - Nächste Session: S3 (Review-Gate in frischer Session, `97-review.md`, Bereich `da5701a..HEAD`)
+> - Relevante Dateien: `00-index.md`, `TODOs/README.md#review-gate-sprint-abnahme`
 > - Architektur-Deltas: alle übernommen
-> - Startpunkt: #4.3 – Ralf fragen: G14/G15 selbst prüfen, dem Agenten übertragen oder verschieben
+> - Startpunkt: `git diff --name-status da5701a..HEAD` in `97-review.md` eintragen

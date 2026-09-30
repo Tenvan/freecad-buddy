@@ -39,7 +39,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 - **A-06 Sicherheit und Sprache:** Kein Replay von `execute_python` ohne dessen Opt-in; `install_addon` wird nie erneut ausgeführt, sondern als Voraussetzung gemeldet. Alle MCP-Ausgaben englisch.
 - **A-07 Budget:** Höchstens drei neue Tools (`storepoint`, `list_storepoints`, `replay`); Tool-Budget bleibt ≤ 100.
 - **A-08 Sichtbarkeit im Modellbaum (Ralf, Chat 2026-09-29):** Ein Storepoint ist in FreeCAD sichtbar, ohne Labels zu verändern (Labels sind Referenzen):
-  - (a) als Beschreibung (`Label2`) auf dem Feature, das zum Zeitpunkt des Storepoints Tip des Bodys war, z. B. „◆ Storepoint 2: Deckel fertig“. FreeCAD zeigt `Label2` als Tooltip im Baum und in der einblendbaren Spalte „Beschreibung“ (vermutet: Spalte ab 1.0 per Kontextmenü des Baumkopfs, ungeprüft). Damit steht der Storepoint an der richtigen Stelle in der Feature-Kette.
+  - (a) als Beschreibung (`Label2`) auf dem Feature, das zum Zeitpunkt des Storepoints Tip des Bodys war, z. B. „◆ Storepoint 2: Deckel fertig“. FreeCAD zeigt `Label2` in der einblendbaren Spalte „Beschreibung“ (Rechtsklick in den Baum), nicht als Hover-Tooltip (in der GUI-Abnahme G14 am 2026-09-30 geprüft). Damit steht der Storepoint an der richtigen Stelle in der Feature-Kette.
   - (b) als Marker-Objekt in einer Gruppe `Storepoints` an der Dokumentwurzel, ein Objekt je Storepoint (`App::FeaturePython` ohne Shape) mit Link auf das Feature, Zeitstempel und Schrittzahl; eigenes Icon über einen ViewProvider des Addons, Auswahl des Markers markiert das verlinkte Feature. Ohne installiertes Addon lädt das Dokument trotzdem (generisches Icon, Proxy-Warnung).
   - In den Body selbst lässt sich kein Marker einfügen; PartDesign nimmt dort nur Features, Skizzen, Datums und Binder (vermutet, im Spike prüfen).
   - `undo` eines Storepoints entfernt Beschreibung und Marker wieder (beides in derselben Transaktion).
@@ -83,7 +83,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 - [ ] AC-07: Eine manuelle GUI-Änderung wird als `manual_edit` markiert und `replay` warnt (GUI-Anteil Nutzerabnahme, headless über simulierte Fremdtransaktion).
 - [ ] AC-08: `execute_python`-Einträge werden ohne Opt-in übersprungen und gemeldet; `install_addon` wird nie erneut ausgeführt.
 - [ ] AC-09: Tool-Budget ≤ 100, `uv run poe check` grün, keine deutschen MCP-Texte.
-- [ ] AC-10: Nach `storepoint("Grundkörper")` trägt das Tip-Feature die Beschreibung „◆ Storepoint 1: Grundkörper“ und die Gruppe `Storepoints` enthält einen Marker mit Link auf dieses Feature; nach `undo` ist beides weg (headless). Sichtbarkeit von Tooltip und Marker-Icon in der GUI als Nutzerabnahme.
+- [ ] AC-10: Nach `storepoint("Grundkörper")` trägt das Tip-Feature die Beschreibung „◆ Storepoint 1: Grundkörper“ und die Gruppe `Storepoints` enthält einen Marker mit Link auf dieses Feature; nach `undo` ist beides weg (headless). Sichtbarkeit von Beschreibungsspalte und Marker-Icon in der GUI als Nutzerabnahme.
 
 ## Offene Fragen
 
@@ -105,7 +105,7 @@ Ein Design lässt sich aus seinem Stream in einem neuen Dokument bis zu einem be
 | AC-07 | Erkennung fremder Transaktionen in der Bridge | Headless-Core-Test + GUI-Nutzerabnahme | offen |
 | AC-08 | Filter für `execute_python`/`install_addon` | Unit-Test Server | offen |
 | AC-09 | Doku, `poe check` | `uv run poe check` | offen |
-| AC-10 | `Label2` auf dem Tip-Feature, Gruppe `Storepoints` mit Marker-Objekten und ViewProvider-Icon im Addon | Headless-Core-Test + GUI-Nutzerabnahme (Tooltip, Icon) | offen |
+| AC-10 | `Label2` auf dem Tip-Feature, Gruppe `Storepoints` mit Marker-Objekten und ViewProvider-Icon im Addon | Headless-Core-Test + GUI-Nutzerabnahme (Beschreibungsspalte, Icon) | GUI G14 bestanden (2026-09-30), Abschluss im Sprint |
 
 Umsetzung folgt dem freigegebenen Spec-Stand. Browser-/manuelle Prüfungen zusätzlich nach der [Abnahmefreigabe](../../README.md#browser--und-manuelle-abnahmeprüfungen) behandeln; Spec-Freigabe ist keine Testfreigabe.
 

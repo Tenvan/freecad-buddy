@@ -5,14 +5,14 @@
 
 ## Roadmap
 
-Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.md) (nächster Schritt R0: Abschluss der beiden aktiven Sprints).
+Reihenfolge der kommenden Sprints mit Domäne je Sprint: [`roadmap.md`](roadmap.md) (nächster Schritt R0: Review-Gate der beiden aktiven Sprints; alle GUI-Abnahmen bestanden).
 
 ## Aktive Sprints
 
 | Name | Pfad | Status | Notiz |
 |---|---|---|---|
-| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 15/16 Aufgaben (S1–S5: 6 neue Tools, Taper, `model_thread`, Regelwerk, Doku, Version 0.3.0); offen nur #5.4 GUI-Abnahme G13 (wartet auf Ralf); danach Sprint-Abschluss S6 |
-| FreeCAD Buddy: Design-Stream mit Storepoints | [`2-sprints-aktiv/freecad-buddy-storepoints/00-index.md`](2-sprints-aktiv/freecad-buddy-storepoints/00-index.md) | 🔵 Aktiv (seit 2026-09-29) | 9/10 Aufgaben (Aufzeichnung, Storepoints mit Marker, Replay, 3 Tools, Doku, Version 0.4.0, 60 Tools); offen nur #4.3 GUI-Abnahme G14/G15 (wartet auf Ralf) |
+| FreeCAD Buddy: PartDesign-Vollständigkeit | [`2-sprints-aktiv/freecad-buddy-partdesign/00-index.md`](2-sprints-aktiv/freecad-buddy-partdesign/00-index.md) | 🟡 Wartet auf Review-Gate (seit 2026-09-30) | 16/16 Aufgaben (6 neue Tools, Taper, `model_thread`, Regelwerk, Doku, Version 0.3.0); GUI-Abnahme G13 bestanden; offen nur Review-Gate |
+| FreeCAD Buddy: Design-Stream mit Storepoints | [`2-sprints-aktiv/freecad-buddy-storepoints/00-index.md`](2-sprints-aktiv/freecad-buddy-storepoints/00-index.md) | 🟡 Wartet auf Review-Gate (seit 2026-09-30) | 10/10 Aufgaben (Aufzeichnung, Storepoints mit Marker, Replay, 3 Tools, Doku, Version 0.4.0, 60 Tools); GUI-Abnahme G14/G15 bestanden (Bugfix `manual_edit`); offen nur Review-Gate |
 
 ## Backlog (nach Domain)
 

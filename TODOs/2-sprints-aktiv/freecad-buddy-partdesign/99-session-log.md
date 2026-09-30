@@ -5,6 +5,42 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 6 — 2026-09-30 (GUI-Abnahme G13)
+
+**Ziel:** #5.4; Ralf überträgt die Führung an den Agenten und prüft selbst in der GUI.
+
+**Erledigt:**
+- `Abnahme_G13` über MCP: Trichter (`loft` Ø20 auf XY → Ø60 auf `DatumPlane_FunnelTop` bei `Funnel_Height`), Feder (`helix` um die Skizzenachse, Draht Ø2, R10, Steigung 5, Höhe 30), Kugelknauf (`primitive` sphere Ø25 auf XY); alle Features gültig, Skizzen DoF 0, ein Undo-Schritt je Aufruf, Volumen rechnerisch geprüft.
+- Ralf: Doppelklick öffnet alle drei Features im Task-Panel; Parameter im VarSet geändert, Recompute ohne Fehler.
+- Nachmessung: Loft 81 681 mm³ (h = 60), Helix 1 974 mm³ (Steigung 3 → 10 Windungen), Kugel 47 713 mm³ (Ø45, weiterhin auf XY); Skizzen DoF 0.
+- Nebenbei bestätigt: Ralfs 12 GUI-Transaktionen stehen als ein `manual_edit` im Stream (Fix `0b8025f` aus dem Sprint `freecad-buddy-storepoints`).
+
+**Release-Änderungen:**
+- `[skip][todos]` Nur Abnahme, keine Produktänderung.
+
+**Blocker:**
+- keine; nächster Schritt Review-Gate (Agent, danach Abnahme durch Ralf).
+
+**Erkenntnisse:**
+- `DatumPlane_FunnelTop` bleibt nach dem Loft sichtbar und verdeckt die Trichteröffnung (Kandidat für den Eingang).
+- Ein offenes Task-Panel sperrt auch reine Lesezugriffe (`[busy_user_transaction]`); bei GUI-Abnahmen den Nutzer zuerst schließen lassen.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: keine
+- Doku-Delta: keins.
+- Nicht übernehmen: —
+
+**Komplexität:** unverändert (keine Codeänderung).
+
+**Validierung:**
+- `get_model_tree`, `get_object`, `list_parameters` nach Ralfs Änderungen (Werte oben).
+- Browser-/manuelle Abnahme: G13 durch Ralf bestätigt (Chat, 2026-09-30).
+
+**Nächste Session:**
+- S7: Review-Gate in frischer Session (`97-review.md`, `git diff --name-status 4fd92f8..da5701a`), Abnahme durch Ralf, dann Verschieben nach `3-sprints-erledigt/2026-09-freecad-buddy-partdesign/`, Ticket, Backlog-Index, `master-todo.md`, Roadmap R0.
+
+---
+
 ## Session 5 — 2026-09-29 (Regelwerk, Doku, Version 0.3.0)
 
 **Ziel:** #5.1, #5.2, #5.3; #5.4 vorbereiten.

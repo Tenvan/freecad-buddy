@@ -38,7 +38,7 @@ Browser- und manuelle Prüfungen nur nach der [Freigaberegel in TODOs/README.md]
 
 | Prüfung / Spec-Kriterium / Umfang / erwartetes Ergebnis | Status | Nutzerbestätigung oder Agentenfreigabe | Ergebnis / Session-Log-Nachweis |
 |---|---|---|---|
-| G14 (AC-10): Teil bauen lassen, `storepoint("Grundkörper")`; im Baum: Gruppe `Storepoints` mit Marker und Icon, Tooltip/Beschreibung „◆ Storepoint 1: Grundkörper“ am Feature, Doppelklick auf den Marker markiert das Feature | offen | ausstehend | ausstehend |
+| G14 (AC-10): Teil bauen lassen, `storepoint("Grundkörper")`; im Baum: Gruppe `Storepoints` mit Marker und Icon, „◆ Storepoint 1: Grundkörper“ in der Beschreibungsspalte am Feature, Doppelklick auf den Marker markiert das Feature | ✅ bestanden | Ralf im Chat, 2026-09-30 | Icon, Beschreibungsspalte und Doppelklick bestätigt; kein Hover-Tooltip (FreeCAD zeigt `Label2` nicht als Tooltip), Katalogtext korrigiert (Session-Log S2) |
 
 ## 🔄 Nächste Session
 

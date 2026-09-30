@@ -1,6 +1,6 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: Design-Stream mit Storepoints
 
-> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-29 │ Status: 🔵 Aktiv
+> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-30 │ Status: 🟡 Wartet auf Review-Gate (alle Aufgaben und Abnahmen erledigt)
 
 ## Spezifikation
 
@@ -79,10 +79,10 @@ Unverändert AC-01 bis AC-10 aus dem Ticket; Nachweis unten.
 | AC-04 | Replay bis zum letzten Storepoint: gleiche Labels und Volumen | #3.1 / P3 | Headless-Bridge-Test (Referenzmodell) | **erfüllt** (`test_replay_rebuilds_the_design_up_to_each_storepoint`: Labels identisch, Volumen gleich; E2E `test_storepoints_and_replay_over_mcp`) |
 | AC-05 | Replay bis zu einem mittleren Storepoint | #3.1 / P3 | Headless-Bridge-Test | **erfüllt** (gleicher Test: Kopie bis „Base“ ohne Pocket) |
 | AC-06 | Scheiternder Schritt: Abbruch mit Schrittnummer, Teilergebnis bleibt | #3.1 / P3 | Headless-Bridge-Test | **erfüllt** (`test_replay_skips_python_and_stops_at_a_failing_step`) |
-| AC-07 | `manual_edit` erkannt, Replay warnt | #1.1 / P1 | Headless-Core-Test (Fremdtransaktion) + GUI-Nutzerabnahme | headless **erfüllt** (`test_undo_compacts_the_stream_and_manual_edits_are_marked`); GUI-Anteil G15 offen |
+| AC-07 | `manual_edit` erkannt, Replay warnt | #1.1 / P1 | Headless-Core-Test (Fremdtransaktion) + GUI-Nutzerabnahme | **erfüllt** (headless `test_undo_compacts_the_stream_and_manual_edits_are_marked`, `test_gui_transactions_between_polls_stay_one_manual_edit`; GUI G15 am 2026-09-30 im 2. Lauf nach Fix `0b8025f` bestanden) |
 | AC-08 | `execute_python` übersprungen, `install_addon` nie erneut | #1.2, #3.1 / P1, P3 | Headless-Bridge-Test | **erfüllt** (Skip-Liste `NEVER_REPLAYED`, Test wie AC-06) |
 | AC-09 | Tool-Budget ≤ 100, `poe check` grün, englische Texte | #4.1–#4.3 / P4 | `uv run poe check` | **erfüllt** (60 Tools; ruff, pyright, 186 + 255 Tests grün) |
-| AC-10 | `Label2` auf dem Tip-Feature, Marker mit Link, Undo räumt auf; Icon/Tooltip in der GUI | #2.1, #2.3 / P2 | Headless-Core-Test + GUI-Nutzerabnahme | headless **erfüllt** (Test wie AC-03); GUI-Anteil G14 offen |
+| AC-10 | `Label2` auf dem Tip-Feature, Marker mit Link, Undo räumt auf; Icon/Beschreibungsspalte in der GUI | #2.1, #2.3 / P2 | Headless-Core-Test + GUI-Nutzerabnahme | **erfüllt** (headless Test wie AC-03; GUI G14 am 2026-09-30 von Ralf bestätigt: Icon, Beschreibungsspalte, Doppelklick) |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -92,15 +92,16 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 |---|---|---|---|
 | 2026-09-29 | Sprint aus dem Ticket mit den Annahmen OF-01 bis OF-05 gestartet (Ralf, „ok, dann umsetzen“) | Annahmen sind tragfähig, Ralf kann vor dem Release widersprechen | mehrere |
 | 2026-09-29 | Aufzeichnung in `MethodRegistry.invoke` über Undo-Zähler und -Namen statt über eine Liste mutierender Methoden | Jede Buddy-Transaktion ist genau ein Undo-Schritt; neue Tools werden automatisch erfasst | bridge, core |
+| 2026-09-30 | G14: Soll ist die Beschreibungsspalte, kein Hover-Tooltip; Katalogtext korrigiert (Ralf) | FreeCAD zeigt `Label2` nicht als Tooltip; Ralf wählt Checklisten-Korrektur statt neuer Anforderung | keiner |
 | 2026-09-29 | Stream-Einträge speichern Bridge-Methode und Parameter (nicht MCP-Tool-Namen) | Replay ohne MCP-Umweg, ein Ausführungsweg (S-01) | bridge |
 
 ## Gesamtfortschritt
 
-[█████████░] 90% — 9 von 10 Aufgaben erledigt
+[██████████] 100% — 10 von 10 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
-- **#4.3 GUI-Abnahme G14/G15** wartet auf Ralf: selbst prüfen, dem Agenten übertragen oder per Scope-Entscheidung ins Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md) verschieben. Besitzer: Ralf.
+- **Review-Gate** ([Regel](../../README.md#review-gate-sprint-abnahme)): in frischer Session `git diff --name-status da5701a..HEAD` in `97-review.md` eintragen, Dateien bewerten, Abnahme durch Ralf; erst danach Verschieben nach `3-sprints-erledigt/`. Besitzer: Agent (Review), Ralf (Abnahme).
 
 ## Phasen-Übersicht
 
@@ -109,14 +110,15 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 1 — Aufzeichnung & Ablage | [01-aufzeichnung.md](01-aufzeichnung.md) | `core`, `bridge` | 0 | 3 | [██████████] 100% |
 | 2 — Storepoints & Baum | [02-storepoints-baum.md](02-storepoints-baum.md) | `core` | 0 | 3 | [██████████] 100% |
 | 3 — Replay | [03-replay.md](03-replay.md) | `bridge` | 0 | 1 | [██████████] 100% |
-| 4 — Server, Doku & Abschluss | [04-server-doku-abschluss.md](04-server-doku-abschluss.md) | `docs/architecture.md` | 1 | 2 | [███████░░░] 67% |
+| 4 — Server, Doku & Abschluss | [04-server-doku-abschluss.md](04-server-doku-abschluss.md) | `docs/architecture.md` | 0 | 3 | [██████████] 100% |
 
 ## 📅 Session-Übersicht
 
 | Session | Phase | Ziel | Status |
 |---|---|---|---|
 | S1 | Phase 1–4 | Stream-Modul, Registry-Hook, Storepoints, Marker, ViewProvider, Replay, Server-Tools, Doku, Version 0.4.0, `poe check` | ✅ Erledigt (2026-09-29), #4.3 GUI offen |
-| **→ S2** | Phase 4 | GUI-Abnahme G14/G15 (nach Freigabe durch Ralf) und Sprint-Abschluss | **Nächste, wartet auf Ralf** |
+| S2 | Phase 4 | GUI-Abnahme G14/G15 (Agent führt, Ralf prüft), Bugfix `manual_edit`, Abnahme-Doku | ✅ Erledigt (2026-09-30) |
+| **→ S3** | — | Review-Gate (`97-review.md`, Bereich `da5701a..HEAD`), Abnahme durch Ralf, Verschieben nach `3-sprints-erledigt/` | **Nächste** |
 
 ## 🔗 Dependency-Übersicht
 
@@ -145,17 +147,18 @@ Pflicht zum Sprint-Abschluss:
 
 ## Sprint-Abschluss / Definition of Done
 
-- [ ] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
-- [ ] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
-- [ ] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
-- [ ] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
-- [ ] Offene Blocker mit Besitzer und nächstem Schritt festgehalten.
-- [ ] `99-session-log.md` aktualisiert.
-- [ ] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
-- [ ] `98-architecture-update.md` ausgewertet.
-- [ ] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [x] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
+- [x] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
+- [x] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
+- [x] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
+- [x] Offene Blocker mit Besitzer und nächstem Schritt festgehalten (Review-Gate).
+- [x] `99-session-log.md` aktualisiert.
+- [x] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
+- [x] `98-architecture-update.md` ausgewertet.
+- [x] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [ ] Review-Gate bestanden (`97-review.md`, Abnahme durch Ralf).
 - [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben.
-- [ ] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
+- [x] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
 
 ## 📓 Session-Log
 

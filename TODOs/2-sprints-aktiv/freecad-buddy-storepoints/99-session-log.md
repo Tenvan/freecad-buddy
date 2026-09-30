@@ -5,6 +5,46 @@ Chronologisches Protokoll aller Arbeitssessions. Nach jeder Session einen neuen 
 
 ---
 
+## Session 2 — 2026-09-30 (GUI-Abnahme G14/G15)
+
+**Ziel:** #4.3 GUI-Anteil; Ralf überträgt die Führung an den Agenten („Agent führt, ich schaue“) und prüft selbst in der GUI.
+
+**Erledigt:**
+- Aufbau über MCP (`Abnahme_Storepoints`: Platte mit Mulde, Storepoints `Grundkörper`/`Mulde`), sauberer `replay` als Gegenprobe (Baum, Undo-Liste, Screenshot identisch).
+- G14: Ralf bestätigt Rauten-Icon, Doppelklick markiert das Feature, „◆ Storepoint 1: Grundkörper“ in der Beschreibungsspalte. Hover-Tooltip gibt es nicht (FreeCAD zeigt `Label2` nur in der Spalte); Ralf entscheidet: Katalogtext korrigieren (`docs/acceptance.md`, Phase 2, Ticket).
+- G15, 1. Lauf ❌: eine Skizzenbearbeitung in der GUI sind 5 Transaktionen (`Edit`, `Edit`, `Drag Constraint`, `Modify sketch constraints`, `Sketch recompute`); weil jeder Bridge-Aufruf (auch Lesezugriffe) abgleicht, entstanden 5 `manual_edit`-Einträge mit überlappenden Namen und 5 Replay-Warnungen.
+- Bugfix `0b8025f`: `reconcile` sucht die Undo-Namen eines vermerkten `manual_edit` ab dem Cursor und übernimmt direkt folgende GUI-Transaktionen in denselben Eintrag; Regressionstest `test_gui_transactions_between_polls_stay_one_manual_edit` (schlägt ohne Fix fehl).
+- G15, 2. Lauf ✅ (`Abnahme_G15`, nach Neustart von FreeCAD): `manual_edits` = 1 vor und nach `pad`, `replay("Fuß")` warnt genau einmal an Schritt 9; Replay-Volumen 16659,2 mm³ (Radius 3) gegenüber Original 16683,3 mm³ (Ralfs Radius) – die manuelle Änderung ist wie erwartet nicht im Stream.
+- `docs/architecture.md`: Zusammenfassung aufeinanderfolgender GUI-Transaktionen ergänzt.
+
+**Release-Änderungen:**
+- `[bugfix][core]` Eine GUI-Bearbeitung aus mehreren Transaktionen zählt als ein `manual_edit`; das Replay warnt einmal statt je Transaktion.
+- `[doc][docs]` Abnahme-Katalog G14 (Beschreibungsspalte statt Tooltip), G15 präzisiert; Architektur-Abschnitt Design-Stream.
+
+**Blocker:**
+- keine; nächster Schritt Review-Gate (Agent, danach Abnahme durch Ralf).
+
+**Erkenntnisse:**
+- Lesezugriffe gleichen den Stream ab; manuelle GUI-Arbeit wird also in Stücken erfasst, die zusammengeführt werden müssen. Headless-Tests mit einer einzigen Fremdtransaktion haben das nicht gezeigt.
+- Solange in FreeCAD ein Task-Panel offen ist, lehnt die Bridge mit `[busy_user_transaction]` ab – bei GUI-Abnahmen den Nutzer zuerst schließen lassen.
+
+**Architektur-Erkenntnisse:**
+- Betroffene Skills: `docs/architecture.md`
+- Doku-Delta: ein Satz im Abschnitt Design-Stream (Abgleich mit der Undo-Historie).
+- Nicht übernehmen: Namen der Sketcher-Transaktionen.
+
+**Komplexität:** unverändert (`ruff --select C901` auf `stream.py` ohne Befund, 334 Zeilen).
+
+**Validierung:**
+- `uv run poe test-core`: 258 passed (neuer Test ohne Fix rot).
+- `ruff check`/`ruff format --check` auf den geänderten Dateien sauber.
+- Browser-/manuelle Abnahme: G14 und G15 durch Ralf bestätigt (Chat, 2026-09-30).
+
+**Nächste Session:**
+- S3: Review-Gate in frischer Session (`97-review.md`, `git diff --name-status da5701a..HEAD`), Abnahme durch Ralf, dann Verschieben nach `3-sprints-erledigt/2026-09-freecad-buddy-storepoints/`, Ticket, Backlog-Index, `master-todo.md`, Roadmap R0.
+
+---
+
 ## Session 1b — 2026-09-30 (Sicherheitsbefund Replay)
 
 **Ziel:** Befund „allowlist-semantic-escape“ der Push-Sicherheitsprüfung in `buddy_bridge/replay.py` beheben.

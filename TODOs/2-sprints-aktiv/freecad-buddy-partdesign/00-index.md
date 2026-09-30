@@ -1,6 +1,6 @@
 # 📋 Umsetzungsplan — FreeCAD Buddy: PartDesign-Vollständigkeit
 
-> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-29 │ Status: 🔵 Aktiv
+> Erstellt: 2026-09-29 │ Letzte Aktualisierung: 2026-09-30 │ Status: 🟡 Wartet auf Review-Gate (alle Aufgaben und Abnahmen erledigt)
 
 ## Spezifikation
 
@@ -82,7 +82,7 @@ Unverändert AC-01 bis AC-11 aus dem Ticket; der Nachweis steht unten.
 | AC-08 | `hole` mit `model_thread`, `unsupported` ohne Eigenschaft | #1.2, #3.4 / P1, P3 | Spike + Headless-Core-Test | **erfüllt** (S3: `test_hole_model_thread_cuts_real_thread_geometry`; `unsupported`-Pfad ist ein Guard ohne eigenen Test, da 26.3 die Eigenschaft hat) |
 | AC-09 | Regelwerk nennt neue Tools, `docs/tools.md` regeneriert, ≤ 100 Tools | #1.3, #5.1, #5.2 / P1, P5 | Unit-Tests Regelwerk und Tool-Doku | **erfüllt** (S5: sechs neue Regeln in `features`/`references` mit `requires`; `test_rules_only_name_registered_tools`, `test_every_topic_of_r03_is_covered`, `test_every_tool_has_an_example_and_docs_are_current` grün; 57 ≤ 100 Tools) |
 | AC-10 | Undo-Schritt, Labels, Sprache, `poe check` grün | #5.3 / P5 | `uv run poe check` | **erfüllt** (S5: `poe check` grün, Undo in den Core-Tests von `boolean`, `hole`, `draft`; Labels per Präfix-Konvention; `test_language.py` grün) |
-| AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | offen – G13 in `docs/acceptance.md` beschrieben, wartet auf Ralf (selbst prüfen, Agent führen lassen oder verschieben) |
+| AC-11 | Loft, Helix, Primitiv in der GUI weiterbearbeitbar | #5.4 / P5 | Nutzerprüfung GUI (Freigabe nötig) | **erfüllt** – G13 am 2026-09-30 von Ralf in der GUI bestätigt (Task-Panels, Parameteränderung, Recompute ohne Fehler, Skizzen DoF 0) |
 
 Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Browser-/manuelle Abnahmefreigabe.
 
@@ -107,11 +107,11 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 
 ## Gesamtfortschritt
 
-[█████████░] 94% — 15 von 16 Aufgaben erledigt
+[██████████] 100% — 16 von 16 Aufgaben erledigt
 
 ## ⚠️ Blocker
 
-- **#5.4 GUI-Abnahme AC-11 (G13)** wartet auf Ralf: selbst prüfen, dem Agenten übertragen („Agent führt, ich schaue“) oder per Scope-Entscheidung ins Folgeticket [`gui-abnahme.md`](../../1-backlog/freecad-buddy/gui-abnahme.md) verschieben. Besitzer: Ralf. Danach Sprint-Abschluss (S6).
+- **Review-Gate** ([Regel](../../README.md#review-gate-sprint-abnahme)): in frischer Session `git diff --name-status 4fd92f8..da5701a` in `97-review.md` eintragen, Dateien bewerten, Abnahme durch Ralf; erst danach Verschieben nach `3-sprints-erledigt/`. Besitzer: Agent (Review), Ralf (Abnahme).
 
 ## Phasen-Übersicht
 
@@ -121,7 +121,7 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | 2 — Loft, Helix, Primitive | [02-additive-features.md](02-additive-features.md) | `mehrere` | 0 | 3 | [██████████] 100% |
 | 3 — Datum & Bestandserweiterungen | [03-referenzen-bestand.md](03-referenzen-bestand.md) | `mehrere` | 0 | 4 | [██████████] 100% |
 | 4 — Boolean & Draft | [04-boolean-draft.md](04-boolean-draft.md) | `mehrere` | 0 | 2 | [██████████] 100% |
-| 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 1 | 3 | [████████░░] 75% |
+| 5 — Regelwerk, Doku & Abschluss | [05-regelwerk-doku-abschluss.md](05-regelwerk-doku-abschluss.md) | `docs/architecture.md` | 0 | 4 | [██████████] 100% |
 
 ## 📅 Session-Übersicht
 
@@ -132,7 +132,8 @@ Umsetzung erst für den freigegebenen Spec-Stand. Spec-Freigabe ersetzt keine Br
 | S3 | Phase 3 | `datum`, Achsen über Datum Line, Taper/`up_to_first`, `model_thread` | ✅ Erledigt (2026-09-29) |
 | S4 | Phase 4 | `boolean`, `draft` | ✅ Erledigt (2026-09-29) |
 | S5 | Phase 5 | Regelwerk, Doku, Version 0.3.0, `poe check` | ✅ Erledigt (2026-09-29), #5.4 offen |
-| **→ S6** | Phase 5 | GUI-Abnahme G13 (nach Freigabe durch Ralf) und Sprint-Abschluss | **Nächste, wartet auf Ralf** |
+| S6 | Phase 5 | GUI-Abnahme G13 (Agent führt, Ralf prüft) | ✅ Erledigt (2026-09-30) |
+| **→ S7** | — | Review-Gate (`97-review.md`, Bereich `4fd92f8..da5701a`), Abnahme durch Ralf, Verschieben nach `3-sprints-erledigt/` | **Nächste** |
 
 ## 🔗 Dependency-Übersicht
 
@@ -162,17 +163,18 @@ Pflicht zum Sprint-Abschluss:
 
 ## Sprint-Abschluss / Definition of Done
 
-- [ ] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
-- [ ] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
-- [ ] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
-- [ ] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
-- [ ] Offene Blocker mit Besitzer und nächstem Schritt festgehalten.
-- [ ] `99-session-log.md` aktualisiert.
-- [ ] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
-- [ ] `98-architecture-update.md` ausgewertet.
-- [ ] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [x] Alle Akzeptanzkriterien geprüft oder bewusst in Folgeaufgaben verschoben.
+- [x] Spec-Stand, Aufgaben und Kriteriennachweise stimmen überein; zurückgestellte Kriterien haben eine ausdrückliche Scope-Entscheidung und Folgeaufgabe.
+- [x] Relevante Tests, Builds oder manuelle Prüfungen dokumentiert.
+- [x] Browser- und manuelle Abnahmen gemäß [Freigaberegel](../../README.md#browser--und-manuelle-abnahmeprüfungen) dokumentiert; gültige Nutzer-/Agentennachweise übernommen, keine automatische Wiederholung zum Sprint-Abschluss.
+- [x] Offene Blocker mit Besitzer und nächstem Schritt festgehalten (Review-Gate).
+- [x] `99-session-log.md` aktualisiert.
+- [x] Jede erledigte Änderung ist im `99-session-log.md` als `feature`, `bugfix`, `doc`, `removal`, `misc` oder bewusst als `skip` erfasst.
+- [x] `98-architecture-update.md` ausgewertet.
+- [x] `docs/architecture.md` aktualisiert oder begründet als unverändert markiert.
+- [ ] Review-Gate bestanden (`97-review.md`, Abnahme durch Ralf).
 - [ ] Sprint nach `TODOs/3-sprints-erledigt/<YYYY-MM-sprint-name>/` verschoben.
-- [ ] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
+- [x] Release-Änderungen im `99-session-log.md` vollständig (eine Release-Queue ist derzeit nicht eingerichtet).
 
 ## 📓 Session-Log
 
