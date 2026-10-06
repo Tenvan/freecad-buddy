@@ -41,3 +41,14 @@ uv run python tools/gen_tool_docs.py  # nach jeder Tool-Änderung (test_tool_doc
 - Eine Domäne je Sprint; Befunde außerhalb des Umfangs als `E-NN` in den Eingang des Backlog-Index, nicht nebenbei fixen.
 - Sprint-Abschluss erst nach Review-Gate (`97-review.md`) und Ralfs Bestätigung im Chat.
 - GUI-Abnahme ([docs/acceptance.md](docs/acceptance.md)) nur nach Freigabe; `execute_python` danach wieder ausschalten.
+
+## Repository Map
+
+A full codemap is available at `codemap.md` in the project root.
+
+Before working on any task, read `codemap.md` to understand:
+- Project architecture and entry points
+- Directory responsibilities and design patterns
+- Data flow and integration points between modules
+
+For deep work on a specific folder, also read that folder's `codemap.md`.
