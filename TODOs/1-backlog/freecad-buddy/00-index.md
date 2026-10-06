@@ -80,6 +80,7 @@ Schnelle Erfassung von Ideen und Problemen ohne Spezifikation (Regeln: [README �
 | E-48 | 2026-09-30 | `core` | schuld | Regressionstest: `get_model_tree` listet Bodies innerhalb eines Boolean (OF-02 bisher nur im Spike belegt) | Review-Gate PartDesign | R3 |
 | E-49 | 2026-09-30 | `infra` | idee | `gen_tool_docs.py` schneidet Kurzbeschreibungen in `docs/tools.md` mitten im Satz ab („funnels,“) | Review-Gate PartDesign | Kandidat |
 | E-50 | 2026-09-30 | `core` | schuld | Umbau-Kandidaten aus `/simplify` (PartDesign), zusammen mit E-05: gemeinsames Gerüst für pad/pocket/revolve/sweep/loft/primitive (`first`, `before`, `_ensure_cuts`, `_finish` wie `_dress_up`); `datum_plane` über `datum`/`_attach` und `select._AXES`; deklarative Primitive-Tabelle statt `required` plus Lambdas; `values.apply(unit='int')` statt zwei Integer-Settern; `thread.py` nutzt `_attach`/`_volume`; `_volume(body.Tip) if body.Tip else 0.0` vereinfachen | Review-Gate PartDesign (`/simplify`) | R3 |
+| E-51 | 2026-10-06 | `infra` | schuld | Kein Test sichert die Schichtgrenze „`buddy_server` importiert nie FreeCAD“; AST-Import-Wächter über `src/buddy_server` analog zu `tests/tools/test_addon_imports.py` ergänzen | CLAUDE.md-Audit | Kandidat |
 
 ## Hinweise
 
