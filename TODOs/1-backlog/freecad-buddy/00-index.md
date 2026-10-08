@@ -81,6 +81,10 @@ Schnelle Erfassung von Ideen und Problemen ohne Spezifikation (Regeln: [README �
 | E-49 | 2026-09-30 | `infra` | idee | `gen_tool_docs.py` schneidet Kurzbeschreibungen in `docs/tools.md` mitten im Satz ab („funnels,“) | Review-Gate PartDesign | Kandidat |
 | E-50 | 2026-09-30 | `core` | schuld | Umbau-Kandidaten aus `/simplify` (PartDesign), zusammen mit E-05: gemeinsames Gerüst für pad/pocket/revolve/sweep/loft/primitive (`first`, `before`, `_ensure_cuts`, `_finish` wie `_dress_up`); `datum_plane` über `datum`/`_attach` und `select._AXES`; deklarative Primitive-Tabelle statt `required` plus Lambdas; `values.apply(unit='int')` statt zwei Integer-Settern; `thread.py` nutzt `_attach`/`_volume`; `_volume(body.Tip) if body.Tip else 0.0` vereinfachen | Review-Gate PartDesign (`/simplify`) | R3 |
 | E-51 | 2026-10-06 | `infra` | schuld | Kein Test sichert die Schichtgrenze „`buddy_server` importiert nie FreeCAD“; AST-Import-Wächter über `src/buddy_server` analog zu `tests/tools/test_addon_imports.py` ergänzen | CLAUDE.md-Audit | Kandidat |
+| E-52 | 2026-10-08 | `core` | idee | `add_to_assembly` lehnt einen Body ab (oder warnt), der als Werkzeug-Body in einem Boolean steckt; heute entsteht Doppelgeometrie, und `create_assembly` listet ihn im Parts-Ordner | Tool-Smoketest | Kandidat |
+| E-53 | 2026-10-08 | `core` | idee | Selector für fillet/chamfer, der nur die Außenkontur trifft (Bohrungsränder ausschließen); `edges:top`/`edges:bottom` erfassen auch die Ränder durchgehender Löcher | Tool-Smoketest | Kandidat |
+| E-54 | 2026-10-08 | `core` | idee | Fehlermeldung bei Ausdrücken nennt den abgelehnten Wert nicht („An expression may only contain numbers…“); `set_material` PETG fehlt in der FreeCAD-Bibliothek, Material-Fallback oder eigene Einträge prüfen | Tool-Smoketest | Kandidat |
+| E-55 | 2026-10-08 | `infra` | idee | Addon-Autostart des Servers (`server_process.py`): Windows-Job-Object, damit nach hartem Kill von FreeCAD kein Server-Waise bleibt; GUI-Abnahme des Autostarts steht aus | Subprocess-Autostart | Kandidat |
 
 ## Hinweise
 

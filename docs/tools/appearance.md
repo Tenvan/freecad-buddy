@@ -17,7 +17,7 @@ Kategorie-Präfix: `[Appearance]` · 3 Tools
 | Parameter | Typ | Pflicht | Standard | Beschreibung |
 |---|---|---|---|---|
 | `target` | string | ja | `—` | Body, part or link label |
-| `material` | string \| null | nein | `null` | Library material: 'PLA', 'ABS', 'PETG', a full name or UUID |
+| `material` | string \| null | nein | `null` | Library material: 'PLA' or 'ABS' (no PETG in the library), a full name or UUID |
 | `color` | string \| array<number> \| null | nein | `null` | Display colour: name (red, yellow, ...), '#RRGGBB' or [r,g,b] |
 | `document` | string \| null | nein | `null` | Document name or label; empty = active document |
 

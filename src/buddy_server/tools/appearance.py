@@ -21,7 +21,10 @@ def register(reg: Registration) -> None:
     async def set_material(
         target: Annotated[str, Field(description="Body, part or link label")],
         material: Annotated[
-            str | None, Field(description="Library material: 'PLA', 'ABS', 'PETG', a full name or UUID")
+            str | None,
+            Field(
+                description="Library material: 'PLA' or 'ABS' (no PETG in the library), a full name or UUID"
+            ),
         ] = None,
         color: Annotated[
             str | list[float] | None,

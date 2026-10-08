@@ -78,6 +78,11 @@ TOPICS: tuple[Topic, ...] = (
                 core=True,
             ),
             Rule("One tool call is one undo step: a few meaningful steps instead of many tiny ones."),
+            Rule(
+                "Set a storepoint after the feature that finishes the milestone: a storepoint taken earlier "
+                "does not contain the later steps in a replay.",
+                requires=("storepoint",),
+            ),
             Rule("Clarify unclear dimensions or functional requirements with the user first, do not guess."),
         ),
     ),
@@ -97,6 +102,14 @@ TOPICS: tuple[Topic, ...] = (
             ),
             Rule(
                 "Derived dimensions as expressions instead of separate numbers; counts as integer parameters."
+            ),
+            Rule(
+                "Pass parameter names bare (Pin_Diameter), never in quotes: expressions may only contain names, "
+                "numbers, + - * / and parentheses, a quoted name is rejected."
+            ),
+            Rule(
+                "Radii, hole and circle diameters are dimensions too: as parameters, otherwise the sketch lint "
+                "reports 'not bound to a parameter'."
             ),
             Rule(
                 "Keep print clearance as its own parameter (e.g. Fit_Clearance = {clearance_fit} mm), "
@@ -122,6 +135,10 @@ TOPICS: tuple[Topic, ...] = (
                 "No Block or Lock constraints; fully_constrain_sketch closes the remaining degrees of freedom."
             ),
             Rule("One purpose per sketch; no overlapping or open contours."),
+            Rule(
+                "A polyline profile is not fully constrained: fully_constrain_sketch with apply=true closes it "
+                "with literal Auto dimensions - bind those to parameters afterwards."
+            ),
             Rule(
                 "analyze_sketch shows conflicts, redundancies and lint findings - fix them before the feature."
             ),
@@ -178,10 +195,21 @@ TOPICS: tuple[Topic, ...] = (
                 core=True,
             ),
             Rule("Details (fillet, chamfer, shell) last, so changes to the base do not break them."),
+            Rule(
+                "edges:top and edges:bottom also hit the rims of holes cut through that face: preview with "
+                "select_geometry and narrow the selector if only the outer contour should be rounded or "
+                "chamfered.",
+                requires=("select_geometry",),
+            ),
             Rule("Housings with shell from one solid instead of several pads."),
             Rule(
+                "shell wraps every hole that already exists in a tube wall (seen with fill_pattern): cut vent "
+                "grids after the shell if the holes should stay open."
+            ),
+            Rule(
                 "Round bars, handles and brackets with sweep: path as a sketch (u_path), circular cross-section "
-                "perpendicular at the path start; bend radius > half the bar diameter.",
+                "perpendicular at the path start (u_path: the legs stand at x = ±length/2, so on XY the circle centre "
+                "is [length/2, 0]); bend radius > half the bar diameter.",
                 requires=("sweep",),
             ),
             Rule(
@@ -217,6 +245,11 @@ TOPICS: tuple[Topic, ...] = (
                 "stay editable inside the boolean. Clearances between separate parts: shape_binder plus pocket.",
                 requires=("boolean", "shape_binder"),
             ),
+            Rule(
+                "A body that went into a boolean is part of the target body now: do not add it to an assembly "
+                "or export it on its own.",
+                requires=("boolean",),
+            ),
         ),
     ),
     Topic(
@@ -231,11 +264,13 @@ TOPICS: tuple[Topic, ...] = (
             Rule("Model parts in place (assembly coordinates), then add_to_assembly needs no offset."),
             Rule(
                 "Standard parts (nuts, washers, screws) come from add_fastener, never modelled by hand; stack "
-                "washer and nut by their bottom faces.",
+                "washer and nut by their bottom faces. The label comes from the addon (FreeCAD language, e.g. "
+                "'M10-Mutter'), purpose is ignored.",
                 requires=("add_fastener",),
             ),
             Rule(
-                "set_material per body: library material for density/mass, colour for the appearance.",
+                "set_material per body: library material for density/mass (the library has generic PLA and ABS, no "
+                "PETG - use the colour only then), colour for the appearance.",
                 requires=("set_material",),
             ),
             Rule(
@@ -287,6 +322,10 @@ TOPICS: tuple[Topic, ...] = (
             Rule("Heights preferably as multiples of the layer height ({layer_height} mm)."),
             Rule("Largest flat face on the bed; avoid tensile load across the layers."),
             Rule("Do not print threads below M6: use a threaded insert, a nut trap or a self-tapping screw."),
+            Rule(
+                "Real threads from thread show overhang warnings in check_printability: expected, print the "
+                "part upright and check the thread flanks."
+            ),
             Rule("Finish: check_printability, fix the findings, then export_body (3mf).", core=True),
         ),
     ),
