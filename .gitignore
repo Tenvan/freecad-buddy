@@ -15,7 +15,6 @@ dist/
 # Exporte und Testartefakte
 out/
 *.stl
-*.3mf
 *.step
 
 # Lokale Laufzeitdaten
