@@ -10,6 +10,7 @@ import FreeCAD
 from buddy_bridge.dispatch import Dispatcher, InlineDispatcher
 from buddy_bridge.methods import build_registry
 from buddy_bridge.server import BridgeServer
+from buddy_bridge.server_process import SERVER_LOG_FILE, ServerProcess, resolve_command
 from buddy_bridge.tokens import BRIDGE_TOKEN_FILE, buddy_home, load_or_create_token
 
 PARAM_PATH = "User parameter:BaseApp/Preferences/Mod/FreeCADBuddy"
@@ -31,6 +32,18 @@ def autostart_enabled() -> bool:
 
 def set_autostart(enabled: bool) -> None:
     _params().SetBool("Autostart", enabled)
+
+
+def server_autostart_enabled() -> bool:
+    return _params().GetBool("ServerAutostart", True)
+
+
+def set_server_autostart(enabled: bool) -> None:
+    _params().SetBool("ServerAutostart", enabled)
+
+
+def configured_server_command() -> str:
+    return _params().GetString("ServerCommand", "")
 
 
 def python_allowed() -> bool:
@@ -94,6 +107,7 @@ class BridgeService:
         self._allow_python = allow_python
         self._allow_addon_install = allow_addon_install
         self._server: BridgeServer | None = None
+        self._server_process: ServerProcess | None = None
 
     @property
     def running(self) -> bool:
@@ -130,15 +144,45 @@ class BridgeService:
         self._server = server
 
     def stop(self) -> None:
+        self.stop_server_process()
         if self._server is not None:
             self._server.stop()
             self._server = None
+
+    def start_server_process(self) -> None:
+        """Start ``freecad-buddy --headless`` as a child, if autostart is on and the command is found."""
+        if not server_autostart_enabled() or (self._server_process and self._server_process.running):
+            return
+        command = resolve_command(configured_server_command())
+        if command is None:
+            self._log(
+                "warning",
+                "MCP-Server-Autostart: freecad-buddy nicht gefunden (PATH, .venv, "  # ui-de
+                "FREECAD_BUDDY_SERVER_CMD oder Parameter ServerCommand). Server manuell starten.",  # ui-de
+            )
+            return
+        self._server_process = ServerProcess(command, self.port, buddy_home() / SERVER_LOG_FILE, self._log)
+        try:
+            self._server_process.start()
+        except OSError as error:
+            self._log("error", f"MCP-Server konnte nicht starten: {error}")  # ui-de
+            return
+        self._log("info", f"MCP-Server gestartet: {command}")  # ui-de
+
+    def check_server_process(self) -> None:
+        if self._server_process is not None:
+            self._server_process.check()
+
+    def stop_server_process(self) -> None:
+        if self._server_process is not None:
+            self._server_process.stop()
 
     def describe(self) -> str:  # ui-de: shown in the FreeCAD console only
         state = f"läuft auf 127.0.0.1:{self.port}" if self.running else "gestoppt"  # ui-de
         clients = f", {self._server.client_count()} Verbindung(en)" if self._server else ""
         return (
             f"Bridge {state}{clients}; Token: {self._token_path}; Autostart: {autostart_enabled()}; "  # ui-de
+            f"MCP-Server: {'läuft' if self._server_process and self._server_process.running else 'aus'}; "  # ui-de
             f"Python-Ausführung: {'erlaubt' if self.allow_python else 'gesperrt'}; "  # ui-de
             f"Addon-Installation: {'erlaubt' if self.allow_addon_install else 'gesperrt'}"  # ui-de
         )

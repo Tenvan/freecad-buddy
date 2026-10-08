@@ -31,7 +31,7 @@ graph LR
 
 Die Trennung in zwei Prozesse ist Standard bei allen untersuchten Projekten und hat sich bewährt: Das MCP-SDK und seine Abhängigkeiten landen nicht in FreeCADs Python, und der Server kann ohne FreeCAD-Neustart neu gestartet werden.
 
-**Startreihenfolge:** FreeCAD starten → Bridge starten (Button/Autostart) → `freecad-buddy` im Terminal starten → Claude Code verbindet sich. Die Reihenfolge von FreeCAD und TUI ist beliebig; die TUI verbindet sich selbstständig neu.
+**Startreihenfolge:** FreeCAD starten → Bridge starten (Button/Autostart) → `freecad-buddy` im Terminal starten → Claude Code verbindet sich. Die Reihenfolge von FreeCAD und TUI ist beliebig; die TUI verbindet sich selbstständig neu. **Optional:** Das Addon startet `freecad-buddy --headless` als Kindprozess (`buddy_bridge/server_process.py`, nur Stdlib; Parameter `ServerAutostart`/`ServerCommand`, `FREECAD_BUDDY_SERVER_CMD`), beendet ihn mit der Bridge bzw. beim FreeCAD-Ende und zeigt Statusmeldungen in der FreeCAD-Konsole (Tool-Aufrufe nicht, kein Überlauf) und schreibt Tool-Aufrufe per `--log-file` als rotiertes `server.jsonl`. Prozesstrennung und Schichtgrenzen bleiben unberührt; nach hartem Kill von FreeCAD bleibt der Server als Waise bestehen.
 
 ## MCP-Transport (Client ↔ Server)
 

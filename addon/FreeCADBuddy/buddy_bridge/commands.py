@@ -21,6 +21,11 @@ def _start() -> None:
             f"Bridge konnte nicht auf Port {bridge.port} starten: {error}. "
             "Port belegt? Einstellung 'Port' unter Mod/FreeCADBuddy anpassen.",
         )
+        return
+    bridge.start_server_process()
+    from PySide import QtCore
+
+    QtCore.QTimer.singleShot(3000, bridge.check_server_process)  # reports an early exit (e.g. port taken)
 
 
 def _restart_bridge() -> None:
@@ -106,6 +111,13 @@ class _SetSetting:
 _AUTOSTART = _Setting(
     "Autostart", service.autostart_enabled, service.set_autostart, "aktiviert", "deaktiviert"
 )
+_SERVER_AUTOSTART = _Setting(
+    "MCP-Server-Autostart",
+    service.server_autostart_enabled,
+    service.set_server_autostart,
+    "aktiviert",
+    "deaktiviert",
+)
 _PYTHON = _Setting(
     "Python-Ausführung",
     service.python_allowed,
@@ -133,6 +145,18 @@ COMMANDS: dict[str, Any] = {
     ),
     "Buddy_DisableAutostart": _SetSetting(
         _AUTOSTART, False, "Autostart aus", "Bridge beim Start von FreeCAD nicht mehr automatisch starten"
+    ),
+    "Buddy_EnableServerAutostart": _SetSetting(
+        _SERVER_AUTOSTART,
+        True,
+        "MCP-Server-Autostart an",
+        "freecad-buddy beim Start der Bridge als Hintergrundprozess mitstarten",
+    ),
+    "Buddy_DisableServerAutostart": _SetSetting(
+        _SERVER_AUTOSTART,
+        False,
+        "MCP-Server-Autostart aus",
+        "freecad-buddy nicht mehr mitstarten (manuell im Terminal starten)",
     ),
     "Buddy_AllowPython": _SetSetting(
         _PYTHON, True, "Python erlauben", "execute_python auf FreeCAD-Seite erlauben (startet die Bridge neu)"

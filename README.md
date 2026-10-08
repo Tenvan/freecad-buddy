@@ -51,6 +51,7 @@ uv run poe install-addon
 ## Starten
 
 1. FreeCAD starten. Die Bridge startet automatisch (abschaltbar über Workbench „FreeCAD Buddy“ → „Autostart aus“); manuell über „Bridge starten“.
+   Mit der Bridge startet auch `freecad-buddy --headless` als Hintergrundprozess (Statusmeldungen in der FreeCAD-Konsole, Tool-Aufrufe nur als rotiertes JSONL in `%APPDATA%\FreeCADBuddy\server.jsonl`), sofern `freecad-buddy` im `PATH` oder in `.venv` des verlinkten Checkouts liegt, per Umgebungsvariable `FREECAD_BUDDY_SERVER_CMD` oder Parameter `Mod/FreeCADBuddy/ServerCommand` (voller Pfad, z. B. `.venv\Scriptsreecad-buddy.exe`) angegeben ist. Abschaltbar über „MCP-Server-Autostart aus“; ohne TUI. Läuft schon ein Server, beendet sich der Kindprozess mit Hinweis.
 2. Server mit Oberfläche starten:
 
 ```bash

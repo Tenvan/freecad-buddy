@@ -56,6 +56,6 @@ def test_every_setting_has_an_on_and_an_off_button() -> None:
     by_setting: dict[str, set[bool]] = {}
     for switch in switches:
         by_setting.setdefault(switch.setting.name, set()).add(switch.value)
-    assert set(by_setting) == {"Autostart", "Python-Ausführung", "Addon-Installation"}
+    assert set(by_setting) == {"Autostart", "MCP-Server-Autostart", "Python-Ausführung", "Addon-Installation"}
     assert all(values == {True, False} for values in by_setting.values())
     assert not any("Toggle" in name for name in commands.COMMANDS)
